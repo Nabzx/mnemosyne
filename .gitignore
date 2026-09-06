@@ -1,0 +1,29 @@
+# Rust
+/target
+**/*.rs.bk
+Cargo.lock
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# maturin
+/wheels
+
+# editors and OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# local mnemosyne stores used in examples and manual testing
+**/.mnem/
+!docs/format/**/.mnem/
