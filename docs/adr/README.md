@@ -16,4 +16,5 @@ change is a new ADR that supersedes the old one.
 | [0004](0004-core-sdk-boundary.md) | The Rust core and Python SDK boundary | Accepted |
 | [0005](0005-commit-identity.md) | Commit identity, hashing and signing | Accepted |
 | [0007](0007-versioning-and-release-policy.md) | Versioning and release policy | Accepted |
-| 0008 | Object encoding and the store engine | Proposed (Phase 1 map, #20) |
+| [0008](0008-object-encoding-and-store-engine.md) | Object encoding and the store engine | Accepted |
+| 0009 | The ref model | Proposed (Phase 1 map, #21) |

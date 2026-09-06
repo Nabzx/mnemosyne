@@ -17,3 +17,9 @@ authors = ["Nabil Shah <nabilshahx@gmail.com>"]
 mnem-core = { path = "crates/mnem-core", version = "0.0.1" }
 anyhow = "1"
 clap = { version = "4", features = ["derive"] }
+# storage and encoding, per ADR-0002, ADR-0005, ADR-0008. Not wired into a
+# crate until the Phase 1 build tickets (#22 onward).
+redb = "2"
+ciborium = "0.2"
+blake3 = "1"
+serde = { version = "1", features = ["derive"] }
