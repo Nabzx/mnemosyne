@@ -3,6 +3,7 @@ resolver = "2"
 members = [
     "crates/mnem-core",
     "crates/mnem-cli",
+    "crates/mnem-py",
 ]
 
 [workspace.package]
