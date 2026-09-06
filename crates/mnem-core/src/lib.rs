@@ -7,22 +7,25 @@
 //!
 //! Phase 1 is building this out. So far: the object model ([`object`]), object
 //! identity ([`id`]), the canonical encoding ([`codec`]), the content-addressed
-//! object database ([`objects`]), and the store lifecycle ([`store`]). The ref
-//! store, the commit and the log land in the tickets after this one. See
-//! `ROADMAP.md`.
+//! object database ([`objects`]), the store lifecycle ([`store`]), the ref
+//! store ([`refs`]) and [`head`]. The commit and the log land in the tickets
+//! after this one. See `ROADMAP.md`.
 
 #![forbid(unsafe_code)]
 
 pub mod codec;
 pub mod config;
 pub mod error;
+pub mod head;
 pub mod id;
 pub mod object;
 pub mod objects;
+pub mod refs;
 pub mod store;
 
 pub use config::Config;
 pub use error::{MnemError, Result};
+pub use head::Head;
 pub use id::ObjectId;
 pub use object::{Commit, ContentKind, MemoryNode, Object, Provenance, State};
 pub use store::Store;
