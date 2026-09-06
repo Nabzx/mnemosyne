@@ -13,7 +13,7 @@
 </div>
 
 <p align="center">
-  <img src="assets/demo.gif" alt="mnem: init, add memories, commit, log" width="820" />
+  <img src="assets/demo.gif" alt="mnem: record memory, fork it on a branch, diff the two lines" width="860" />
 </p>
 
 An AI agent builds up memory as it works: facts it learns, decisions it makes, conclusions it reaches. Frameworks store that as state the agent overwrites as it goes.

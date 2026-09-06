@@ -8,6 +8,10 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ## [Unreleased]
 
+### Changed
+
+- README: the demo GIF now shows branching and `diff`, not just `commit` / `log`.
+
 ## [0.0.3] - 2026-09-07
 
 Era 1, "it branches and travels". `format_version` 1.
