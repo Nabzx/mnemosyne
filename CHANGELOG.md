@@ -8,6 +8,10 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ## [Unreleased]
 
+## [0.0.3] - 2026-09-07
+
+Era 1, "it branches and travels". `format_version` 1.
+
 ### Added
 
 - ADR-0012 (the branch and checkout model): branches stay pointer-only, working
@@ -89,6 +93,7 @@ Era 1, "it commits". `format_version` 1.
 - Initial bootstrap tag. Workspace, CI and process scaffolding only; no
   features.
 
-[Unreleased]: https://github.com/Nabzx/mnemosyne/compare/v0.0.2...HEAD
+[Unreleased]: https://github.com/Nabzx/mnemosyne/compare/v0.0.3...HEAD
+[0.0.3]: https://github.com/Nabzx/mnemosyne/compare/v0.0.2...v0.0.3
 [0.0.2]: https://github.com/Nabzx/mnemosyne/compare/v0.0.1...v0.0.2
 [0.0.1]: https://github.com/Nabzx/mnemosyne/releases/tag/v0.0.1
