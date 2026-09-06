@@ -7,7 +7,7 @@ _default:
     @just --list
 
 # Everything CI runs, in the same order. Run this before opening a pull request.
-ci: fmt-check clippy test build deny py commits
+ci: fmt-check clippy test build deny py checks commits
 
 # Format the whole workspace.
 fmt:
@@ -48,6 +48,12 @@ wheel:
     rm -rf dist
     maturin build --release --out dist
     python -c "import zipfile,glob; z=zipfile.ZipFile(glob.glob('dist/*.whl')[0]); n=z.namelist(); assert 'mnem/_mnem.pyi' in n and 'mnem/py.typed' in n, n"
+
+# Repo consistency: the ADR index, ADR references, and the changelog.
+checks:
+    python scripts/check_adr_index.py
+    python scripts/check_adr_refs.py
+    python scripts/check_changelog.py --range main..HEAD
 
 # Check that this branch's commits follow the conventional-commit format.
 commits:

@@ -98,6 +98,25 @@ jobs:
           PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
           PR_TITLE: ${{ github.event.pull_request.title }}
 
+  checks:
+    name: checks (repo consistency)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+      # ADR index and references (ADR-0001).
+      - run: uv run --no-project python scripts/check_adr_index.py
+      - run: uv run --no-project python scripts/check_adr_refs.py
+      # A user-facing change must touch the changelog (ADR-0007).
+      - if: github.event_name == 'pull_request'
+        run: uv run --no-project python scripts/check_changelog.py --pr
+        env:
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+
   msrv:
     name: msrv (rust 1.85)
     runs-on: ubuntu-latest
