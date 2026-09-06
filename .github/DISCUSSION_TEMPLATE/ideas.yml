@@ -1,0 +1,30 @@
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        For feature requests, direction, and behaviour changes. Read
+        `ROADMAP.md` first: much of the plan is already fixed. Upvotes show
+        interest; they do not commit the maintainer to anything.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What you are trying to do, and where Mnemosyne gets in the way. Not the implementation.
+    validations:
+      required: true
+
+  - type: textarea
+    id: why
+    attributes:
+      label: Why it matters
+      description: Who hits this, and how often.
+    validations:
+      required: true
+
+  - type: input
+    id: phase
+    attributes:
+      label: Where it might fit
+      description: A phase or era from ROADMAP.md, if you have a view.

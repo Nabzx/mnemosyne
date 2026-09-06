@@ -1,0 +1,68 @@
+name: Bug report
+description: Something behaves differently from what the docs or an ADR say.
+labels: ["bug", "needs-repro"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Issues are for reproducible bugs and maintainer work items only.
+        Feature requests, ideas, questions and direction checks belong in
+        [Discussions](https://github.com/Nabzx/mnemosyne/discussions).
+
+        Keep it to roughly one screen. State what you observed, not a guessed
+        cause. Do not paste a proposed fix, a patch, or an investigation dump.
+
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: Before filing
+      options:
+        - label: This is a reproducible bug, not a feature request, idea or question.
+          required: true
+        - label: I searched open and closed issues and this is not a duplicate.
+          required: true
+
+  - type: textarea
+    id: current
+    attributes:
+      label: What happened
+      description: What you observed.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+      description: Point at the doc or ADR that says otherwise, if you can.
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Shortest reproduction
+      description: The exact commands or steps.
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact
+      description: How this affects your work.
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      value: |
+        - Mnemosyne version (`mnem --version` or the wheel version):
+        - Installed from (crates.io / PyPI / source):
+        - OS and architecture:
+        - Rust or Python version, if relevant:
+    validations:
+      required: true

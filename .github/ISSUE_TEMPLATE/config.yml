@@ -1,5 +1,11 @@
-blank_issues_enabled: true
+blank_issues_enabled: false
 contact_links:
+  - name: Feature requests, ideas and direction
+    url: https://github.com/Nabzx/mnemosyne/discussions/new?category=ideas
+    about: Anything that is not a reproducible bug. Explain the problem and why it matters, for a human to read.
+  - name: Questions
+    url: https://github.com/Nabzx/mnemosyne/discussions/new?category=q-a
+    about: How something works, or whether an approach fits.
   - name: Roadmap
     url: https://github.com/Nabzx/mnemosyne/blob/main/ROADMAP.md
     about: What each phase ships and in what order.
