@@ -74,3 +74,60 @@ def test_missing_store_raises_the_typed_exception(tmp_path: object) -> None:
 def test_repr_names_the_root(tmp_path: object) -> None:
     store = mnem.init(tmp_path)
     assert "mnem.Store" in repr(store)
+
+
+def test_branch_context_manager_isolates_an_experiment(tmp_path: object) -> None:
+    store = mnem.init(tmp_path)
+    store.add("customer", "on Enterprise")
+    store.add("status", "triaging")
+    store.commit("open", author="agent", time_ms=1)
+
+    with store.branch("assume-downgrade"):
+        assert store.head() == "ref: assume-downgrade"
+        store.add("customer", "downgraded to Pro")
+        store.rm("status")
+        changes = store.diff()
+        assert {c.id: c.kind for c in changes} == {
+            "customer": "modified",
+            "status": "removed",
+        }
+        store.commit("try it", author="agent", time_ms=2)
+        assert sorted(store.working_memory()) == ["customer"]
+
+    # back on main, main untouched, the branch kept
+    assert store.head() == "ref: main"
+    assert sorted(store.working_memory()) == ["customer", "status"]
+    assert [name for name, _ in store.branches()] == ["assume-downgrade", "main"]
+
+
+def test_time_travel_and_cross_branch_diff(tmp_path: object) -> None:
+    store = mnem.init(tmp_path)
+    store.add("plan", "enterprise")
+    store.commit("one", author="agent", time_ms=1)
+    c1 = store.head_commit()
+
+    store.new_branch("pro")
+    store.checkout("pro")
+    store.add("plan", "pro")
+    store.commit("two", author="agent", time_ms=2)
+
+    assert store.state_at(c1)["plan"].content == "enterprise"
+    assert store.working_node("plan").content == "pro"
+
+    changes = store.diff("main", "pro")
+    assert len(changes) == 1
+    assert changes[0].kind == "modified"
+    assert changes[0].old.content == "enterprise"
+    assert changes[0].new.content == "pro"
+
+
+def test_checkout_refuses_a_dirty_index(tmp_path: object) -> None:
+    store = mnem.init(tmp_path)
+    store.add("a", "1")
+    store.commit("one", author="agent", time_ms=1)
+    store.new_branch("other")
+    store.add("b", "2")
+    with pytest.raises(mnem.InvalidRefError):
+        store.checkout("other")
+    store.checkout("other", discard=True)
+    assert store.staged() == []
