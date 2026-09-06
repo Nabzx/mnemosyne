@@ -112,9 +112,14 @@ release wheel with `maturin build --release`, checks the archive bundles
 environment, and runs the SDK tests from outside the repo so `import mnem` can
 only resolve to the installed wheel. The wheel is uploaded as a build artefact.
 
-## Phase 1 complete
+## Phase 1 complete, tagged `v0.0.2`
 
 The substrate core, the `mnem` CLI, the pyo3 binding, the Python SDK, the format
 spec and golden vectors, the round-trip test, and the wheel job are all in. The
-definition of done is met. The `v0.0.2` tag is the maintainer's to push
-(ADR-0007), the same as `v0.0.1`.
+repo-hardening epic (#99) landed alongside: conventional commits, the
+offline-core `deny` check, issue forms, the `justfile`, the consistency checks,
+and workspace lints. The definition of done is met.
+
+`v0.0.2` tagged on `main` (ADR-0007): workspace version bumped, the changelog
+section dated, `docs/progress/plain-notes.md` written. The `pending-release`
+issues and the `v0.0.2` milestone are closed. Next: Phase 2 (`v0.0.3`), map #10.
