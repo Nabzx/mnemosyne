@@ -45,6 +45,31 @@ pub fn require(txn: &redb::ReadTransaction, id: ObjectId) -> Result<Object> {
     get(txn, id)?.ok_or(MnemError::NotFound(id))
 }
 
+/// Read a memory node by id, erroring if it is missing or a different kind.
+pub fn require_node(
+    txn: &redb::ReadTransaction,
+    id: ObjectId,
+) -> Result<crate::object::MemoryNode> {
+    match require(txn, id)? {
+        Object::MemoryNode(node) => Ok(node),
+        other => Err(MnemError::CorruptStore(format!(
+            "{id} is a {}, not a memory node",
+            other.kind()
+        ))),
+    }
+}
+
+/// Read a state by id, erroring if it is missing or a different kind.
+pub fn require_state(txn: &redb::ReadTransaction, id: ObjectId) -> Result<crate::object::State> {
+    match require(txn, id)? {
+        Object::State(state) => Ok(state),
+        other => Err(MnemError::CorruptStore(format!(
+            "{id} is a {}, not a state",
+            other.kind()
+        ))),
+    }
+}
+
 /// Whether an object with this id is stored.
 pub fn has(txn: &redb::ReadTransaction, id: ObjectId) -> Result<bool> {
     let table = match txn.open_table(OBJECTS) {

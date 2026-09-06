@@ -27,6 +27,7 @@ pub mod objects;
 pub mod refs;
 pub mod staging;
 pub mod store;
+pub mod timetravel;
 
 pub use config::Config;
 pub use error::{MnemError, Result};

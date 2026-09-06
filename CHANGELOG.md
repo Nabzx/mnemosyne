@@ -19,6 +19,8 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   `working_memory` / `working_node` (the view), and `rm` (stage a tombstone in
   the new local `staging_tombstones` table). `commit` and `unstage` account for
   tombstones; staging a node lifts its tombstone.
+- `mnem-core`: `Store::state_at` / `state_map_at` (time travel): reconstruct the
+  memory at any past commit, read-only, no `HEAD` move.
 
 ### Changed
 
