@@ -63,5 +63,11 @@ vetoes on its own.
 ## House style
 
 British English. Plain, short sentences. No marketing tone in commits, issues,
-or ADRs. No em dashes. Commit messages are present tense and reference the
-issue, for example `add the commit object and its content hash (#7)`.
+or ADRs. No em dashes.
+
+Commit messages and pull request titles follow Conventional Commits (ADR-0011):
+`<type>(<scope>): <description>`, lowercase, imperative, concise, for example
+`feat(core): add the commit object and its content hash`. The body, when
+present, stays plain and explains why. Reference an issue with `refs #<n>` in
+the body, never a closing keyword; issues close when their release is tagged,
+not on merge. `scripts/conventional_commits.py` enforces the format in CI.

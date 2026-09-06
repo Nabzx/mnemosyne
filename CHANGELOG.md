@@ -22,13 +22,19 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 - CI `wheel` job: builds a release wheel, checks it bundles the extension and
   the type stubs, and runs the SDK tests against the installed wheel.
 - ADR-0008 (object encoding and the store engine), ADR-0009 (the ref model),
-  ADR-0010 (what 1.0 means, and the 0.0.x roadmap).
+  ADR-0010 (what 1.0 means, and the 0.0.x roadmap), ADR-0011 (conventional
+  commits and the issue lifecycle).
+- CI `commits` job: `scripts/conventional_commits.py` checks every commit in a
+  pull request and the pull request title.
 
 ### Changed
 
 - Versioning scheme (ADR-0010): the whole current roadmap is `0.0.x` initial
   development, and `1.0` is reserved for the agent-as-repository platform. The
   six roadmap milestones are renumbered `v0.0.2` through `v0.0.7`.
+- Commit convention (ADR-0011): commits and pull request titles now follow
+  Conventional Commits. Issues reference `refs #<n>` and close at release, not
+  on merge.
 
 ## [0.0.1] - 2026-09-06
 

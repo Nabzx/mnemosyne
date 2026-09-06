@@ -41,9 +41,16 @@ ADRs live in `docs/adr/`, numbered, following `docs/adr/0000-template.md`.
 - One branch per issue: `feat/<slug>-<n>`, `research/<slug>-<n>`, `adr/<slug>-<n>`.
 - One pull request per branch. CI must be green before merge.
 - Commits are small and cover one logical change.
-- Commit messages: present tense, British English, plain and concise, no
-  marketing tone, no em dashes, no co-author trailer. Reference the issue, for
-  example `add the object store directory layout (#4)`.
+- Commit messages and pull request titles follow Conventional Commits
+  (ADR-0011): `<type>(<scope>): <description>`, lowercase, imperative, British
+  English, plain and concise, no marketing tone, no em dashes, no co-author
+  trailer. Types: `feat`, `fix`, `docs`, `test`, `refactor`, `perf`, `build`,
+  `ci`, `chore`, `revert`. Scope is a crate or area (`core`, `cli`, `sdk`,
+  `format`, `adr`) when it sharpens the subject.
+- Put `refs #<n>` in the body, not `closes #<n>`. Issues close when the release
+  that contains them is tagged, not on merge (ADR-0011).
+- `python scripts/conventional_commits.py --range main..HEAD` checks the format
+  locally.
 - The author of every commit is the maintainer.
 
 ### Docs move with the code
