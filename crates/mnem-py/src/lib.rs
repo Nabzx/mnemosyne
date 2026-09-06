@@ -11,7 +11,10 @@ use pyo3::exceptions::{PyException, PyValueError};
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyList};
 
-use mnem_core::{ContentKind, MemoryNode, MnemError, Provenance, Store};
+use mnem_core::{
+    Checkout, ContentKind, DiffTarget, MemoryNode, MnemError, NodeChange, ObjectId, Provenance,
+    Store,
+};
 
 create_exception!(
     _mnem,
@@ -94,6 +97,36 @@ fn parse_content_kind(name: &str) -> PyResult<ContentKind> {
             "content_kind must be \"note\" or \"claim\", got {other:?}"
         ))),
     }
+}
+
+fn content_kind_name(kind: ContentKind) -> &'static str {
+    match kind {
+        ContentKind::Note => "note",
+        ContentKind::Claim => "claim",
+    }
+}
+
+/// A memory node as a dict: `content` is a JSON string, `provenance` its own
+/// dict. The `mnem` package turns this back into a `MemoryNode` dataclass.
+fn node_to_dict<'py>(py: Python<'py>, node: &MemoryNode) -> PyResult<Bound<'py, PyDict>> {
+    let dict = PyDict::new(py);
+    dict.set_item("id", &node.id)?;
+    dict.set_item(
+        "content",
+        serde_json::to_string(&node.content).unwrap_or_default(),
+    )?;
+    dict.set_item("content_kind", content_kind_name(node.content_kind))?;
+    dict.set_item("event_time", node.event_time)?;
+
+    let prov = PyDict::new(py);
+    prov.set_item("agent_step", &node.provenance.agent_step)?;
+    prov.set_item("observation", &node.provenance.observation)?;
+    prov.set_item("tool_call", &node.provenance.tool_call)?;
+    prov.set_item("source", &node.provenance.source)?;
+    prov.set_item("note", &node.provenance.note)?;
+    dict.set_item("provenance", prov)?;
+
+    Ok(dict)
 }
 
 /// A Mnemosyne store. Wraps [`mnem_core::Store`].
@@ -238,6 +271,157 @@ impl PyStore {
             out.append(row)?;
         }
         Ok(out)
+    }
+
+    // --- Phase 2 (ADR-0012) ---
+
+    /// The staged deletions (`mnem rm`), sorted by node id.
+    fn staged_deletions(&self) -> PyResult<Vec<String>> {
+        self.inner.staged_deletions().map_err(to_py_err)
+    }
+
+    /// Stage the deletion of a node from the next commit.
+    fn rm(&self, id: &str) -> PyResult<()> {
+        self.inner.rm(id).map_err(to_py_err)
+    }
+
+    /// The commit `HEAD` resolves to, as hex, or `None` on an unborn branch.
+    fn head_commit(&self) -> PyResult<Option<String>> {
+        Ok(self
+            .inner
+            .head_commit()
+            .map_err(to_py_err)?
+            .map(|id| id.to_hex()))
+    }
+
+    /// Resolve a commit-ish (branch name or commit id prefix) to a commit hex.
+    fn resolve_commitish(&self, spec: &str) -> PyResult<String> {
+        Ok(self
+            .inner
+            .resolve_commitish(spec)
+            .map_err(to_py_err)?
+            .to_hex())
+    }
+
+    /// Create a branch at `start` (a commit-ish) or at `HEAD`.
+    #[pyo3(signature = (name, start = None))]
+    fn branch(&self, name: &str, start: Option<&str>) -> PyResult<()> {
+        self.inner.branch(name, start).map_err(to_py_err)
+    }
+
+    /// Every branch as `(name, tip_hex)`, sorted by name.
+    fn branches(&self) -> PyResult<Vec<(String, String)>> {
+        Ok(self
+            .inner
+            .branches()
+            .map_err(to_py_err)?
+            .into_iter()
+            .map(|(name, tip)| (name, tip.to_hex()))
+            .collect())
+    }
+
+    /// Delete a branch. Returns whether it existed. Refuses the current branch.
+    fn delete_branch(&self, name: &str) -> PyResult<bool> {
+        self.inner.delete_branch(name).map_err(to_py_err)
+    }
+
+    /// Move `HEAD` to `target`. Returns `(kind, ref)` where `kind` is
+    /// `"branch"`, `"detached"` or `"already"`.
+    #[pyo3(signature = (target, *, discard = false))]
+    fn checkout(&self, target: &str, discard: bool) -> PyResult<(String, String)> {
+        Ok(
+            match self.inner.checkout(target, discard).map_err(to_py_err)? {
+                Checkout::SwitchedToBranch(name) => ("branch".to_string(), name),
+                Checkout::DetachedAt(id) => ("detached".to_string(), id.to_hex()),
+                Checkout::AlreadyThere => ("already".to_string(), String::new()),
+            },
+        )
+    }
+
+    /// The current working memory as `{node_id: node_dict}`.
+    fn working_memory<'py>(&self, py: Python<'py>) -> PyResult<Bound<'py, PyDict>> {
+        let out = PyDict::new(py);
+        for (id, node) in self.inner.working_memory().map_err(to_py_err)? {
+            out.set_item(id, node_to_dict(py, &node)?)?;
+        }
+        Ok(out)
+    }
+
+    /// One node from working memory, or `None` if absent or tombstoned.
+    fn working_node<'py>(&self, py: Python<'py>, id: &str) -> PyResult<Option<Bound<'py, PyDict>>> {
+        Ok(match self.inner.working_node(id).map_err(to_py_err)? {
+            Some(node) => Some(node_to_dict(py, &node)?),
+            None => None,
+        })
+    }
+
+    /// The full memory at a commit (a commit-ish), as `{node_id: node_dict}`.
+    fn state_at<'py>(&self, py: Python<'py>, commit: &str) -> PyResult<Bound<'py, PyDict>> {
+        let id = self.inner.resolve_commitish(commit).map_err(to_py_err)?;
+        let out = PyDict::new(py);
+        for (node_id, node) in self.inner.state_at(id).map_err(to_py_err)? {
+            out.set_item(node_id, node_to_dict(py, &node)?)?;
+        }
+        Ok(out)
+    }
+
+    /// The changes between two states. `from_ref` defaults to the `HEAD`
+    /// commit, `to_ref` to working memory. Each change is a dict with `id`,
+    /// `kind` (`"added"` / `"removed"` / `"modified"`) and `old` / `new` node
+    /// dicts (or `None`).
+    #[pyo3(signature = (from_ref = None, to_ref = None))]
+    fn diff<'py>(
+        &self,
+        py: Python<'py>,
+        from_ref: Option<&str>,
+        to_ref: Option<&str>,
+    ) -> PyResult<Bound<'py, PyList>> {
+        let from = self.diff_target(from_ref, true)?;
+        let to = self.diff_target(to_ref, false)?;
+
+        let out = PyList::empty(py);
+        for change in self.inner.diff(from, to).map_err(to_py_err)? {
+            let row = PyDict::new(py);
+            row.set_item("id", change.id())?;
+            match change {
+                NodeChange::Added { new, .. } => {
+                    row.set_item("kind", "added")?;
+                    row.set_item("old", py.None())?;
+                    row.set_item("new", self.node_dict(py, new)?)?;
+                }
+                NodeChange::Removed { old, .. } => {
+                    row.set_item("kind", "removed")?;
+                    row.set_item("old", self.node_dict(py, old)?)?;
+                    row.set_item("new", py.None())?;
+                }
+                NodeChange::Modified { old, new, .. } => {
+                    row.set_item("kind", "modified")?;
+                    row.set_item("old", self.node_dict(py, old)?)?;
+                    row.set_item("new", self.node_dict(py, new)?)?;
+                }
+            }
+            out.append(row)?;
+        }
+        Ok(out)
+    }
+}
+
+impl PyStore {
+    fn diff_target(&self, spec: Option<&str>, is_from: bool) -> PyResult<DiffTarget> {
+        match spec {
+            Some(s) => Ok(DiffTarget::Commit(
+                self.inner.resolve_commitish(s).map_err(to_py_err)?,
+            )),
+            None if is_from => Ok(match self.inner.head_commit().map_err(to_py_err)? {
+                Some(id) => DiffTarget::Commit(id),
+                None => DiffTarget::Empty,
+            }),
+            None => Ok(DiffTarget::Working),
+        }
+    }
+
+    fn node_dict<'py>(&self, py: Python<'py>, object_id: ObjectId) -> PyResult<Bound<'py, PyDict>> {
+        node_to_dict(py, &self.inner.node(object_id).map_err(to_py_err)?)
     }
 }
 
