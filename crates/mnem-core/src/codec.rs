@@ -43,7 +43,7 @@ fn canonicalise(value: &mut Value) {
             for (_, v) in entries.iter_mut() {
                 canonicalise(v);
             }
-            entries.sort_by(|a, b| encoded_key(&a.0).cmp(&encoded_key(&b.0)));
+            entries.sort_by_cached_key(|(key, _)| encoded_key(key));
         }
         Value::Array(items) => {
             for item in items.iter_mut() {
