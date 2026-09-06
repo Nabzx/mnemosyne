@@ -29,6 +29,9 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 - CI `deny` job: `cargo deny check bans` over `deny.toml`, which bans every
   network, TLS and async-runtime crate from the workspace tree. This is the
   offline-core check ADR-0004 promised.
+- GitHub issue forms (`bug.yml`, `wayfinder.yml`), discussion templates, and a
+  priority and triage-state label set. Discussions enabled; blank issues off;
+  non-bugs routed to Discussions.
 
 ### Changed
 
