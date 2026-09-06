@@ -38,18 +38,19 @@ Board: [Mnemosyne roadmap](https://github.com/users/Nabzx/projects/1).
 
 ---
 
-## Phase 0: Bootstrap
+## Phase 0: Bootstrap: done
 
 Get to "clone and build" with the process scaffolding in place.
 
-- [ ] Rust workspace: `mnem-core` (library) and `mnem-cli` (the `mnem` binary), both compiling, `mnem --version` working
-- [ ] Python SDK skeleton: `mnem` installs and imports, exposes its version, raises a clear error on any unbuilt API
-- [ ] CI on every pull request: `cargo fmt`, `cargo clippy -D warnings`, `cargo test`, `cargo build`, plus `ruff` and `pytest`
-- [ ] Docs: `README.md`, `CONTEXT.md`, this file, `AGENTS.md`, `CONTRIBUTING.md`, the ADR template and ADR-0001, the agent workflow docs
-- [ ] Labels, milestones `v0.1` to `v1.0`, and a project board
-- [ ] The Phase 0 Wayfinder map and its child tickets: ADR-0002 (on-disk object format), ADR-0003 (the memory node model), ADR-0004 (Rust core and Python SDK boundary)
+- [x] Rust workspace: `mnem-core` and `mnem-cli`, both compiling, `mnem --version` working
+- [x] Python SDK skeleton: installs, imports, raises a clear error on any unbuilt API
+- [x] CI on every pull request: `cargo fmt`, `cargo clippy -D warnings`, `cargo test`, `cargo build`, an `msrv` job, plus `ruff` and `pytest`
+- [x] Docs: `README.md`, `CONTEXT.md`, this file, `AGENTS.md`, `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`, `CHANGELOG.md`, the ADR template, the agent workflow docs
+- [x] Labels, milestones `v0.1` to `v1.0`, and a project board
+- [x] The Phase 0 Wayfinder map (#1) and the full backlog, plus the Phase 1 to 6 maps
+- [x] ADR-0001 to ADR-0005 and ADR-0007 Accepted
 
-**Definition of done:** `cargo build` and `cargo test` pass in CI; `pip install -e .` gives a working `import mnem`; `mnem --version` runs. No features. Tag `v0.0.1`.
+**Definition of done:** `cargo build` and `cargo test` pass in CI; `pip install -e .` gives a working `import mnem`; `mnem --version` runs. No features. Tagged `v0.0.1`. Met.
 
 ---
 

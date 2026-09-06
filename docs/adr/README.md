@@ -15,5 +15,5 @@ change is a new ADR that supersedes the old one.
 | [0003](0003-memory-node-model.md) | The memory node model | Accepted |
 | [0004](0004-core-sdk-boundary.md) | The Rust core and Python SDK boundary | Accepted |
 | [0005](0005-commit-identity.md) | Commit identity, hashing and signing | Accepted |
-| 0007 | Versioning and release policy | Proposed (Phase 0 map, #17) |
+| [0007](0007-versioning-and-release-policy.md) | Versioning and release policy | Accepted |
 | 0008 | Object encoding and the store engine | Proposed (Phase 1 map, #20) |

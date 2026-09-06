@@ -43,22 +43,28 @@ Bootstrap. Get to "clone and build" with the process scaffolding in place.
 - Repo hygiene (#18): `SECURITY.md`, `CODE_OF_CONDUCT.md`, `.github/dependabot.yml`
   (cargo, pip, github-actions), `rust-toolchain.toml`, and an `msrv` CI job at
   Rust 1.85 (the floor set by `clap`'s `edition2024` transitive requirement).
+- **ADR-0007, versioning and release policy: Accepted** (#17). SemVer 2.0.0;
+  `format_version` on its own integer track; additive format changes are a MINOR
+  software release, breaking ones a MAJOR with `mnem migrate`; hand-written
+  `CHANGELOG.md`; a gated release workflow (built in Phase 6).
 
-## Pending
+**Phase 0 is complete.** Definition of done met: `cargo build` and `cargo test`
+green in CI, `import mnem` works, `mnem --version` runs, `v0.0.1` tagged.
+ADR-0001 to ADR-0005 and ADR-0007 Accepted.
+
+## Pending, not blocking
 
 - The `v0.0.1` GitHub release. The tag is pushed; the release page was blocked
   by a session safety check. Cut it from the tag in the web UI, or add a Bash
   permission rule for `gh release`.
 - Project board views. The project has all items; add a "group by Milestone"
-  view for the roadmap and a "group by Status" board in the UI.
-- ADR-0007 (versioning and release policy): grilling #17, the last Phase 0
-  decision.
+  view and a "group by Status" board in the UI.
 
-## Frontier, in order
+## Next
 
-Phase 0: #17 (ADR-0007). Once it is Accepted, Phase 0 closes and Phase 1 opens
-with research #19 (object encoding and the store engine), then ADR-0008 (#20),
-then the build tickets starting at #22 (object types).
+Phase 1 (`v0.1`, "it commits"), map #9. First: research #19 (object encoding and
+the store engine), then ADR-0008 (#20) and ADR-0009 (#21), then the build tickets
+starting at #22 (object types).
 
 ## Notes
 
