@@ -34,7 +34,7 @@ jobs:
       - run: cargo build --workspace --exclude mnem-py --release
 
   python:
-    name: python (ruff, pytest, wheel)
+    name: python (ruff, pytest)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -47,6 +47,39 @@ jobs:
       - run: uv pip install -e ".[dev]"
       - run: uv run ruff check python
       - run: uv run pytest python/tests -q
+
+  wheel:
+    name: python (wheel)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.93.0
+      - uses: Swatinem/rust-cache@v2
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+      # Build a real release wheel, the artefact a user installs (#33).
+      - name: build the wheel
+        run: uv run --with 'maturin>=1.7,<2' maturin build --release --out dist
+      - name: the wheel bundles the extension and the type stubs
+        run: |
+          names() { uv run --no-project python -c "import sys,zipfile;print(chr(10).join(zipfile.ZipFile(sys.argv[1]).namelist()))" "$(echo dist/*.whl)"; }
+          names
+          names | grep -qE '^mnem/_mnem\.abi3\.so$'
+          names | grep -qE '^mnem/_mnem\.pyi$'
+          names | grep -qE '^mnem/py\.typed$'
+      # Install into a clean environment and run the SDK tests from outside the
+      # repo, so `import mnem` can only resolve to the installed wheel.
+      - name: install the wheel and test the SDK against it
+        run: |
+          uv venv /tmp/wheelenv
+          uv pip install --python /tmp/wheelenv pytest dist/*.whl
+          cp -r python/tests /tmp/sdk-tests
+          cd /tmp && /tmp/wheelenv/bin/python -m pytest sdk-tests -q
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheel
+          path: dist/*.whl
 
   msrv:
     name: msrv (rust 1.85)

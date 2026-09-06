@@ -17,6 +17,7 @@ build/
 
 # maturin
 /wheels
+/dist
 # the compiled extension, dropped in-tree by `maturin develop`
 /python/mnem/_mnem*.so
 /python/mnem/_mnem*.pyd
@@ -34,3 +35,6 @@ build/
 
 # uv
 uv.lock
+
+# built wheels
+/dist/

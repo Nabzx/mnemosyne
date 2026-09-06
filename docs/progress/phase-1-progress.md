@@ -104,6 +104,17 @@ hex and `ObjectId`. `crates/mnem-core/tests/golden_vectors.rs` checks both that
 the encoder still produces those bytes and that the doc still lists them, so the
 format cannot drift without a red test.
 
-## Left in Phase 1
+## The wheel job (#33)
 
-- #33 CI: build the wheel and test the SDK against it, then tag `v0.0.2`
+CI now has a `wheel` job separate from the editable `python` job: it builds a
+release wheel with `maturin build --release`, checks the archive bundles
+`_mnem.abi3.so`, `_mnem.pyi` and `py.typed`, installs it into a clean
+environment, and runs the SDK tests from outside the repo so `import mnem` can
+only resolve to the installed wheel. The wheel is uploaded as a build artefact.
+
+## Phase 1 complete
+
+The substrate core, the `mnem` CLI, the pyo3 binding, the Python SDK, the format
+spec and golden vectors, the round-trip test, and the wheel job are all in. The
+definition of done is met. The `v0.0.2` tag is the maintainer's to push
+(ADR-0007), the same as `v0.0.1`.
