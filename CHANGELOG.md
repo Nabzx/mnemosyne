@@ -34,6 +34,9 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   non-bugs routed to Discussions.
 - A `justfile` (`just ci` runs the full check set locally), a `.githooks`
   pre-commit hook (`just install-hooks`), and a `CODEOWNERS` file.
+- CI `checks` job: `scripts/check_adr_index.py`, `check_adr_refs.py` and
+  `check_changelog.py` keep the ADR index current, ADR references live, and a
+  user-facing change tied to a changelog entry.
 
 ### Changed
 
