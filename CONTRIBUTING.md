@@ -2,8 +2,14 @@
 
 ## External contributions
 
-Mnemosyne is developed by a single maintainer. External pull requests are not
-merged. Issues, bug reports, and design feedback are welcome and read.
+Mnemosyne is developed by a single maintainer. External pull requests from other
+people are not merged. Issues, bug reports, and design feedback are welcome and
+read.
+
+The one exception is Dependabot, which is the maintainer's own dependency-update
+tooling, configured in `.github/dependabot.yml`. The maintainer reviews each
+Dependabot pull request and re-lands the change under their own commit, so the
+history stays single-author.
 
 This keeps the history clean and the design coherent while the project is
 young. It may change once v1 has shipped.
