@@ -45,8 +45,8 @@ jobs:
           python-version: "3.12"
       # Builds the mnem-py extension through maturin and installs it editable.
       - run: uv pip install -e ".[dev]"
-      - run: uv run ruff check python
-      - run: uv run pytest python/tests -q
+      - run: uv run ruff check python scripts
+      - run: uv run pytest python/tests scripts -q
 
   wheel:
     name: python (wheel)
@@ -80,6 +80,23 @@ jobs:
         with:
           name: wheel
           path: dist/*.whl
+
+  commits:
+    name: commits (conventional)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+      # Every non-merge commit in the PR, and the PR title (ADR-0011).
+      - run: uv run --no-project python scripts/conventional_commits.py --pr
+        env:
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
 
   msrv:
     name: msrv (rust 1.85)
