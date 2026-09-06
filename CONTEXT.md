@@ -38,9 +38,17 @@ message and one or more parent pointers. Identified by the hash of its content.
 _Avoid_: checkpoint, snapshot, revision, save
 
 **Store**:
-The on-disk `.mnem/` directory: the object database, the refs, and the
-provenance index. One store belongs to one agent or one shared memory.
+The on-disk `.mnem/` directory: a single `redb` file for objects and refs, a
+plain-text `HEAD`, and a plain-text `config`. One store belongs to one agent or
+one shared memory. See ADR-0002.
 _Avoid_: repo, repository, database, vault
+
+**State**:
+The content-addressed set of memory nodes visible at a commit. A commit points
+at one state. It is `flat` (a sorted map) in v0.1 and gains a `prolly` form in
+Phase 2. Distinct from working memory, which is the mutable form the agent
+reads and writes.
+_Avoid_: snapshot, tree, index, the memory
 
 **Working memory**:
 The current, mutable memory state the agent reads and writes, materialised from
