@@ -79,10 +79,15 @@ maps each variant to a Python exception in a hierarchy rooted at
 | `Conflict` | `ConflictError` |
 | `CorruptStore` | `CorruptStoreError` |
 | `FormatVersion` | `FormatVersionError` |
+| `StoreExists` | `StoreExistsError` |
+| `NoStore` | `NoStoreError` |
 | `Io` | `StoreIoError` |
 
 Adding a variant means adding a row here. No stringly-typed errors cross the
-boundary.
+boundary. `StoreExists` and `NoStore` were added with `Store::init`/`open` in
+issue #24 and their rows added here per this rule, which the ADR carves out from
+the usual immutability. In Python the base class is named `MnemError`; the
+mapping and hierarchy are exercised by the binding's tests (#29).
 
 ### Versioning
 

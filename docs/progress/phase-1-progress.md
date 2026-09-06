@@ -43,10 +43,25 @@ ddb2a9ea60a3 record the downgrade
 45ee8a6b98b1 learn the plan tier
 ```
 
+## `mnem-py`, the Python binding (#29)
+
+A `pyo3` `cdylib` (`_mnem`) over `mnem-core`, built by maturin as an abi3
+wheel (`abi3-py310`, one wheel for CPython 3.10 and up). It exposes `Store`
+(`init`, `open`, `add`, `commit`, `staged`, `unstage`, `log`, `head`,
+`format_version`, `root`) and maps every `MnemError` variant onto a Python
+exception hierarchy rooted at `mnem.MnemError` (ADR-0004). `pyproject.toml`
+moved from hatchling to the maturin backend; the version is read from the Cargo
+workspace at build time. `python/mnem/__init__.py` re-exports the binding; the
+ergonomic layer is #30.
+
+The `rust` CI job excludes `mnem-py` from `cargo test`/`build` (its test binary
+would need libpython to link); the `python` job builds the real extension
+through maturin and runs the binding's smoke tests. The behaviour itself stays
+tested in the core.
+
 ## Left in Phase 1
 
-- #29 the pyo3 crate and the maturin build
-- #30 the Python SDK
+- #30 the Python SDK (ergonomic layer over the binding)
 - #31 the round-trip test (the Phase 1 definition of done)
 - #32 write and freeze `docs/format/` for the v0.x line
 - #33 CI: build the wheel and test the SDK against it

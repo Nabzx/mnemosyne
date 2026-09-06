@@ -25,18 +25,25 @@ jobs:
           components: rustfmt, clippy
       - uses: Swatinem/rust-cache@v2
       - run: cargo fmt --all --check
+      # clippy checks every crate, `mnem-py` included: it is check-only, no link.
       - run: cargo clippy --all-targets --all-features -- -D warnings
-      - run: cargo test --all
-      - run: cargo build --all --release
+      # `mnem-py` is a Python extension module; its test binary would need
+      # libpython to link, and the wheel is maturin's job (see the python job
+      # and #33). The pure-Rust crates carry the behaviour tests (ADR-0004).
+      - run: cargo test --workspace --exclude mnem-py
+      - run: cargo build --workspace --exclude mnem-py --release
 
   python:
-    name: python (ruff, pytest)
+    name: python (ruff, pytest, wheel)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.93.0
+      - uses: Swatinem/rust-cache@v2
       - uses: astral-sh/setup-uv@v5
         with:
           python-version: "3.12"
+      # Builds the mnem-py extension through maturin and installs it editable.
       - run: uv pip install -e ".[dev]"
       - run: uv run ruff check python
       - run: uv run pytest python/tests -q

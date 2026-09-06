@@ -1,0 +1,26 @@
+[package]
+name = "mnem-py"
+description = "Python binding for Mnemosyne, version control for AI agent memory."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[lib]
+name = "_mnem"
+# A Python extension module only. Never built as an rlib, so `cargo test` does
+# not try to link a test binary against libpython (ADR-0004: the binding's
+# behaviour is tested through the SDK, see #33).
+crate-type = ["cdylib"]
+
+[dependencies]
+mnem-core = { workspace = true }
+serde_json = { workspace = true }
+# abi3-py310: one wheel for CPython 3.10 and up. extension-module: do not link
+# libpython, the host resolves it at import time.
+pyo3 = { version = "0.29", features = ["extension-module", "abi3-py310"] }
+
+[lints.clippy]
+all = "warn"
