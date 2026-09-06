@@ -24,7 +24,7 @@ operations. `gh` infers the repo from `git remote -v`.
 - `track-a` / `track-b`: core and format, versus SDK, adapters and developer experience. Not used while there is one maintainer, but kept current.
 - `adr`: the issue needs or updates an ADR.
 - `format`: the issue touches the on-disk format spec.
-- `benchmark`: the issue concerns the v1 benchmark.
+- `benchmark`: the issue concerns the substrate benchmark.
 
 ## Wayfinder
 

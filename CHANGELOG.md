@@ -10,10 +10,21 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Added
 
-- Phase 0 scaffold: the Rust workspace (`mnem-core`, `mnem-cli`), the Python SDK
-  skeleton, CI, and the full doc set.
-- ADR-0001 to ADR-0007, fixing the object format, the memory node model, the
-  Rust and Python boundary, commit identity, and this versioning policy.
+- Phase 1 substrate core: the object model, the canonical CBOR codec, the
+  content-addressed object store, refs and `HEAD`, staging, `commit`, and the
+  `log` walk in `mnem-core`.
+- The `mnem` CLI: `init`, `add`, `commit`, `log`.
+- The Python binding (`mnem._mnem`, pyo3 + maturin) and the agent-facing SDK
+  (`mnem.Store`, the `Provenance` / `MemoryNode` / `Commit` dataclasses).
+- The round-trip test: a fixed synthetic run reloaded from disk byte for byte.
+- ADR-0008 (object encoding and the store engine), ADR-0009 (the ref model),
+  ADR-0010 (what 1.0 means, and the 0.0.x roadmap).
+
+### Changed
+
+- Versioning scheme (ADR-0010): the whole current roadmap is `0.0.x` initial
+  development, and `1.0` is reserved for the agent-as-repository platform. The
+  six roadmap milestones are renumbered `v0.0.2` through `v0.0.7`.
 
 ## [0.0.1] - 2026-09-06
 
