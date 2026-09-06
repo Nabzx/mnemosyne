@@ -10,7 +10,7 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Changed
 
-- README: a `mnem` demo GIF, a shorter and more direct problem statement, and
+- README: a `mnem` demo GIF, a concrete developer-facing problem statement, and
   the roadmap reframed as "the GitHub for AI agents".
 
 ## [0.0.2] - 2026-09-06
