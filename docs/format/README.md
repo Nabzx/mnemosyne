@@ -11,9 +11,18 @@ the end of Phase 1 (issue #32). It is finalised for v1 in Phase 6.
 - **Container**: one `redb` file, `.mnem/store.redb`, plus plain-text `HEAD` and
   `config`. ADR-0002.
 - **Object identity**: BLAKE3 of the object's canonical CBOR bytes. ADR-0005.
-- **Encoding**: CBOR restricted to RFC 8949 §4.2 deterministic encoding, plus
-  our rules (JSON data model for `content`, finite numbers only, no CBOR tags).
-  String-keyed maps. No per-object framing. ADR-0008.
+- **Encoding**: CBOR restricted to a deterministic profile (ADR-0008),
+  implemented in `mnem-core`'s `codec` module:
+  - RFC 8949 §4.2: map keys sorted bytewise by their encoded form; shortest-form
+    integers; definite-length items only.
+  - Mnemosyne's own rules: every float is encoded as a 64-bit CBOR float, never
+    16 or 32 bit (simpler and unambiguous, a legal narrowing of §4.2). No CBOR
+    tags. `content` is the JSON data model with finite numbers only; a
+    non-finite float is rejected at the SDK boundary.
+  - String-keyed maps, no positional arrays. No per-object framing: an object's
+    bytes are exactly its canonical CBOR, and `kind` is a map entry.
+  - Verified by the `codec` tests: idempotence, and key-order independence
+    inside `content`.
 - **Tables**: `objects: [u8; 32] -> Vec<u8>`, `refs: &str -> [u8; 32]`. ADR-0008.
 - **`config`**: holds `format_version`, `hash_algo`, and `default_branch`.
   ADR-0007, ADR-0005, ADR-0009.
