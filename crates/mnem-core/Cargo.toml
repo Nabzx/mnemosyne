@@ -16,6 +16,11 @@ ciborium = { workspace = true }
 redb = { workspace = true }
 thiserror = { workspace = true }
 
+[dev-dependencies]
+# the round-trip integration test (#31) reads the raw object table back
+redb = { workspace = true }
+serde_json = { workspace = true }
+
 [lints.rust]
 missing_docs = "warn"
 

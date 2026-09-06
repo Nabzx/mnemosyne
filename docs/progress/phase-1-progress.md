@@ -71,8 +71,26 @@ Module-level `mnem.init` / `mnem.open` mirror the classmethods. The binding's
 ADR-0003's provenance. A `_mnem.pyi` stub types the raw extension. Binding tests
 moved to `mnem._mnem`; `test_sdk.py` covers the wrapper.
 
+## Round-trip test (#31), the definition of done
+
+`crates/mnem-core/tests/round_trip.rs`: a fixed synthetic run (a support agent
+triaging one ticket over three commits, mixing fresh nodes with updates, string
+/ nested / unicode content, and provenance from empty to every field set) is
+persisted, the `Store` is dropped so the database file closes, then it is
+reopened from disk. The test asserts:
+
+- the whole object table is byte-identical before and after the reload
+- every stored id is still the BLAKE3 hash of its stored bytes, and decoding
+  then re-encoding an object reproduces those bytes exactly
+- the commit history reloads in the same order with the same parents, messages,
+  authors and times
+- HEAD's state holds every node id pointing at its latest value, and an earlier
+  commit's state still holds the pre-update value
+
+Runs in the `rust` CI job. An agent loop can persist its memory and read it back
+byte for byte.
+
 ## Left in Phase 1
 
-- #31 the round-trip test (the Phase 1 definition of done)
 - #32 write and freeze `docs/format/` for the v0.x line
 - #33 CI: build the wheel and test the SDK against it
