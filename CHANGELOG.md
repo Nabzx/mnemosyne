@@ -15,6 +15,10 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   form is deferred with named triggers.
 - `mnem-core`: `Store::branch` / `branches` / `delete_branch`, and
   `resolve_commitish` (a branch name or an unambiguous commit id prefix).
+- `mnem-core`: `Store::checkout` (move `HEAD`, refused on a dirty index),
+  `working_memory` / `working_node` (the view), and `rm` (stage a tombstone in
+  the new local `staging_tombstones` table). `commit` and `unstage` account for
+  tombstones; staging a node lifts its tombstone.
 
 ### Changed
 

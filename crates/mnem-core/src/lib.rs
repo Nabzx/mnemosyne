@@ -14,6 +14,7 @@
 #![forbid(unsafe_code)]
 
 pub mod branch;
+pub mod checkout;
 pub mod codec;
 pub mod commit;
 pub mod config;
