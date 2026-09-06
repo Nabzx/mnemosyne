@@ -146,6 +146,50 @@ impl Store {
             Head::Attached(name) => crate::refs::get(txn, &name),
         }
     }
+
+    /// Resolve a commit-ish (ADR-0012): an exact branch name first, then an
+    /// unambiguous lowercase-hex commit id prefix of 4 to 64 characters.
+    pub fn resolve_commitish(&self, spec: &str) -> Result<ObjectId> {
+        let txn = self.begin_read()?;
+        self.resolve_commitish_in(&txn, spec)
+    }
+
+    /// [`resolve_commitish`](Self::resolve_commitish) inside a transaction the
+    /// caller owns.
+    pub fn resolve_commitish_in(
+        &self,
+        txn: &redb::ReadTransaction,
+        spec: &str,
+    ) -> Result<ObjectId> {
+        if let Some(id) = crate::refs::get(txn, spec)? {
+            return Ok(id);
+        }
+
+        let is_hex_prefix = (4..=ObjectId::LEN * 2).contains(&spec.len())
+            && spec.bytes().all(|b| matches!(b, b'0'..=b'9' | b'a'..=b'f'));
+        if !is_hex_prefix {
+            return Err(MnemError::InvalidRef(format!(
+                "no branch named {spec:?}, and it is not a commit id prefix (4 to 64 lowercase hex)"
+            )));
+        }
+
+        let mut commits: Vec<ObjectId> = Vec::new();
+        for id in crate::objects::ids_with_prefix(txn, spec)? {
+            if let Some(crate::object::Object::Commit(_)) = crate::objects::get(txn, id)? {
+                commits.push(id);
+            }
+        }
+        match commits.as_slice() {
+            [] => Err(MnemError::InvalidRef(format!(
+                "no commit matching {spec:?}"
+            ))),
+            [only] => Ok(*only),
+            many => Err(MnemError::InvalidRef(format!(
+                "ambiguous commit prefix {spec:?}: {} commits match",
+                many.len()
+            ))),
+        }
+    }
 }
 
 /// Walk up from `start` (inclusive) looking for a directory that contains a
