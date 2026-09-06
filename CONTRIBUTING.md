@@ -49,8 +49,7 @@ ADRs live in `docs/adr/`, numbered, following `docs/adr/0000-template.md`.
   `format`, `adr`) when it sharpens the subject.
 - Put `refs #<n>` in the body, not `closes #<n>`. Issues close when the release
   that contains them is tagged, not on merge (ADR-0011).
-- `python scripts/conventional_commits.py --range main..HEAD` checks the format
-  locally.
+- `just commits` checks the format locally; the pre-commit hook and CI enforce it.
 - The author of every commit is the maintainer.
 
 ### Docs move with the code
@@ -58,8 +57,17 @@ ADRs live in `docs/adr/`, numbered, following `docs/adr/0000-template.md`.
 If a change alters behaviour, update `CONTEXT.md` (if a term shifts),
 `ROADMAP.md` (if scope shifts), and the phase note in `docs/progress/`.
 
-### Tests
+### Checks
 
-- Rust: `cargo fmt`, `cargo clippy -- -D warnings`, `cargo test`.
-- Python: `ruff check python`, `pytest python/tests`.
-- From Phase 3, the merge property harness runs in CI.
+`just ci` runs everything CI runs, in the same order: `cargo fmt --check`,
+`cargo clippy -D warnings`, `cargo test`, the release build, `cargo deny check
+bans`, the Python lint and tests, and the conventional-commit check. It must
+pass before a pull request.
+
+`just install-hooks` sets `.githooks` as the hooks path, so `git commit` runs a
+fast pre-commit check (formatting and the Python lint).
+
+Individual recipes: `just fmt`, `just test`, `just clippy`, `just msrv`, `just
+deny`, `just py`, `just wheel`, `just commits`. Run `just` to list them.
+
+From Phase 3, the merge property harness runs in CI.
