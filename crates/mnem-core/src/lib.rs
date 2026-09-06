@@ -5,15 +5,21 @@
 //! on-disk store, the commit graph, and the deterministic operations built on
 //! them.
 //!
-//! Phase 1 is building this out. So far: the object model ([`object`]) and
-//! object identity ([`id`]). The store, the commit graph and the operations
-//! land in the tickets after this one. See `ROADMAP.md`.
+//! Phase 1 is building this out. So far: the object model ([`object`]), object
+//! identity ([`id`]), the canonical encoding ([`codec`]), and the
+//! content-addressed object database ([`objects`]). The store file, the ref
+//! store, the commit and the log land in the tickets after this one. See
+//! `ROADMAP.md`.
 
 #![forbid(unsafe_code)]
 
+pub mod codec;
+pub mod error;
 pub mod id;
 pub mod object;
+pub mod objects;
 
+pub use error::{MnemError, Result};
 pub use id::ObjectId;
 pub use object::{Commit, ContentKind, MemoryNode, Object, Provenance, State};
 
