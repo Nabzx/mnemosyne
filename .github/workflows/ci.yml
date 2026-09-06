@@ -108,3 +108,14 @@ jobs:
       - uses: dtolnay/rust-toolchain@1.85.0
       - uses: Swatinem/rust-cache@v2
       - run: cargo check --all --all-features
+
+  deny:
+    name: deny (offline core)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # No network-capable or async-runtime crate may enter the tree
+      # (ADR-0004, deny.toml). This is the check ADR-0004 promised.
+      - uses: EmbarkStudios/cargo-deny-action@v2
+        with:
+          command: check bans

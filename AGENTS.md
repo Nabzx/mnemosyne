@@ -33,8 +33,10 @@ declined politely and closed. No commit carries a co-author trailer.
 ### `mnem-core` is offline and model-free
 
 Nothing in `mnem-core` opens a network connection or calls a model. The
-substrate is deterministic. The semantic layer (Era 2) lives behind a trait, in
-a separate crate, and its default implementation is a local model.
+substrate is deterministic. `deny.toml` bans every network, TLS and
+async-runtime crate from the workspace tree, and the `deny` CI job enforces it;
+this is the check ADR-0004 promised. The semantic layer (Era 2) lives behind a
+trait, in a separate crate, and its default implementation is a local model.
 
 ### The on-disk format changes only by the rules in ADR-0007
 
