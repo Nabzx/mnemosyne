@@ -10,13 +10,22 @@ from __future__ import annotations
 import json
 import os
 import time
+from contextlib import AbstractContextManager
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
 from . import _mnem
 
-__all__ = ["Commit", "MemoryNode", "Provenance", "Store", "init", "open"]
+__all__ = [
+    "Commit",
+    "MemoryNode",
+    "NodeChange",
+    "Provenance",
+    "Store",
+    "init",
+    "open",
+]
 
 
 @dataclass(frozen=True, slots=True)
@@ -29,16 +38,57 @@ class Provenance:
     source: str | None = None
     note: str | None = None
 
+    @classmethod
+    def _from_dict(cls, d: dict[str, Any]) -> Provenance:
+        return cls(
+            agent_step=d.get("agent_step"),
+            observation=d.get("observation"),
+            tool_call=d.get("tool_call"),
+            source=d.get("source"),
+            note=d.get("note"),
+        )
+
 
 @dataclass(slots=True)
 class MemoryNode:
-    """A memory node to stage. ``content`` is any JSON-serialisable value."""
+    """A memory node. ``content`` is any JSON-serialisable value."""
 
     id: str
     content: Any
     content_kind: str = "note"
     provenance: Provenance = field(default_factory=Provenance)
     event_time: int | None = None
+
+    @classmethod
+    def _from_dict(cls, d: dict[str, Any]) -> MemoryNode:
+        return cls(
+            id=d["id"],
+            content=json.loads(d["content"]),
+            content_kind=d["content_kind"],
+            provenance=Provenance._from_dict(d["provenance"]),
+            event_time=d.get("event_time"),
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class NodeChange:
+    """One node's change between two states, as returned by :meth:`Store.diff`."""
+
+    id: str
+    kind: str  # "added" | "removed" | "modified"
+    old: MemoryNode | None
+    new: MemoryNode | None
+
+    @classmethod
+    def _from_dict(cls, d: dict[str, Any]) -> NodeChange:
+        old = d["old"]
+        new = d["new"]
+        return cls(
+            id=d["id"],
+            kind=d["kind"],
+            old=MemoryNode._from_dict(old) if old is not None else None,
+            new=MemoryNode._from_dict(new) if new is not None else None,
+        )
 
 
 @dataclass(frozen=True, slots=True)
@@ -168,6 +218,14 @@ class Store:
             _now_ms() if time_ms is None else time_ms,
         )
 
+    def rm(self, node_id: str) -> None:
+        """Stage the deletion of a node from the next commit."""
+        self._inner.rm(node_id)
+
+    def staged_deletions(self) -> list[str]:
+        """The node ids staged for deletion, sorted."""
+        return list(self._inner.staged_deletions())
+
     def log(
         self,
         *,
@@ -178,8 +236,109 @@ class Store:
         rows = self._inner.log(first_parent=first_parent, limit=limit)
         return [Commit._from_row(row) for row in rows]
 
+    # --- Phase 2 (ADR-0012) ---
+
+    def head_commit(self) -> str | None:
+        """The commit ``HEAD`` resolves to, or ``None`` on an unborn branch."""
+        return self._inner.head_commit()
+
+    def resolve(self, spec: str) -> str:
+        """Resolve a branch name or commit id prefix to a full commit id."""
+        return self._inner.resolve_commitish(spec)
+
+    def new_branch(self, name: str, *, start: str | None = None) -> None:
+        """Create a branch at ``start`` (a commit-ish) or at ``HEAD``."""
+        self._inner.branch(name, start)
+
+    def branches(self) -> list[tuple[str, str]]:
+        """Every branch as ``(name, tip_commit_id)``, sorted by name."""
+        return [(name, tip) for name, tip in self._inner.branches()]
+
+    def delete_branch(self, name: str) -> bool:
+        """Delete a branch. Returns whether it existed. Refuses the current one."""
+        return self._inner.delete_branch(name)
+
+    def checkout(
+        self,
+        target: str | None = None,
+        *,
+        create: str | None = None,
+        discard: bool = False,
+    ) -> None:
+        """Move ``HEAD`` to ``target``. With ``create``, make that branch first
+        (``target`` is then its start point, default ``HEAD``)."""
+        if create is not None:
+            self._inner.branch(create, target)
+            target = create
+        elif target is None:
+            msg = "checkout needs a target, or create= to make a branch"
+            raise ValueError(msg)
+        self._inner.checkout(target, discard=discard)
+
+    def working_memory(self) -> dict[str, MemoryNode]:
+        """The current working memory, keyed by node id."""
+        return {
+            node_id: MemoryNode._from_dict(node)
+            for node_id, node in self._inner.working_memory().items()
+        }
+
+    def working_node(self, node_id: str) -> MemoryNode | None:
+        """One node from working memory, or ``None`` if absent or deleted."""
+        node = self._inner.working_node(node_id)
+        return MemoryNode._from_dict(node) if node is not None else None
+
+    def state_at(self, commit: str) -> dict[str, MemoryNode]:
+        """The full memory at a commit (a commit-ish), keyed by node id."""
+        return {
+            node_id: MemoryNode._from_dict(node)
+            for node_id, node in self._inner.state_at(commit).items()
+        }
+
+    def diff(self, frm: str | None = None, to: str | None = None) -> list[NodeChange]:
+        """Changes between two states. ``frm`` defaults to the ``HEAD`` commit,
+        ``to`` to working memory."""
+        return [NodeChange._from_dict(row) for row in self._inner.diff(frm, to)]
+
+    def branch(self, name: str, *, start: str | None = None) -> _BranchScope:
+        """Create ``name`` (at ``start`` or ``HEAD``) and return a context
+        manager. Entering checks it out; leaving checks the previous branch back
+        and leaves ``name`` in place (ADR-0004)::
+
+            with store.branch("assume-downgrade"):
+                store.add("customer", "downgraded")
+                store.commit("try it")
+            # back on the original branch; "assume-downgrade" still there
+
+        Commit inside the block to keep work; uncommitted staged changes at the
+        block's exit are discarded. On an exception the previous branch is still
+        checked back and the exception re-raised.
+        """
+        self._inner.branch(name, start)
+        return _BranchScope(self, name)
+
     def __repr__(self) -> str:
         return f"<mnem.Store root={str(self.root)!r}>"
+
+
+class _BranchScope(AbstractContextManager["_BranchScope"]):
+    """The context manager returned by :meth:`Store.branch`."""
+
+    __slots__ = ("_name", "_return_to", "_store")
+
+    def __init__(self, store: Store, name: str) -> None:
+        self._store = store
+        self._name = name
+        self._return_to: str | None = None
+
+    def __enter__(self) -> _BranchScope:  # noqa: PYI034 - Self needs 3.11
+        head = self._store.head()
+        self._return_to = head[len("ref: ") :] if head.startswith("ref: ") else None
+        self._store.checkout(self._name)
+        return self
+
+    def __exit__(self, *exc: object) -> None:
+        if self._return_to is not None:
+            self._store.checkout(self._return_to, discard=True)
 
 
 def init(path: str | os.PathLike[str] = ".") -> Store:

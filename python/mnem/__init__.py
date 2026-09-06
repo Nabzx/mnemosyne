@@ -32,7 +32,7 @@ from ._mnem import (
     __version__,
     version,
 )
-from ._sdk import Commit, MemoryNode, Provenance, Store, init, open
+from ._sdk import Commit, MemoryNode, NodeChange, Provenance, Store, init, open
 
 __all__ = [
     "Commit",
@@ -43,6 +43,7 @@ __all__ = [
     "MemoryNode",
     "MnemError",
     "NoStoreError",
+    "NodeChange",
     "NotFoundError",
     "Provenance",
     "Store",

@@ -25,6 +25,10 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   (added / removed / modified), and `Store::node(object_id)`.
 - `mnem` CLI: `branch`, `checkout`, `show`, `diff`, `status`, `rm` (ADR-0012).
   `commit` now accepts a tombstone-only commit.
+- Python SDK: `with store.branch("h1"):` context manager, plus `new_branch`,
+  `branches`, `delete_branch`, `checkout`, `rm`, `working_memory`,
+  `working_node`, `state_at`, `diff` (returning `NodeChange` dataclasses),
+  `head_commit` and `resolve`.
 
 ### Changed
 
