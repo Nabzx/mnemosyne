@@ -83,9 +83,9 @@ The content-addressed object store and the commit graph.
 
 Isolation and history.
 
-- [ ] Branches, `mnem checkout`, and refs
-- [ ] Time travel: materialise working memory at any past commit
-- [ ] `mnem diff`, structural, between two commits
+- [x] Branches, `mnem checkout`, and refs
+- [x] Time travel: materialise working memory at any past commit
+- [x] `mnem diff`, structural, between two commits
 - [ ] The branch-per-hypothesis pattern in the SDK: `with store.branch("h1"): ...`
 
 **Definition of done:** an agent forks memory, explores on a branch, and either keeps or discards it; time travel reconstructs past working memory exactly. Tag `v0.0.3`.

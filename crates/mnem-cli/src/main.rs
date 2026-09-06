@@ -1,7 +1,8 @@
 //! `mnem`, the Mnemosyne command line interface.
 //!
-//! Four commands so far, each a thin wrapper over `mnem-core` (ADR-0004):
-//! `init`, `add`, `commit`, `log`. See `ROADMAP.md`.
+//! Each subcommand is a thin wrapper over `mnem-core` (ADR-0004). Phase 1:
+//! `init`, `add`, `commit`, `log`. Phase 2 (ADR-0012): `branch`, `checkout`,
+//! `show`, `diff`, `status`, `rm`. See `ROADMAP.md`.
 
 use std::fs;
 use std::io::Read;
@@ -9,7 +10,9 @@ use std::path::PathBuf;
 
 use anyhow::{Context, Result};
 use clap::{Parser, Subcommand};
-use mnem_core::{ContentKind, MemoryNode, ObjectId, Provenance, Store};
+use mnem_core::{
+    Checkout, ContentKind, DiffTarget, Head, MemoryNode, NodeChange, ObjectId, Provenance, Store,
+};
 
 /// Version control for AI agent memory.
 #[derive(Parser)]
@@ -45,6 +48,11 @@ enum Command {
         #[arg(long, value_name = "MS")]
         event_time: Option<i64>,
     },
+    /// Stage the deletion of a node from the next commit.
+    Rm {
+        /// The node id to remove.
+        id: String,
+    },
     /// Record the staged memory state as a commit.
     Commit {
         /// The commit message.
@@ -66,6 +74,47 @@ enum Command {
         #[arg(long)]
         oneline: bool,
     },
+    /// The current branch, HEAD, and what is staged.
+    Status,
+    /// List, create, or delete branches.
+    Branch {
+        /// The branch to create. Omit to list branches.
+        name: Option<String>,
+        /// Where the new branch starts: a branch name or commit id (default HEAD).
+        start: Option<String>,
+        /// Delete this branch.
+        #[arg(short = 'd', long, value_name = "NAME", conflicts_with_all = ["name", "start"])]
+        delete: Option<String>,
+    },
+    /// Move HEAD to a branch or commit.
+    Checkout {
+        /// A branch or commit to switch to. With -b, the new branch's start point.
+        rev: Option<String>,
+        /// Create a branch and switch to it.
+        #[arg(short = 'b', long, value_name = "NAME")]
+        create: Option<String>,
+        /// Drop uncommitted staged changes instead of refusing.
+        #[arg(long)]
+        discard: bool,
+    },
+    /// Print the full memory at a commit, or working memory with no argument.
+    Show {
+        /// A branch name or commit id.
+        rev: Option<String>,
+    },
+    /// Show what changed between two memory states.
+    Diff {
+        /// The `from` side: a branch or commit. Default: the HEAD commit.
+        from: Option<String>,
+        /// The `to` side: a branch or commit. Default: working memory.
+        to: Option<String>,
+        /// One classified line per node, no content.
+        #[arg(long)]
+        stat: bool,
+        /// Just the changed node ids.
+        #[arg(long = "name-only")]
+        name_only: bool,
+    },
 }
 
 fn main() -> Result<()> {
@@ -85,12 +134,31 @@ fn main() -> Result<()> {
             source,
             event_time,
         }) => cmd_add(id, content, content_file, step, source, event_time),
+        Some(Command::Rm { id }) => cmd_rm(id),
         Some(Command::Commit { message, author }) => cmd_commit(message, author),
         Some(Command::Log {
             first_parent,
             max_count,
             oneline,
         }) => cmd_log(first_parent, max_count, oneline),
+        Some(Command::Status) => cmd_status(),
+        Some(Command::Branch {
+            name,
+            start,
+            delete,
+        }) => cmd_branch(name, start, delete),
+        Some(Command::Checkout {
+            rev,
+            create,
+            discard,
+        }) => cmd_checkout(rev, create, discard),
+        Some(Command::Show { rev }) => cmd_show(rev),
+        Some(Command::Diff {
+            from,
+            to,
+            stat,
+            name_only,
+        }) => cmd_diff(from, to, stat, name_only),
     }
 }
 
@@ -145,14 +213,21 @@ fn cmd_add(
     Ok(())
 }
 
+fn cmd_rm(id: String) -> Result<()> {
+    let store = open_store()?;
+    store.rm(&id)?;
+    println!("Staged deletion of {id}");
+    Ok(())
+}
+
 fn cmd_commit(message: String, author: Option<String>) -> Result<()> {
     let author = author
         .or_else(|| std::env::var("MNEM_AUTHOR").ok())
         .unwrap_or_else(|| "unknown".to_string());
 
     let store = open_store()?;
-    if store.staged()?.is_empty() {
-        anyhow::bail!("nothing staged; use `mnem add` first");
+    if store.staged()?.is_empty() && store.staged_deletions()?.is_empty() {
+        anyhow::bail!("nothing staged; use `mnem add` or `mnem rm` first");
     }
     let id = store.commit(&message, &author, now_ms())?;
     println!(
@@ -191,9 +266,189 @@ fn cmd_log(first_parent: bool, max_count: Option<usize>, oneline: bool) -> Resul
     Ok(())
 }
 
+fn cmd_status() -> Result<()> {
+    let store = open_store()?;
+    match store.head()? {
+        Head::Attached(name) => println!("On branch {name}"),
+        Head::Detached(id) => println!("HEAD detached at {}", short(&id)),
+    }
+
+    match store.head_commit()? {
+        Some(tip) => {
+            let msg = tip_message(&store, tip)?;
+            println!("  {}  {msg}", short(&tip));
+        }
+        None => println!("  (no commits yet)"),
+    }
+
+    let from = head_diff_target(&store)?;
+    let changes = store.diff(from, DiffTarget::Working)?;
+    if changes.is_empty() {
+        println!("nothing staged");
+    } else {
+        println!("Staged:");
+        for change in changes {
+            println!("  {} {}", marker(&change), change.id());
+        }
+    }
+    Ok(())
+}
+
+fn cmd_branch(name: Option<String>, start: Option<String>, delete: Option<String>) -> Result<()> {
+    let store = open_store()?;
+
+    if let Some(name) = delete {
+        if store.delete_branch(&name)? {
+            println!("Deleted branch '{name}'");
+            return Ok(());
+        }
+        anyhow::bail!("no branch '{name}'");
+    }
+
+    match name {
+        Some(name) => {
+            store.branch(&name, start.as_deref())?;
+            let at = store.resolve_commitish(&name)?;
+            println!("Created branch '{name}' at {}", short(&at));
+        }
+        None => {
+            let current = match store.head()? {
+                Head::Attached(n) => Some(n),
+                Head::Detached(_) => None,
+            };
+            let branches = store.branches()?;
+            if branches.is_empty() {
+                println!("no branches yet");
+                return Ok(());
+            }
+            for (name, tip) in branches {
+                let flag = if Some(&name) == current.as_ref() {
+                    "*"
+                } else {
+                    " "
+                };
+                let msg = tip_message(&store, tip)?;
+                println!("{flag} {name}  {}  {msg}", short(&tip));
+            }
+        }
+    }
+    Ok(())
+}
+
+fn cmd_checkout(rev: Option<String>, create: Option<String>, discard: bool) -> Result<()> {
+    let store = open_store()?;
+
+    let target = match create {
+        Some(name) => {
+            store.branch(&name, rev.as_deref())?;
+            name
+        }
+        None => rev.context("checkout needs a target, or -b <name> to create one")?,
+    };
+
+    match store.checkout(&target, discard)? {
+        Checkout::SwitchedToBranch(name) => println!("Switched to branch '{name}'"),
+        Checkout::DetachedAt(id) => println!("HEAD is now at {} (detached)", short(&id)),
+        Checkout::AlreadyThere => println!("Already on '{target}'"),
+    }
+    Ok(())
+}
+
+fn cmd_show(rev: Option<String>) -> Result<()> {
+    let store = open_store()?;
+    let memory = match rev {
+        Some(spec) => store.state_at(store.resolve_commitish(&spec)?)?,
+        None => store.working_memory()?,
+    };
+    if memory.is_empty() {
+        println!("(empty)");
+        return Ok(());
+    }
+    for (id, node) in memory {
+        println!("{id}");
+        println!("  {}", serde_json::to_string(&node.content)?);
+    }
+    Ok(())
+}
+
+fn cmd_diff(from: Option<String>, to: Option<String>, stat: bool, name_only: bool) -> Result<()> {
+    let store = open_store()?;
+
+    let (from_target, to_target) = match (from, to) {
+        (None, _) => (head_diff_target(&store)?, DiffTarget::Working),
+        (Some(a), None) => (
+            DiffTarget::Commit(store.resolve_commitish(&a)?),
+            DiffTarget::Working,
+        ),
+        (Some(a), Some(b)) => (
+            DiffTarget::Commit(store.resolve_commitish(&a)?),
+            DiffTarget::Commit(store.resolve_commitish(&b)?),
+        ),
+    };
+
+    let changes = store.diff(from_target, to_target)?;
+    if changes.is_empty() {
+        println!("no changes");
+        return Ok(());
+    }
+
+    for change in &changes {
+        if name_only {
+            println!("{}", change.id());
+            continue;
+        }
+        println!("{} {}", marker(change), change.id());
+        if stat {
+            continue;
+        }
+        match change {
+            NodeChange::Added { new, .. } => {
+                println!("  + {}", node_content(&store, *new)?);
+            }
+            NodeChange::Removed { old, .. } => {
+                println!("  - {}", node_content(&store, *old)?);
+            }
+            NodeChange::Modified { old, new, .. } => {
+                println!("  - {}", node_content(&store, *old)?);
+                println!("  + {}", node_content(&store, *new)?);
+            }
+        }
+    }
+    Ok(())
+}
+
 fn open_store() -> Result<Store> {
     let cwd = std::env::current_dir().context("reading the current directory")?;
     Ok(Store::open(&cwd)?)
+}
+
+fn head_diff_target(store: &Store) -> Result<DiffTarget> {
+    Ok(match store.head_commit()? {
+        Some(id) => DiffTarget::Commit(id),
+        None => DiffTarget::Empty,
+    })
+}
+
+fn tip_message(store: &Store, tip: ObjectId) -> Result<String> {
+    let message = store
+        .log(tip, true, Some(1))?
+        .into_iter()
+        .next()
+        .map(|(_, commit)| commit.message)
+        .unwrap_or_default();
+    Ok(message.lines().next().unwrap_or_default().to_string())
+}
+
+fn node_content(store: &Store, object_id: ObjectId) -> Result<String> {
+    Ok(serde_json::to_string(&store.node(object_id)?.content)?)
+}
+
+fn marker(change: &NodeChange) -> char {
+    match change {
+        NodeChange::Added { .. } => '+',
+        NodeChange::Removed { .. } => '-',
+        NodeChange::Modified { .. } => '~',
+    }
 }
 
 fn now_ms() -> i64 {

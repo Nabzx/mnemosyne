@@ -125,6 +125,12 @@ impl Store {
         }
     }
 
+    /// The node ids staged for deletion, sorted.
+    pub fn staged_deletions(&self) -> Result<Vec<String>> {
+        let txn = self.begin_read()?;
+        staging::tombstones(&txn)
+    }
+
     /// Stage the deletion of a node from the next commit's state.
     ///
     /// If the node is only a pending add (staged, not in the `HEAD` state), this
