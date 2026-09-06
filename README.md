@@ -66,12 +66,16 @@ store.add(
 )
 store.commit("learn the plan tier from the support ticket", author="support-agent")
 
+# try an idea on a branch, keep it or throw it away
+with store.branch("assume-downgrade"):
+    store.add("customer-4821", "the customer downgraded to Pro")
+    store.commit("assume the downgrade", author="support-agent")
+
 for c in store.log():
     print(c.id[:12], c.message)
 
-# later eras
-#   with store.branch("assume-downgrade"): ...   try an idea off the main line
-#   store.blame("customer-4821")                 why does the agent believe this?
+# later phases
+#   store.blame("customer-4821")   why does the agent believe this?  (Phase 4)
 ```
 
 ## The GitHub for AI agents
