@@ -35,6 +35,15 @@ pub enum MnemError {
         supported: u32,
     },
 
+    /// `init` was asked to create a store where one already exists, or inside
+    /// another store.
+    #[error("a store already exists at {0}")]
+    StoreExists(std::path::PathBuf),
+
+    /// `open` found no store at or above the given path.
+    #[error("no mnemosyne store at or above {0}")]
+    NoStore(std::path::PathBuf),
+
     /// An error from the underlying storage.
     #[error("storage error: {0}")]
     Io(String),

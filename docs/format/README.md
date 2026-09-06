@@ -24,8 +24,20 @@ the end of Phase 1 (issue #32). It is finalised for v1 in Phase 6.
   - Verified by the `codec` tests: idempotence, and key-order independence
     inside `content`.
 - **Tables**: `objects: [u8; 32] -> Vec<u8>`, `refs: &str -> [u8; 32]`. ADR-0008.
-- **`config`**: holds `format_version`, `hash_algo`, and `default_branch`.
-  ADR-0007, ADR-0005, ADR-0009.
+- **`config`**: a plain-text file of `key = value` lines (`#` comments allowed,
+  unknown keys ignored). Keys: `format_version`, `hash_algo`, `default_branch`.
+  ADR-0007, ADR-0005, ADR-0009. A fresh store:
+
+  ```
+  # Mnemosyne store config. See docs/format/.
+  format_version = 1
+  hash_algo = blake3
+  default_branch = main
+  ```
+
+- **Discovery**: `Store::open` walks up from the given path to the nearest
+  directory holding a `.mnem/`. `Store::init` refuses to create a store inside
+  another one. Small config and `HEAD` writes are atomic (temp file plus rename).
 - **Refs**: `refs` table, flat `name -> commit id`. `HEAD` is a one-line text
   file: `ref: <branch>` or a bare commit id. Ref moves are compare-and-swap.
   ADR-0009.

@@ -6,22 +6,26 @@
 //! them.
 //!
 //! Phase 1 is building this out. So far: the object model ([`object`]), object
-//! identity ([`id`]), the canonical encoding ([`codec`]), and the
-//! content-addressed object database ([`objects`]). The store file, the ref
+//! identity ([`id`]), the canonical encoding ([`codec`]), the content-addressed
+//! object database ([`objects`]), and the store lifecycle ([`store`]). The ref
 //! store, the commit and the log land in the tickets after this one. See
 //! `ROADMAP.md`.
 
 #![forbid(unsafe_code)]
 
 pub mod codec;
+pub mod config;
 pub mod error;
 pub mod id;
 pub mod object;
 pub mod objects;
+pub mod store;
 
+pub use config::Config;
 pub use error::{MnemError, Result};
 pub use id::ObjectId;
 pub use object::{Commit, ContentKind, MemoryNode, Object, Provenance, State};
+pub use store::Store;
 
 /// The crate version, taken from `Cargo.toml` at build time.
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
