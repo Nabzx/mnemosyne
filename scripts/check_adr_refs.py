@@ -44,16 +44,17 @@ def referenced_numbers(paths: list[pathlib.Path]) -> dict[str, set[str]]:
     return out
 
 
-def next_number(have: set[str]) -> str:
-    """The next ADR in sequence. A research ticket names the ADR it feeds
-    before that ADR is written, so one forward reference is allowed."""
+def upcoming_numbers(have: set[str], count: int = 2) -> set[str]:
+    """The next few ADR numbers. A research ticket names the ADRs it feeds
+    before they are written, and a ticket can split into two (an algorithm ADR
+    and an API ADR), so a short forward window is allowed."""
     highest = max((int(n) for n in have), default=0)
-    return f"{highest + 1:04d}"
+    return {f"{highest + i:04d}" for i in range(1, count + 1)}
 
 
 def check() -> list[str]:
     have = existing_numbers(ADR_DIR)
-    allowed = have | {"0000", next_number(have)}
+    allowed = have | {"0000"} | upcoming_numbers(have)
     refs = referenced_numbers(tracked_files())
     problems = []
     for number, where in sorted(refs.items()):
