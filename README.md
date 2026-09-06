@@ -12,23 +12,23 @@
 
 </div>
 
-AI is moving from single prompts to agents that work for hours, and from single agents to teams of them. Those agents build up memory as they go: facts they learn, notes they keep, conclusions they reach. Today that memory is an unversioned blob. It gets overwritten, it cannot be audited, and when two agents share it they overwrite each other.
+<p align="center">
+  <img src="assets/demo.gif" alt="mnem: init, add memories, commit, log" width="820" />
+</p>
 
-Mnemosyne treats agent memory the way Git treats code. Every change is a commit. You branch to test an idea and merge it back. You trace any belief to the moment it was formed, and you can rewind to what the agent knew at any point in its run.
+An AI agent builds up memory as it works: facts it learns, decisions it makes, conclusions it reaches. Frameworks keep that memory as one file the agent overwrites in place.
 
-Git made collaborative software possible. As software becomes agents, and agents start working in teams, they need the same foundation underneath them. Mnemosyne is building it.
+Mnemosyne gives agent memory what Git gives code: commits, history, branches, merge, and blame. It is a Rust core with a `mnem` CLI and a Python SDK. Local, deterministic, no network, no model calls.
 
 ## The problem
 
-An agent's memory is its working understanding of the task: what it has read, what it has decided, what it now believes. Frameworks persist this as a flat store that the agent rewrites in place.
+A memory blob tells you nothing when it matters: when a bad belief crept in, what it rests on, what the agent knew before it went off track. You cannot branch it to try three approaches and keep the best. And when two agents write to it, one silently wins.
 
-That is fine until something goes wrong. Then you cannot ask when a wrong belief entered, or what evidence it rests on, or what the agent knew before it went off track. You cannot let the agent try three approaches on isolated copies and keep the best. And the moment a second agent writes to the same store, one set of changes silently wins.
+Version control solved exactly this for source code. Agent memory needs the same, with merges that understand contradiction, not line diffs.
 
-These are the problems version control solved for source code forty years ago. Agent memory needs the same treatment, with merge semantics that understand contradiction rather than line diffs.
+## What you get
 
-## What Mnemosyne gives you
-
-The substrate command set, modelled on Git and adapted to memory:
+A command set modelled on Git and adapted to memory:
 
 | Command | What it does |
 | --- | --- |
@@ -39,17 +39,18 @@ The substrate command set, modelled on Git and adapted to memory:
 | `bisect` | binary search a run to find the commit where a wrong belief first appeared |
 | `log` and time travel | materialise working memory exactly as it stood at any past commit |
 
-It ships as a Rust core, a `mnem` command line tool, a Python SDK, an MCP server, and a LangGraph adapter. The substrate is fully local and deterministic. No network, no model calls.
+It ships as a Rust core, a `mnem` CLI, a Python SDK, and later an MCP server and a LangGraph adapter.
 
 ## Status
 
-Early development, and numbered to say so: the whole current roadmap is `0.0.x` (ADR-0010). `v0.0.2` is in progress. The API shown below is the target for it, not a released interface. `ROADMAP.md` says what lands in each phase.
+Early development, and numbered to say so: the whole current roadmap is `0.0.x` (ADR-0010). `v0.0.2` ships `commit`, `add` and `log`; `branch`, `merge` and `blame` are the next phases. `ROADMAP.md` says what lands when.
 
 ## Quickstart
 
 ```bash
-cargo install mnem              # the cli
-pip install mnemosyne-agents    # the python sdk
+# not published yet; build from source
+cargo build --release -p mnem-cli      # the mnem binary
+pip install -e ".[dev]"                # the python sdk
 ```
 
 ```python
@@ -71,21 +72,22 @@ for c in store.log():
 #   store.blame("customer-4821")                 why does the agent believe this?
 ```
 
-## Where this goes
+## The GitHub for AI agents
 
-Mnemosyne is built in three eras, and the later two are the point. Only the last
-is `1.0` (ADR-0010); everything before it is `0.0.x`.
+Git made source code collaborative. GitHub made it social: pull requests, review, forks, and a registry the whole ecosystem is built on. As software becomes agents, and agents start working in teams, they need that same stack underneath them. Mnemosyne is building it, in three eras.
 
-1. **The substrate.** Single-agent versioned memory: commit, branch, merge, blame, bisect, time travel. Local and deterministic.
-2. **The collaboration layer.** Semantic merge that reasons about contradiction, a sync protocol between stores, and a review step so one agent's memory update is checked before it lands in shared memory. Git plus a review queue, for agents.
-3. **The platform, `1.0`.** The whole agent, its prompt, tools, memory, policy and evaluations, as one versioned, signed, forkable artefact, with a registry to publish, discover and improve them.
+1. **The substrate** (now). Single-agent versioned memory: commit, branch, merge, blame, bisect, time travel. Local and deterministic.
+2. **The collaboration layer.** Semantic merge that reasons about contradiction, a sync protocol between stores, and a review step so one agent's memory update is checked before it lands in shared memory. Pull requests, for agent memory.
+3. **The platform** (`1.0`). The whole agent, its prompt, tools, memory, policy and evaluations, as one versioned, signed, forkable artefact, with a registry to publish, discover and improve them. The GitHub for AI agents.
+
+The later two are the point. Everything today is `0.0.x` groundwork (ADR-0010).
 
 ## How it works
 
 - `mnem-core` (Rust): the object model, the content-addressed store, the commit graph, and every deterministic operation built on them. It never touches the network and never calls a model, and a CI check (`cargo deny`) bans every network and TLS crate from its dependency tree.
 - `mnem` (Rust binary): the command line interface.
 - `mnem` (Python): the SDK an agent calls.
-- The store is a `.mnem/` directory, in the spirit of `.git/`. Its format is specified in [`docs/format/`](docs/format) and frozen within a major version.
+- The store is a `.mnem/` directory, in the spirit of `.git/`. Its format is specified in full in [`docs/format/`](docs/format) and frozen for the `0.0.x` line at `format_version` 1.
 
 Architecture decisions and their reasoning live in [`docs/adr/`](docs/adr).
 
