@@ -53,12 +53,14 @@ fn err<E: std::fmt::Display>(e: E) -> MnemError {
 
 impl Store {
     /// Stage a memory node for the next commit. The node object is written to
-    /// the store and its id is recorded in staging.
+    /// the store and its id is recorded in staging. Staging a node lifts any
+    /// tombstone on that id (ADR-0012): re-adding un-deletes.
     pub fn stage(&self, node: &MemoryNode) -> Result<ObjectId> {
         let txn = self.begin_write()?;
         let node_id = node.id.clone();
         let object_id = write_object(&txn, &Object::MemoryNode(node.clone()))?;
         staging::put(&txn, &node_id, object_id)?;
+        staging::untombstone(&txn, &node_id)?;
         txn.commit().map_err(err)?;
         Ok(object_id)
     }
@@ -69,12 +71,14 @@ impl Store {
         staging::list(&txn)
     }
 
-    /// Drop a node from staging. Returns whether it was staged.
+    /// Drop a pending change to a node: an add or update from `staging`, or a
+    /// tombstone. Returns whether anything was pending.
     pub fn unstage(&self, node_id: &str) -> Result<bool> {
         let txn = self.begin_write()?;
-        let existed = staging::remove(&txn, node_id)?;
+        let unstaged = staging::remove(&txn, node_id)?;
+        let untombstoned = staging::untombstone(&txn, node_id)?;
         txn.commit().map_err(err)?;
-        Ok(existed)
+        Ok(unstaged || untombstoned)
     }
 
     /// Record everything staged as a commit on the current branch, and return
@@ -116,6 +120,9 @@ impl Store {
         for (node_id, object_id) in staging::list_in_write(&txn)? {
             nodes.insert(node_id, object_id);
         }
+        for node_id in staging::tombstones_in_write(&txn)? {
+            nodes.remove(&node_id);
+        }
 
         let state_id = write_object(&txn, &Object::State(State { nodes }))?;
 
@@ -146,6 +153,7 @@ impl Store {
         }
 
         staging::clear(&txn)?;
+        staging::clear_tombstones(&txn)?;
 
         txn.commit().map_err(err)?;
         Ok(commit_id)
@@ -160,9 +168,12 @@ mod tests {
     use crate::object::{ContentKind, Provenance};
 
     fn tempdir() -> std::path::PathBuf {
+        use std::sync::atomic::{AtomicU64, Ordering};
+        static COUNTER: AtomicU64 = AtomicU64::new(0);
         let base = std::env::temp_dir().join(format!(
-            "mnem-commit-{}-{:?}",
+            "mnem-commit-{}-{}-{:?}",
             std::process::id(),
+            COUNTER.fetch_add(1, Ordering::Relaxed),
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)
                 .unwrap()

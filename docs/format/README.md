@@ -28,7 +28,7 @@ part of `format_version` 1.
 
 ```
 .mnem/
-  store.redb    the object, ref and staging tables
+  store.redb    the object, ref and staging tables (see below)
   HEAD          the current position, one line of text
   config        key = value lines
 ```
@@ -91,18 +91,19 @@ store with a single-file, copy-on-write B-tree layout; its own file-format
 version travels inside the file and is handled by the `redb` crate, pinned at
 major version 2 (ADR-0008).
 
-Three tables:
+Four tables:
 
 | Table | Key | Value | Holds |
 | --- | --- | --- | --- |
 | `objects` | 32 raw bytes, an `ObjectId` | the object's canonical CBOR | every memory node, state and commit |
 | `refs` | branch name, UTF-8 | 32 raw bytes, a commit `ObjectId` | one row per branch |
 | `staging` | node id, UTF-8 | 32 raw bytes, a node `ObjectId` | the nodes staged for the next commit |
+| `staging_tombstones` | node id, UTF-8 | empty | the nodes staged for deletion (ADR-0012) |
 
 `objects` is append-only in practice: an id is the hash of its bytes, so writing
-the same object twice is a no-op and an entry is never rewritten. `staging` is
-local working state and is not part of the portable history; a fresh clone or a
-different machine does not carry it.
+the same object twice is a no-op and an entry is never rewritten. `staging` and
+`staging_tombstones` are local working state and are not part of the portable
+history; a fresh clone or a different machine does not carry them.
 
 ## Object identity
 
