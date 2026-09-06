@@ -27,3 +27,6 @@ build/
 # local mnemosyne stores used in examples and manual testing
 **/.mnem/
 !docs/format/**/.mnem/
+
+# uv
+uv.lock

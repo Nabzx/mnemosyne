@@ -21,7 +21,7 @@ reshaping the work. Until then the phases run in order.
 
 ---
 
-## Phase 0 — Bootstrap
+## Phase 0: Bootstrap
 
 Get to "clone and build" with the process scaffolding in place.
 
@@ -36,7 +36,7 @@ Get to "clone and build" with the process scaffolding in place.
 
 ---
 
-## Phase 1 — v0.1: it commits
+## Phase 1 (v0.1): it commits
 
 The content-addressed object store and the commit graph.
 
@@ -50,7 +50,7 @@ The content-addressed object store and the commit graph.
 
 ---
 
-## Phase 2 — v0.2: it branches and travels
+## Phase 2 (v0.2): it branches and travels
 
 Isolation and history.
 
@@ -63,7 +63,7 @@ Isolation and history.
 
 ---
 
-## Phase 3 — v0.3: it merges
+## Phase 3 (v0.3): it merges
 
 Deterministic merge, the last purely mechanical piece.
 
@@ -76,7 +76,7 @@ Deterministic merge, the last purely mechanical piece.
 
 ---
 
-## Phase 4 — v0.4: it explains
+## Phase 4 (v0.4): it explains
 
 The debugging layer, still deterministic.
 
@@ -89,7 +89,7 @@ The debugging layer, still deterministic.
 
 ---
 
-## Phase 5 — v0.5: it plugs in
+## Phase 5 (v0.5): it plugs in
 
 Make it usable from a real agent.
 
@@ -102,7 +102,7 @@ Make it usable from a real agent.
 
 ---
 
-## Phase 6 — v1.0: launch
+## Phase 6 (v1.0): launch
 
 - [ ] A benchmark measuring what v1 actually delivers: time-travel reproducibility, blame accuracy, merge correctness, against a no-version-control baseline, framed on the GitOfThoughts methodology
 - [ ] A short docs site and a recorded terminal demo in the README
@@ -119,14 +119,14 @@ Make it usable from a real agent.
 
 Detailed only once v1 has shipped and has users.
 
-### v2.0 — the multi-agent layer
+### v2.0: the multi-agent layer
 
 - Semantic diff and merge over claims, with embeddings and an optional LLM adjudicator. Local model by default, an API optional and never used by CI.
 - Contradiction objects: incompatible claims kept and surfaced, not dropped.
 - The sync protocol: `remote`, `push`, `pull`, `fetch` between stores.
 - The review model: an agent proposes a memory update, a reviewer (a policy, a critic agent, or a person) approves it before it lands in shared memory, with full provenance.
 
-### v3.0 — the agent as a repository
+### v3.0: the agent as a repository
 
 - The whole agent, its identity, prompt, tools, memory schema, policy and evaluations, as one versioned, signed, forkable artefact.
 - A registry to publish, discover, fork, and submit improvements to agents.
