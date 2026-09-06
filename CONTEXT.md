@@ -101,12 +101,21 @@ _Avoid_: rewind, rollback, restore, replay
 
 ### Integration
 
-**Adapter**:
-The binding between Mnemosyne and one agent framework (LangGraph, CrewAI) or one
-protocol (MCP). Adapters live outside `mnem-core` and depend on the SDK.
-_Avoid_: plugin, connector, integration, driver
+**Core**:
+The `mnem-core` Rust crate: the object model, the store, the commit graph, and
+every deterministic operation on them. No network, no model calls, no CLI or
+Python or framework concerns. Its two consumers are the CLI and the binding.
+See ADR-0004.
+_Avoid_: engine, kernel, backend, library
 
 **SDK**:
-The Python package `mnem`. The interface an agent uses directly. Wraps the Rust
-core.
+The Python package `mnem`, bound to the core through pyo3. Pure ergonomics: it
+adds Pythonic names, exceptions and context managers, and holds no operation
+semantics. The interface an agent uses directly.
 _Avoid_: client, library, wrapper
+
+**Adapter**:
+The binding between Mnemosyne and one agent framework (LangGraph, CrewAI) or one
+protocol (MCP). A Python package that depends on the SDK, not the core. Lives
+outside the workspace.
+_Avoid_: plugin, connector, integration, driver
