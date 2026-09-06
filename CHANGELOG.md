@@ -23,6 +23,8 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   memory at any past commit, read-only, no `HEAD` move.
 - `mnem-core`: `Store::diff(DiffTarget, DiffTarget)` returning `Vec<NodeChange>`
   (added / removed / modified), and `Store::node(object_id)`.
+- `mnem` CLI: `branch`, `checkout`, `show`, `diff`, `status`, `rm` (ADR-0012).
+  `commit` now accepts a tombstone-only commit.
 
 ### Changed
 
