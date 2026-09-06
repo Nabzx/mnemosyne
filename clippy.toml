@@ -1,0 +1,11 @@
+# Clippy configuration, enforced by the `rust` CI job (`clippy -D warnings`).
+#
+# `msrv` makes the `incompatible_msrv` lint fail the main clippy run when code
+# uses an API newer than the minimum supported Rust version, so an MSRV break
+# is caught locally, not only by the separate `msrv` job.
+msrv = "1.85"
+
+# Tests may reach for `unwrap`/`expect` for brevity; library and binary code
+# should not.
+allow-unwrap-in-tests = true
+allow-expect-in-tests = true

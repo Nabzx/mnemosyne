@@ -14,6 +14,17 @@ license = "Apache-2.0"
 repository = "https://github.com/Nabzx/mnemosyne"
 authors = ["Nabil Shah <nabilshahx@gmail.com>"]
 
+[workspace.lints.rust]
+missing_docs = "warn"
+
+[workspace.lints.clippy]
+all = { level = "warn", priority = -1 }
+# A few restriction lints that should never fire in this codebase.
+todo = "warn"
+dbg_macro = "warn"
+unimplemented = "warn"
+mem_forget = "warn"
+
 [workspace.dependencies]
 mnem-core = { path = "crates/mnem-core", version = "0.0.1" }
 anyhow = "1"
