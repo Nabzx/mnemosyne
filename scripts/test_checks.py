@@ -1,14 +1,15 @@
 """Tests for the consistency-check scripts (#104)."""
 
 from check_adr_index import index_rows
-from check_adr_refs import next_number
+from check_adr_refs import upcoming_numbers
 from check_changelog import check as changelog_check
 from check_changelog import is_user_facing
 
 
-def test_next_number_is_the_sequel() -> None:
-    assert next_number({"0001", "0009", "0011"}) == "0012"
-    assert next_number(set()) == "0001"
+def test_upcoming_numbers_is_a_short_forward_window() -> None:
+    assert upcoming_numbers({"0001", "0009", "0012"}) == {"0013", "0014"}
+    assert upcoming_numbers(set()) == {"0001", "0002"}
+    assert upcoming_numbers({"0005"}, count=3) == {"0006", "0007", "0008"}
 
 
 def test_index_rows_parses_the_table() -> None:
