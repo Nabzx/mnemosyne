@@ -13,22 +13,28 @@ under _Avoid_. New terms are added lazily, as decisions settle, not upfront.
 ### The unit of memory
 
 **Memory node**:
-The versioned unit. Its content (text or JSON), the provenance of where it came
-from, its timestamps, and an optional embedding. A structured claim is a memory
-node whose content follows a claim schema, nothing more.
+The versioned unit. Its `id` (a stable logical key), its `content` (a string or
+any JSON value, stored verbatim), its `content_kind` (`note` or `claim`), its
+provenance, and an optional `event_time`. Immutable within a commit: an update
+is the same `id` with new content in a new commit. See ADR-0003.
 _Avoid_: fact, record, entry, item, memory (on its own)
 
 **Provenance**:
-The pointer from a memory node to what produced it: the agent step, the
-observation, the tool call, or the external source. Every memory node carries
-one. It is what `blame` reads.
+How a memory node came to exist: `agent_step`, `observation`, `tool_call`,
+`source`, and a free-text `note`. Every field is optional and an empty
+provenance is legal. It is what `blame` reads. Distinct from evidence.
 _Avoid_: source, origin, metadata, trace
 
 **Claim**:
-A memory node whose content is a statement that can be contradicted, written to
-a fixed schema (a subject, a predicate, a value, a confidence). The unit that
-semantic merge reasons over in v2.
+A memory node with `content_kind = claim`, whose content is shaped as `subject`,
+`predicate`, `value`, `confidence`, `evidence`. Defined in ADR-0003 but dormant:
+not built or validated until v2, where semantic merge reasons over it.
 _Avoid_: belief, assertion, fact
+
+**Evidence**:
+The references on a claim that support its assertion. Claim-only, optional.
+Distinct from provenance, which is about the record, not the assertion.
+_Avoid_: provenance, source, support
 
 ### Version control
 
