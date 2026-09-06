@@ -15,7 +15,11 @@ the end of Phase 1 (issue #32). It is finalised for v1 in Phase 6.
   our rules (JSON data model for `content`, finite numbers only, no CBOR tags).
   String-keyed maps. No per-object framing. ADR-0008.
 - **Tables**: `objects: [u8; 32] -> Vec<u8>`, `refs: &str -> [u8; 32]`. ADR-0008.
-- **`config`**: holds `format_version` and `hash_algo`. ADR-0007, ADR-0005.
+- **`config`**: holds `format_version`, `hash_algo`, and `default_branch`.
+  ADR-0007, ADR-0005, ADR-0009.
+- **Refs**: `refs` table, flat `name -> commit id`. `HEAD` is a one-line text
+  file: `ref: <branch>` or a bare commit id. Ref moves are compare-and-swap.
+  ADR-0009.
 
 ## To be written here
 
@@ -23,7 +27,6 @@ the end of Phase 1 (issue #32). It is finalised for v1 in Phase 6.
 - The `docs/format/golden-vectors.md` file: objects and their exact hex
   encodings, pinned by the encoder's CI test.
 - The `redb` file-format version a store is written with.
-- The ref model, once ADR-0009 lands.
 
 Once frozen for a version line, a store written by one release in that line is
 readable by every other release in it. A breaking change needs a major version

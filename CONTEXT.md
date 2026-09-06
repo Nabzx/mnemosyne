@@ -70,9 +70,16 @@ a commit. The equivalent of a working tree.
 _Avoid_: HEAD state, context, context window, RAM, live memory
 
 **Branch**:
-A named line of memory development. Cheap to create. Used to hold a hypothesis
-apart from the main line until it is kept or dropped.
+A ref: a mutable `name -> commit id` pointer, held in the `refs` table. Cheap to
+create. Used to hold a hypothesis apart from the main line until it is kept or
+dropped. The default is `main`. See ADR-0009.
 _Avoid_: fork (reserved for v3), timeline, thread, world
+
+**HEAD**:
+The one-line plain-text file naming the current position: `ref: <branch>` when
+attached, a bare commit id when detached. The source of truth for where the
+next commit lands. See ADR-0009.
+_Avoid_: current, tip, cursor
 
 **Merge**:
 Combining two branches into one memory state. In v1 the merge is deterministic
