@@ -55,6 +55,30 @@ pub fn has(txn: &redb::ReadTransaction, id: ObjectId) -> Result<bool> {
     Ok(table.get(id.as_bytes().as_slice())?.is_some())
 }
 
+/// Every stored object id whose lowercase-hex form starts with `hex_prefix`.
+/// Used to resolve a short commit id (ADR-0012). O(objects); the caller keeps
+/// the prefix long enough that the match set is tiny.
+pub fn ids_with_prefix(txn: &redb::ReadTransaction, hex_prefix: &str) -> Result<Vec<ObjectId>> {
+    let table = match txn.open_table(OBJECTS) {
+        Ok(table) => table,
+        Err(redb::TableError::TableDoesNotExist(_)) => return Ok(Vec::new()),
+        Err(e) => return Err(e.into()),
+    };
+    let mut out = Vec::new();
+    for entry in table.iter()? {
+        let (key, _) = entry?;
+        let bytes: [u8; ObjectId::LEN] = key
+            .value()
+            .try_into()
+            .map_err(|_| MnemError::CorruptStore("an object key is not 32 bytes".to_string()))?;
+        let id = ObjectId::from_bytes(bytes);
+        if id.to_hex().starts_with(hex_prefix) {
+            out.push(id);
+        }
+    }
+    Ok(out)
+}
+
 #[cfg(test)]
 mod tests {
     use serde_json::json;

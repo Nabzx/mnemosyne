@@ -103,9 +103,12 @@ mod tests {
     use crate::object::{ContentKind, MemoryNode, Provenance, State};
 
     fn tempdir() -> std::path::PathBuf {
+        use std::sync::atomic::{AtomicU64, Ordering};
+        static COUNTER: AtomicU64 = AtomicU64::new(0);
         let base = std::env::temp_dir().join(format!(
-            "mnem-log-{}-{:?}",
+            "mnem-log-{}-{}-{:?}",
             std::process::id(),
+            COUNTER.fetch_add(1, Ordering::Relaxed),
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)
                 .unwrap()
