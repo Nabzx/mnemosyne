@@ -12,7 +12,7 @@ change is a new ADR that supersedes the old one.
 | --- | --- | --- |
 | [0001](0001-record-architecture-decisions.md) | Record architecture decisions | Accepted |
 | [0002](0002-on-disk-object-format.md) | On-disk object format | Accepted |
-| 0003 | The memory node model | Proposed (Phase 0 map, #6) |
+| [0003](0003-memory-node-model.md) | The memory node model | Accepted |
 | 0004 | Rust core and Python SDK boundary | Proposed (Phase 0 map, #7) |
 | 0005 | Commit identity, hashing and signing | Proposed (Phase 0 map, #16) |
 | 0007 | Versioning and release policy | Proposed (Phase 0 map, #17) |
