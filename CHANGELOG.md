@@ -8,6 +8,10 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ## [Unreleased]
 
+## [0.0.2] - 2026-09-06
+
+Era 1, "it commits". `format_version` 1.
+
 ### Added
 
 - Phase 1 substrate core: the object model, the canonical CBOR codec, the
@@ -56,5 +60,6 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 - Initial bootstrap tag. Workspace, CI and process scaffolding only; no
   features.
 
-[Unreleased]: https://github.com/Nabzx/mnemosyne/compare/v0.0.1...HEAD
+[Unreleased]: https://github.com/Nabzx/mnemosyne/compare/v0.0.2...HEAD
+[0.0.2]: https://github.com/Nabzx/mnemosyne/compare/v0.0.1...v0.0.2
 [0.0.1]: https://github.com/Nabzx/mnemosyne/releases/tag/v0.0.1
