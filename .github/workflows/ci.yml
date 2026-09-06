@@ -33,7 +33,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
-      - run: uv python install 3.12
-      - run: uv pip install --system -e ".[dev]"
-      - run: uv run --with ruff ruff check python
-      - run: uv run --with pytest pytest python/tests -q
+        with:
+          python-version: "3.12"
+      - run: uv venv
+      - run: uv pip install -e ".[dev]"
+      - run: uv run ruff check python
+      - run: uv run pytest python/tests -q
