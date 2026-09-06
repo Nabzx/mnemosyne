@@ -86,7 +86,7 @@ Isolation and history.
 - [x] Branches, `mnem checkout`, and refs
 - [x] Time travel: materialise working memory at any past commit
 - [x] `mnem diff`, structural, between two commits
-- [ ] The branch-per-hypothesis pattern in the SDK: `with store.branch("h1"): ...`
+- [x] The branch-per-hypothesis pattern in the SDK: `with store.branch("h1"): ...`
 
 **Definition of done:** an agent forks memory, explores on a branch, and either keeps or discards it; time travel reconstructs past working memory exactly. Tag `v0.0.3`.
 
