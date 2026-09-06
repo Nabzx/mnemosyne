@@ -1,0 +1,60 @@
+name: Wayfinder ticket
+description: A research, prototype, grilling or task ticket hanging off a phase map. Maintainer use.
+labels: ["wayfinder:task"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Wayfinder tickets are maintainer-created work items that hang off a
+        phase map issue. If you are not the maintainer, open a
+        [Discussion](https://github.com/Nabzx/mnemosyne/discussions) instead.
+
+  - type: input
+    id: map
+    attributes:
+      label: Part of
+      description: The phase map issue this hangs off, e.g. "#10".
+      placeholder: "#<map>"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind
+      description: Also add the matching `wayfinder:*` and `phase-N` labels.
+      options:
+        - "wayfinder:research (autonomous investigation, output is an ADR recommendation)"
+        - "wayfinder:grilling (pressure-test a decision with the maintainer)"
+        - "wayfinder:prototype (throwaway spike, needs a human to judge)"
+        - "wayfinder:task (build work)"
+    validations:
+      required: true
+
+  - type: input
+    id: blocked-by
+    attributes:
+      label: Blocked by
+      placeholder: "#n, #n, or nothing"
+
+  - type: textarea
+    id: job
+    attributes:
+      label: Question or job
+      description: What this ticket settles or builds. One paragraph.
+    validations:
+      required: true
+
+  - type: textarea
+    id: done-when
+    attributes:
+      label: Done when
+      description: The concrete output. An ADR recommendation, a spike result, a merged change, a locked decision.
+    validations:
+      required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Links, prior art, constraints.

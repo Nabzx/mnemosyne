@@ -1,0 +1,19 @@
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        For questions about how Mnemosyne works or whether an approach fits.
+        Check `README.md`, `CONTEXT.md`, `docs/adr/` and `docs/format/` first.
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: What you have tried or read
