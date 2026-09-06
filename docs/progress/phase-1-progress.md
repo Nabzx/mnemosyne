@@ -59,9 +59,20 @@ would need libpython to link); the `python` job builds the real extension
 through maturin and runs the binding's smoke tests. The behaviour itself stays
 tested in the core.
 
+## `mnem`, the Python SDK (#30)
+
+The agent-facing layer, pure ergonomics over the binding (ADR-0004). `Store`
+takes `str | PathLike`, `add` takes any JSON-serialisable value and does the
+`json.dumps`, `commit` defaults the author to `$MNEM_AUTHOR` then `"unknown"`
+and the time to now (matching the CLI), and `log` returns `Commit` dataclasses.
+`Provenance` and `MemoryNode` are dataclasses; `add_node` stages a `MemoryNode`.
+Module-level `mnem.init` / `mnem.open` mirror the classmethods. The binding's
+`add` grew the remaining three `Provenance` fields so the SDK carries all of
+ADR-0003's provenance. A `_mnem.pyi` stub types the raw extension. Binding tests
+moved to `mnem._mnem`; `test_sdk.py` covers the wrapper.
+
 ## Left in Phase 1
 
-- #30 the Python SDK (ergonomic layer over the binding)
 - #31 the round-trip test (the Phase 1 definition of done)
 - #32 write and freeze `docs/format/` for the v0.x line
 - #33 CI: build the wheel and test the SDK against it

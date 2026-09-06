@@ -140,15 +140,31 @@ impl PyStore {
     }
 
     /// Stage a memory node for the next commit. `content` is a JSON string; a
-    /// plain note is a JSON string literal. Returns the node object's id as hex.
-    #[pyo3(signature = (id, content, *, content_kind = "note", agent_step = None, source = None, event_time = None))]
+    /// plain note is a JSON string literal. The provenance fields match
+    /// `mnem_core::Provenance` (ADR-0003). Returns the node object's id as hex.
+    #[pyo3(signature = (
+        id,
+        content,
+        *,
+        content_kind = "note",
+        agent_step = None,
+        observation = None,
+        tool_call = None,
+        source = None,
+        note = None,
+        event_time = None,
+    ))]
+    #[allow(clippy::too_many_arguments)]
     fn add(
         &self,
         id: &str,
         content: &str,
         content_kind: &str,
         agent_step: Option<String>,
+        observation: Option<String>,
+        tool_call: Option<String>,
         source: Option<String>,
+        note: Option<String>,
         event_time: Option<i64>,
     ) -> PyResult<String> {
         let value = serde_json::from_str(content)
@@ -159,8 +175,10 @@ impl PyStore {
             content_kind: parse_content_kind(content_kind)?,
             provenance: Provenance {
                 agent_step,
+                observation,
+                tool_call,
                 source,
-                ..Default::default()
+                note,
             },
             event_time,
         };
