@@ -21,6 +21,8 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   tombstones; staging a node lifts its tombstone.
 - `mnem-core`: `Store::state_at` / `state_map_at` (time travel): reconstruct the
   memory at any past commit, read-only, no `HEAD` move.
+- `mnem-core`: `Store::diff(DiffTarget, DiffTarget)` returning `Vec<NodeChange>`
+  (added / removed / modified), and `Store::node(object_id)`.
 
 ### Changed
 

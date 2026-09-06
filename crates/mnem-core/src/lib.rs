@@ -18,6 +18,7 @@ pub mod checkout;
 pub mod codec;
 pub mod commit;
 pub mod config;
+pub mod diff;
 pub mod error;
 pub mod head;
 pub mod id;
@@ -29,7 +30,9 @@ pub mod staging;
 pub mod store;
 pub mod timetravel;
 
+pub use checkout::Checkout;
 pub use config::Config;
+pub use diff::{DiffTarget, NodeChange};
 pub use error::{MnemError, Result};
 pub use head::Head;
 pub use id::ObjectId;

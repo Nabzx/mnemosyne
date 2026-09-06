@@ -81,19 +81,29 @@ impl Store {
         })
     }
 
+    /// The working-memory node map as `id -> ObjectId`: the `HEAD` state, minus
+    /// staged tombstones, with `staging` overlaid. The raw form behind
+    /// [`working_memory`](Self::working_memory).
+    pub(crate) fn working_state_map(
+        &self,
+        txn: &redb::ReadTransaction,
+    ) -> Result<BTreeMap<String, ObjectId>> {
+        let mut out = self.head_state_map(txn)?;
+        for id in staging::tombstones(txn)? {
+            out.remove(&id);
+        }
+        for (id, object_id) in staging::list(txn)? {
+            out.insert(id, object_id);
+        }
+        Ok(out)
+    }
+
     /// The current working memory: the `HEAD` commit's state, minus staged
     /// tombstones, with `staging` overlaid. Computed on every call.
     pub fn working_memory(&self) -> Result<BTreeMap<String, MemoryNode>> {
         let txn = self.begin_read()?;
-
-        let mut out: BTreeMap<String, MemoryNode> = BTreeMap::new();
-        for (id, object_id) in self.head_state_map(&txn)? {
-            out.insert(id, objects::require_node(&txn, object_id)?);
-        }
-        for id in staging::tombstones(&txn)? {
-            out.remove(&id);
-        }
-        for (id, object_id) in staging::list(&txn)? {
+        let mut out = BTreeMap::new();
+        for (id, object_id) in self.working_state_map(&txn)? {
             out.insert(id, objects::require_node(&txn, object_id)?);
         }
         Ok(out)

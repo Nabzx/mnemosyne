@@ -147,6 +147,12 @@ impl Store {
         }
     }
 
+    /// Load a memory node by its object id.
+    pub fn node(&self, object_id: ObjectId) -> Result<crate::object::MemoryNode> {
+        let txn = self.begin_read()?;
+        crate::objects::require_node(&txn, object_id)
+    }
+
     /// Resolve a commit-ish (ADR-0012): an exact branch name first, then an
     /// unambiguous lowercase-hex commit id prefix of 4 to 64 characters.
     pub fn resolve_commitish(&self, spec: &str) -> Result<ObjectId> {
