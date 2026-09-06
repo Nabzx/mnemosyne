@@ -8,12 +8,13 @@
 //! Phase 1 is building this out. So far: the object model ([`object`]), object
 //! identity ([`id`]), the canonical encoding ([`codec`]), the content-addressed
 //! object database ([`objects`]), the store lifecycle ([`store`]), the ref
-//! store ([`refs`]) and [`head`]. The commit and the log land in the tickets
-//! after this one. See `ROADMAP.md`.
+//! store ([`refs`]) and [`head`], and staging plus [`commit`]. The log lands in
+//! the next ticket. See `ROADMAP.md`.
 
 #![forbid(unsafe_code)]
 
 pub mod codec;
+pub mod commit;
 pub mod config;
 pub mod error;
 pub mod head;
@@ -21,6 +22,7 @@ pub mod id;
 pub mod object;
 pub mod objects;
 pub mod refs;
+pub mod staging;
 pub mod store;
 
 pub use config::Config;
