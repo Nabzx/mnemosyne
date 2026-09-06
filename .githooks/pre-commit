@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Fast checks before a commit. Heavier checks (clippy, tests, deny) are `just ci`
+# and CI. Install with `just install-hooks`.
+set -euo pipefail
+
+if ! cargo fmt --all --check >/dev/null 2>&1; then
+    echo "pre-commit: rustfmt would change files. Run 'cargo fmt --all'." >&2
+    exit 1
+fi
+
+if command -v ruff >/dev/null 2>&1; then
+    ruff check python scripts
+fi
+
+echo "pre-commit: ok"

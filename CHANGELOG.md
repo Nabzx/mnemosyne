@@ -32,6 +32,8 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 - GitHub issue forms (`bug.yml`, `wayfinder.yml`), discussion templates, and a
   priority and triage-state label set. Discussions enabled; blank issues off;
   non-bugs routed to Discussions.
+- A `justfile` (`just ci` runs the full check set locally), a `.githooks`
+  pre-commit hook (`just install-hooks`), and a `CODEOWNERS` file.
 
 ### Changed
 
