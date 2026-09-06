@@ -1,0 +1,21 @@
+[package]
+name = "mnem-cli"
+description = "Command line interface for Mnemosyne, version control for AI agent memory."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[[bin]]
+name = "mnem"
+path = "src/main.rs"
+
+[dependencies]
+mnem-core = { workspace = true }
+anyhow = { workspace = true }
+clap = { workspace = true }
+
+[lints.clippy]
+all = "warn"
