@@ -37,6 +37,12 @@ Bootstrap. Get to "clone and build" with the process scaffolding in place.
 - Tag `v0.0.1` pushed.
 - The GitHub project ([Mnemosyne roadmap](https://github.com/users/Nabzx/projects/1)),
   linked to the repo, with all open issues added.
+- Decision tickets closed: #3 and #15 (research), #4, #5, #6, #7, #16 (research
+  and grilling). ADR-0002 (object format), ADR-0003 (memory node model), ADR-0004
+  (core and SDK boundary) and ADR-0005 (commit identity) all Accepted.
+- Repo hygiene (#18): `SECURITY.md`, `CODE_OF_CONDUCT.md`, `.github/dependabot.yml`
+  (cargo, pip, github-actions), `rust-toolchain.toml`, and an `msrv` CI job at
+  Rust 1.82.
 
 ## Pending
 
@@ -45,15 +51,14 @@ Bootstrap. Get to "clone and build" with the process scaffolding in place.
   permission rule for `gh release`.
 - Project board views. The project has all items; add a "group by Milestone"
   view for the roadmap and a "group by Status" board in the UI.
-- The Phase 0 frontier: #3, #5, #15 (research) and #7, #17 (grilling), none
-  blocked. #4 (blocked by #3), #6 (blocked by #5) and #16 (blocked by #15) open
-  once their research closes.
+- ADR-0007 (versioning and release policy): grilling #17, the last Phase 0
+  decision.
 
 ## Frontier, in order
 
-Phase 0: #3, #5, #15, #7, #17, then #4, #6, #16. Once the Phase 0 ADRs (0002 to
-0005, 0007) are Accepted, Phase 1 build tickets open, starting with #22 (object
-types), which is blocked only by ADR-0008 (#20).
+Phase 0: #17 (ADR-0007). Once it is Accepted, Phase 0 closes and Phase 1 opens
+with research #19 (object encoding and the store engine), then ADR-0008 (#20),
+then the build tickets starting at #22 (object types).
 
 ## Notes
 
