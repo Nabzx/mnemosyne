@@ -8,6 +8,12 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ## [Unreleased]
 
+### Added
+
+- ADR-0012 (the branch and checkout model): branches stay pointer-only, working
+  memory is a view, `mnem rm` gains a local tombstone, and the prolly-tree state
+  form is deferred with named triggers.
+
 ### Changed
 
 - README: a `mnem` demo GIF, a concrete developer-facing problem statement, and
