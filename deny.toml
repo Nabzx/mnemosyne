@@ -1,0 +1,40 @@
+# cargo-deny configuration.
+#
+# The `deny` CI job runs `cargo deny check bans`: no network-capable, TLS or
+# async-runtime crate may enter the workspace dependency tree. `mnem-core` is
+# offline and model-free by ADR-0004, and this is the check that ADR promised.
+# The `mnem` CLI and the `mnem-py` binding are held to the same bar.
+#
+# License and advisory checks are not wired into CI yet.
+
+[graph]
+all-features = true
+
+[bans]
+multiple-versions = "allow"
+wildcards = "allow"
+
+# Deny by name. If a legitimate need for one of these ever appears (a daemon,
+# a remote sync in Era 2) it gets its own ADR and a scoped exception here.
+deny = [
+  { name = "tokio", reason = "async runtime; the substrate is synchronous and offline" },
+  { name = "async-std", reason = "async runtime" },
+  { name = "smol", reason = "async runtime" },
+  { name = "reqwest", reason = "HTTP client" },
+  { name = "hyper", reason = "HTTP" },
+  { name = "h2", reason = "HTTP/2" },
+  { name = "ureq", reason = "HTTP client" },
+  { name = "isahc", reason = "HTTP client" },
+  { name = "surf", reason = "HTTP client" },
+  { name = "curl", reason = "HTTP client" },
+  { name = "curl-sys", reason = "HTTP client" },
+  { name = "native-tls", reason = "TLS" },
+  { name = "openssl", reason = "TLS" },
+  { name = "openssl-sys", reason = "TLS" },
+  { name = "rustls", reason = "TLS" },
+  { name = "tokio-rustls", reason = "TLS" },
+  { name = "hyper-tls", reason = "TLS" },
+  { name = "quinn", reason = "QUIC" },
+  { name = "tonic", reason = "gRPC" },
+  { name = "socket2", reason = "raw sockets" },
+]

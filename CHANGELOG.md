@@ -26,6 +26,9 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   commits and the issue lifecycle).
 - CI `commits` job: `scripts/conventional_commits.py` checks every commit in a
   pull request and the pull request title.
+- CI `deny` job: `cargo deny check bans` over `deny.toml`, which bans every
+  network, TLS and async-runtime crate from the workspace tree. This is the
+  offline-core check ADR-0004 promised.
 
 ### Changed
 

@@ -82,7 +82,7 @@ is `1.0` (ADR-0010); everything before it is `0.0.x`.
 
 ## How it works
 
-- `mnem-core` (Rust): the object model, the content-addressed store, the commit graph, and every deterministic operation built on them. It never touches the network and never calls a model.
+- `mnem-core` (Rust): the object model, the content-addressed store, the commit graph, and every deterministic operation built on them. It never touches the network and never calls a model, and a CI check (`cargo deny`) bans every network and TLS crate from its dependency tree.
 - `mnem` (Rust binary): the command line interface.
 - `mnem` (Python): the SDK an agent calls.
 - The store is a `.mnem/` directory, in the spirit of `.git/`. Its format is specified in [`docs/format/`](docs/format) and frozen within a major version.
