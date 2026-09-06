@@ -90,7 +90,20 @@ reopened from disk. The test asserts:
 Runs in the `rust` CI job. An agent loop can persist its memory and read it back
 byte for byte.
 
+## The format spec, frozen (#32)
+
+`docs/format/README.md` is now the full specification: the store directory,
+discovery and atomicity, the `config` and `HEAD` grammars, the three `redb`
+tables, object identity, the canonical CBOR profile (RFC 8949 section 4.2 plus
+the three Mnemosyne rules), and a field table for each object kind. It is marked
+frozen for the `0.0.x` line: `format_version` 1, the same for every `0.0.x`
+release.
+
+`docs/format/golden-vectors.md` pins six canonical objects with their exact CBOR
+hex and `ObjectId`. `crates/mnem-core/tests/golden_vectors.rs` checks both that
+the encoder still produces those bytes and that the doc still lists them, so the
+format cannot drift without a red test.
+
 ## Left in Phase 1
 
-- #32 write and freeze `docs/format/` for the v0.x line
-- #33 CI: build the wheel and test the SDK against it
+- #33 CI: build the wheel and test the SDK against it, then tag `v0.0.2`
