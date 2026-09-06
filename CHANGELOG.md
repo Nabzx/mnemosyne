@@ -29,6 +29,8 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   `branches`, `delete_branch`, `checkout`, `rm`, `working_memory`,
   `working_node`, `state_at`, `diff` (returning `NodeChange` dataclasses),
   `head_commit` and `resolve`.
+- The time-travel property test: over 40 pseudo-random histories, `state_at` of
+  every commit equals the working memory recorded when that commit was made.
 
 ### Changed
 
