@@ -20,3 +20,4 @@ change is a new ADR that supersedes the old one.
 | [0009](0009-ref-model.md) | The ref model | Accepted |
 | [0010](0010-what-1-0-means.md) | What 1.0 means, and the 0.0.x roadmap | Accepted |
 | [0011](0011-conventional-commits-and-issue-lifecycle.md) | Conventional commits and the issue lifecycle | Accepted |
+| [0012](0012-branch-and-checkout-model.md) | The branch and checkout model | Accepted |
