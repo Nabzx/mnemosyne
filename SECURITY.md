@@ -16,8 +16,8 @@ patched release is cut and the advisory is published.
 Mnemosyne is pre-1.0. Only the latest tagged release is supported. There are no
 backports.
 
-Once v1.0 ships, the latest v1.x release is supported, and the on-disk format
-guarantees in `AGENTS.md` apply.
+Once `1.0.0` ships, the latest `1.x` release is supported, and the on-disk
+format guarantees in `AGENTS.md` apply.
 
 ## Scope
 
@@ -26,4 +26,4 @@ In scope: anything that lets an untrusted store, commit, or memory node cause
 or misreport `verify` or `fsck`.
 
 Out of scope for now: denial of service from a deliberately huge store, and the
-v2 semantic layer (embeddings, semantic merge), which does not exist yet.
+Era 2 semantic layer (embeddings, semantic merge), which does not exist yet.

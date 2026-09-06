@@ -28,7 +28,7 @@ _Avoid_: source, origin, metadata, trace
 **Claim**:
 A memory node with `content_kind = claim`, whose content is shaped as `subject`,
 `predicate`, `value`, `confidence`, `evidence`. Defined in ADR-0003 but dormant:
-not built or validated until v2, where semantic merge reasons over it.
+not built or validated until Era 2, where semantic merge reasons over it.
 _Avoid_: belief, assertion, fact
 
 **Evidence**:
@@ -59,7 +59,7 @@ _Avoid_: repo, repository, database, vault
 
 **State**:
 The content-addressed set of memory nodes visible at a commit. A commit points
-at one state. It is `flat` (a sorted map) in v0.1 and gains a `prolly` form in
+at one state. It is `flat` (a sorted map) now and gains a `prolly` form in
 Phase 2. Distinct from working memory, which is the mutable form the agent
 reads and writes.
 _Avoid_: snapshot, tree, index, the memory
@@ -73,7 +73,7 @@ _Avoid_: HEAD state, context, context window, RAM, live memory
 A ref: a mutable `name -> commit id` pointer, held in the `refs` table. Cheap to
 create. Used to hold a hypothesis apart from the main line until it is kept or
 dropped. The default is `main`. See ADR-0009.
-_Avoid_: fork (reserved for v3), timeline, thread, world
+_Avoid_: fork (reserved for Era 3), timeline, thread, world
 
 **HEAD**:
 The one-line plain-text file naming the current position: `ref: <branch>` when
@@ -82,17 +82,18 @@ next commit lands. See ADR-0009.
 _Avoid_: current, tip, cursor
 
 **Merge**:
-Combining two branches into one memory state. In v1 the merge is deterministic
-and structural. In v2 it is semantic and reasons about contradiction.
+Combining two branches into one memory state. In the substrate the merge is
+deterministic and structural. In Era 2 it is semantic and reasons about
+contradiction.
 _Avoid_: reconcile, sync, integrate
 
 **Conflict**:
 A structural merge collision: two branches changed the same memory node in
 different ways and the tool will not choose between them. Resolved by hand or by
 a supplied policy.
-_Avoid_: clash, contradiction (that is a separate, semantic thing in v2)
+_Avoid_: clash, contradiction (that is a separate, semantic thing in Era 2)
 
-**Contradiction** (v2):
+**Contradiction** (Era 2):
 A first-class object emitted when semantic merge finds two claims that assert
 incompatible things about the same subject and cannot be auto-resolved. It is
 kept, not silently dropped.

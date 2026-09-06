@@ -22,7 +22,8 @@ Bootstrap. Get to "clone and build" with the process scaffolding in place.
 - Licence: Apache 2.0.
 - Labels: `phase-0` to `phase-7`, the `wayfinder:*` set, `ready-for-agent`,
   `track-a` / `track-b`, `adr`, `format`, `benchmark`, `spike`.
-- Milestones: `v0.1` to `v1.0`.
+- Milestones: one per roadmap phase (renumbered to `v0.0.2` to `v0.0.7` in
+  ADR-0010).
 - The Phase 0 Wayfinder map (#1), now with ten child tickets: #2 to #7 plus #15
   to #18 (commit hashing research and ADR-0005, ADR-0007 versioning, repo
   hygiene).
@@ -62,7 +63,7 @@ ADR-0001 to ADR-0005 and ADR-0007 Accepted.
 
 ## Next
 
-Phase 1 (`v0.1`, "it commits"), map #9. First: research #19 (object encoding and
+Phase 1 (`v0.0.2`, "it commits"), map #9. First: research #19 (object encoding and
 the store engine), then ADR-0008 (#20) and ADR-0009 (#21), then the build tickets
 starting at #22 (object types).
 

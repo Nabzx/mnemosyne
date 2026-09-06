@@ -1,6 +1,6 @@
 # Phase 1 progress
 
-v0.1, "it commits". The content-addressed object store and the commit graph.
+v0.0.2, "it commits". The content-addressed object store and the commit graph.
 
 ## Decisions (all Accepted)
 
