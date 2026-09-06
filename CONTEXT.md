@@ -39,9 +39,17 @@ _Avoid_: provenance, source, support
 ### Version control
 
 **Commit**:
-An immutable, content-addressed, signed snapshot of the memory state, with a
-message and one or more parent pointers. Identified by the hash of its content.
+An immutable snapshot of the state, with `{kind, parents, state, message,
+author, time}`. Identified by the BLAKE3 hash of its canonical bytes, which do
+not include any signature. May be signed, but a signature lives in a side table
+and never changes the id. See ADR-0005.
 _Avoid_: checkpoint, snapshot, revision, save
+
+**Signature**:
+An ed25519 attestation over `{commit id, signer, signed_at}`, held in the store's
+`signatures` side table. Optional and additive: a commit may have none, one, or
+several, added at any time. Checked by `mnem verify`.
+_Avoid_: seal, stamp, certificate
 
 **Store**:
 The on-disk `.mnem/` directory: a single `redb` file for objects and refs, a

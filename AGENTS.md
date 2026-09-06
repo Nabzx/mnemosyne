@@ -42,6 +42,13 @@ Once `docs/format/` is marked frozen for a version line, a change to the object
 format requires a major version bump and a migration path. A store written by
 one v1.x release is readable by every other v1.x release.
 
+### A commit's id does not include its signature
+
+An object's id is the BLAKE3 hash of its canonical bytes (ADR-0005). A commit's
+hashed bytes are `{kind, parents, state, message, author, time}`. Signatures live
+in a side table. Signing, re-signing, or adding a signature never changes any
+id, and signing is never required by any operation.
+
 ### The human is always the gate in v2
 
 When the review model lands, an approval is only ever given by a person or an

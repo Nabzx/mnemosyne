@@ -14,6 +14,6 @@ change is a new ADR that supersedes the old one.
 | [0002](0002-on-disk-object-format.md) | On-disk object format | Accepted |
 | [0003](0003-memory-node-model.md) | The memory node model | Accepted |
 | [0004](0004-core-sdk-boundary.md) | The Rust core and Python SDK boundary | Accepted |
-| 0005 | Commit identity, hashing and signing | Proposed (Phase 0 map, #16) |
+| [0005](0005-commit-identity.md) | Commit identity, hashing and signing | Accepted |
 | 0007 | Versioning and release policy | Proposed (Phase 0 map, #17) |
 | 0008 | Object encoding and the store engine | Proposed (Phase 1 map, #20) |
