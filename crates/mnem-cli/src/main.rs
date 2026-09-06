@@ -207,12 +207,39 @@ fn short(id: &ObjectId) -> String {
     id.to_hex()[..12].to_string()
 }
 
+/// Render a Unix-millisecond timestamp as `YYYY-MM-DD HH:MM:SSZ` (UTC).
+///
+/// Uses Howard Hinnant's civil-from-days algorithm, so there is no date
+/// dependency to keep the CLI's minimum Rust version low.
 fn render_time(ms: i64) -> String {
-    time::OffsetDateTime::from_unix_timestamp(ms.div_euclid(1000))
-        .ok()
-        .and_then(|dt| {
-            dt.format(&time::format_description::well_known::Rfc3339)
-                .ok()
-        })
-        .unwrap_or_else(|| format!("{ms} ms"))
+    let secs = ms.div_euclid(1000);
+    let days = secs.div_euclid(86_400);
+    let sod = secs.rem_euclid(86_400);
+    let (hh, mm, ss) = (sod / 3600, (sod % 3600) / 60, sod % 60);
+
+    let z = days + 719_468;
+    let era = z.div_euclid(146_097);
+    let doe = z - era * 146_097;
+    let yoe = (doe - doe / 1460 + doe / 36_524 - doe / 146_096) / 365;
+    let y = yoe + era * 400;
+    let doy = doe - (365 * yoe + yoe / 4 - yoe / 100);
+    let mp = (5 * doy + 2) / 153;
+    let day = doy - (153 * mp + 2) / 5 + 1;
+    let month = if mp < 10 { mp + 3 } else { mp - 9 };
+    let year = if month <= 2 { y + 1 } else { y };
+
+    format!("{year:04}-{month:02}-{day:02} {hh:02}:{mm:02}:{ss:02}Z")
+}
+
+#[cfg(test)]
+mod tests {
+    use super::render_time;
+
+    #[test]
+    fn render_time_is_correct() {
+        assert_eq!(render_time(0), "1970-01-01 00:00:00Z");
+        assert_eq!(render_time(1_757_170_500_000), "2025-09-06 14:55:00Z");
+        // a leap day
+        assert_eq!(render_time(1_582_934_400_000), "2020-02-29 00:00:00Z");
+    }
 }
