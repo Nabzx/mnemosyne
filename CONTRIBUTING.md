@@ -12,7 +12,7 @@ Dependabot pull request and re-lands the change under their own commit, so the
 history stays single-author.
 
 This keeps the history clean and the design coherent while the project is
-young. It may change once v1 has shipped.
+young. It may change once the substrate has shipped.
 
 ## How the maintainer works
 

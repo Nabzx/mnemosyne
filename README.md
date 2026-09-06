@@ -28,7 +28,7 @@ These are the problems version control solved for source code forty years ago. A
 
 ## What Mnemosyne gives you
 
-The v1 command set, modelled on Git and adapted to memory:
+The substrate command set, modelled on Git and adapted to memory:
 
 | Command | What it does |
 | --- | --- |
@@ -39,11 +39,11 @@ The v1 command set, modelled on Git and adapted to memory:
 | `bisect` | binary search a run to find the commit where a wrong belief first appeared |
 | `log` and time travel | materialise working memory exactly as it stood at any past commit |
 
-It ships as a Rust core, a `mnem` command line tool, a Python SDK, an MCP server, and a LangGraph adapter. v1 is fully local and deterministic. No network, no model calls.
+It ships as a Rust core, a `mnem` command line tool, a Python SDK, an MCP server, and a LangGraph adapter. The substrate is fully local and deterministic. No network, no model calls.
 
 ## Status
 
-Early development. v0.1 is in progress. The API shown below is the target for v0.1, not a released interface. `ROADMAP.md` says what lands in each phase.
+Early development, and numbered to say so: the whole current roadmap is `0.0.x` (ADR-0010). `v0.0.2` is in progress. The API shown below is the target for it, not a released interface. `ROADMAP.md` says what lands in each phase.
 
 ## Quickstart
 
@@ -66,18 +66,19 @@ store.commit("learn the plan tier from the support ticket", author="support-agen
 for c in store.log():
     print(c.id[:12], c.message)
 
-# v0.2 and beyond
+# later eras
 #   with store.branch("assume-downgrade"): ...   try an idea off the main line
 #   store.blame("customer-4821")                 why does the agent believe this?
 ```
 
 ## Where this goes
 
-Mnemosyne is built in three stages, and the later two are the point.
+Mnemosyne is built in three eras, and the later two are the point. Only the last
+is `1.0` (ADR-0010); everything before it is `0.0.x`.
 
-1. **v1, the substrate.** Single-agent versioned memory: commit, branch, merge, blame, bisect, time travel. Local and deterministic.
-2. **v2, the multi-agent layer.** Semantic merge that reasons about contradiction, a sync protocol between stores, and a review step so one agent's memory update is checked before it lands in shared memory. Git plus a review queue, for agents.
-3. **v3, the agent as a repository.** The whole agent, its prompt, tools, memory, policy and evaluations, as one versioned, signed, forkable artefact, with a registry to publish, discover and improve them.
+1. **The substrate.** Single-agent versioned memory: commit, branch, merge, blame, bisect, time travel. Local and deterministic.
+2. **The collaboration layer.** Semantic merge that reasons about contradiction, a sync protocol between stores, and a review step so one agent's memory update is checked before it lands in shared memory. Git plus a review queue, for agents.
+3. **The platform, `1.0`.** The whole agent, its prompt, tools, memory, policy and evaluations, as one versioned, signed, forkable artefact, with a registry to publish, discover and improve them.
 
 ## How it works
 

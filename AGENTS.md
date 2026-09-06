@@ -32,19 +32,20 @@ declined politely and closed. No commit carries a co-author trailer.
 
 ### `mnem-core` is offline and model-free
 
-Nothing in `mnem-core` opens a network connection or calls a model. The v1
-product is deterministic. The semantic layer in v2 lives behind a trait, in a
-separate crate, and its default implementation is a local model.
+Nothing in `mnem-core` opens a network connection or calls a model. The
+substrate is deterministic. The semantic layer (Era 2) lives behind a trait, in
+a separate crate, and its default implementation is a local model.
 
 ### The on-disk format changes only by the rules in ADR-0007
 
 `config` carries a `format_version` integer, on its own track from the software
 SemVer. An additive format change (a new object kind, a new optional field)
-bumps `format_version` and ships in a MINOR software release. A change that would
-make an older reader misread an existing object bumps `format_version`, requires
-a MAJOR software release, and ships `mnem migrate`. A newer release opens any
-older store it declares support for; an older release refuses a newer store with
-a clear message.
+bumps `format_version`. A change that would make an older reader misread an
+existing object bumps `format_version` and ships `mnem migrate`. A newer release
+opens any older store it declares support for; an older release refuses a newer
+store with a clear message. The software bump that carries a `format_version`
+change is a MINOR from `0.1.0` on, and a `0.0.x` bump while the roadmap is still
+in `0.0.x` (ADR-0010).
 
 ### A commit's id does not include its signature
 
@@ -53,7 +54,7 @@ hashed bytes are `{kind, parents, state, message, author, time}`. Signatures liv
 in a side table. Signing, re-signing, or adding a signature never changes any
 id, and signing is never required by any operation.
 
-### The human is always the gate in v2
+### The human is always the gate in Era 2
 
 When the review model lands, an approval is only ever given by a person or an
 explicit policy they configured. A critic agent advises; it never approves or
