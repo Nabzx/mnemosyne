@@ -7,7 +7,7 @@ members = [
 ]
 
 [workspace.package]
-version = "0.0.2"
+version = "0.0.3"
 edition = "2021"
 rust-version = "1.85"
 license = "Apache-2.0"
@@ -26,7 +26,7 @@ unimplemented = "warn"
 mem_forget = "warn"
 
 [workspace.dependencies]
-mnem-core = { path = "crates/mnem-core", version = "0.0.2" }
+mnem-core = { path = "crates/mnem-core", version = "0.0.3" }
 anyhow = "1"
 clap = { version = "4", features = ["derive"] }
 # storage and encoding, per ADR-0002, ADR-0005, ADR-0008. Not wired into a
