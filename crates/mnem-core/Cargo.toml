@@ -1,0 +1,15 @@
+[package]
+name = "mnem-core"
+description = "Core object model and storage engine for Mnemosyne, version control for AI agent memory."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[lints.rust]
+missing_docs = "warn"
+
+[lints.clippy]
+all = "warn"
