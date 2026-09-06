@@ -36,11 +36,15 @@ Nothing in `mnem-core` opens a network connection or calls a model. The v1
 product is deterministic. The semantic layer in v2 lives behind a trait, in a
 separate crate, and its default implementation is a local model.
 
-### The on-disk format is frozen within a major version
+### The on-disk format changes only by the rules in ADR-0007
 
-Once `docs/format/` is marked frozen for a version line, a change to the object
-format requires a major version bump and a migration path. A store written by
-one v1.x release is readable by every other v1.x release.
+`config` carries a `format_version` integer, on its own track from the software
+SemVer. An additive format change (a new object kind, a new optional field)
+bumps `format_version` and ships in a MINOR software release. A change that would
+make an older reader misread an existing object bumps `format_version`, requires
+a MAJOR software release, and ships `mnem migrate`. A newer release opens any
+older store it declares support for; an older release refuses a newer store with
+a clear message.
 
 ### A commit's id does not include its signature
 
