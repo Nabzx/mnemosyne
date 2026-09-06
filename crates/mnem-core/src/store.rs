@@ -153,6 +153,13 @@ impl Store {
         crate::objects::require_node(&txn, object_id)
     }
 
+    /// The commit `HEAD` resolves to, or `None` when `HEAD` is on a branch with
+    /// no commit yet. A convenience over [`resolve_head`](Self::resolve_head).
+    pub fn head_commit(&self) -> Result<Option<ObjectId>> {
+        let txn = self.begin_read()?;
+        self.resolve_head(&txn)
+    }
+
     /// Resolve a commit-ish (ADR-0012): an exact branch name first, then an
     /// unambiguous lowercase-hex commit id prefix of 4 to 64 characters.
     pub fn resolve_commitish(&self, spec: &str) -> Result<ObjectId> {
