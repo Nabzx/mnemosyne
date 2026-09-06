@@ -19,6 +19,8 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 - The round-trip test: a fixed synthetic run reloaded from disk byte for byte.
 - `docs/format/`: the full on-disk format specification and golden vectors,
   frozen for the `0.0.x` line at `format_version` 1, pinned by a test.
+- CI `wheel` job: builds a release wheel, checks it bundles the extension and
+  the type stubs, and runs the SDK tests against the installed wheel.
 - ADR-0008 (object encoding and the store engine), ADR-0009 (the ref model),
   ADR-0010 (what 1.0 means, and the 0.0.x roadmap).
 
