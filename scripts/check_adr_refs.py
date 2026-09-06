@@ -44,14 +44,20 @@ def referenced_numbers(paths: list[pathlib.Path]) -> dict[str, set[str]]:
     return out
 
 
+def next_number(have: set[str]) -> str:
+    """The next ADR in sequence. A research ticket names the ADR it feeds
+    before that ADR is written, so one forward reference is allowed."""
+    highest = max((int(n) for n in have), default=0)
+    return f"{highest + 1:04d}"
+
+
 def check() -> list[str]:
     have = existing_numbers(ADR_DIR)
+    allowed = have | {"0000", next_number(have)}
     refs = referenced_numbers(tracked_files())
     problems = []
     for number, where in sorted(refs.items()):
-        if number == "0000":
-            continue
-        if number not in have:
+        if number not in allowed:
             sites = ", ".join(sorted(where)[:3])
             problems.append(f"ADR-{number} is referenced ({sites}) but no file exists")
     return problems
