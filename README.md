@@ -16,15 +16,17 @@
   <img src="assets/demo.gif" alt="mnem: init, add memories, commit, log" width="820" />
 </p>
 
-An AI agent builds up memory as it works: facts it learns, decisions it makes, conclusions it reaches. Frameworks keep that memory as one file the agent overwrites in place.
+An AI agent builds up memory as it works: facts it learns, decisions it makes, conclusions it reaches. Frameworks store that as state the agent overwrites as it goes.
 
 Mnemosyne gives agent memory what Git gives code: commits, history, branches, merge, and blame. It is a Rust core with a `mnem` CLI and a Python SDK. Local, deterministic, no network, no model calls.
 
 ## The problem
 
-A memory blob tells you nothing when it matters: when a bad belief crept in, what it rests on, what the agent knew before it went off track. You cannot branch it to try three approaches and keep the best. And when two agents write to it, one silently wins.
+Your agent runs for an hour, makes forty tool calls, and updates its memory the whole way. Then it gets something wrong.
 
-Version control solved exactly this for source code. Agent memory needs the same, with merges that understand contradiction, not line diffs.
+You go to debug it, and all you have is the memory as it stands right now. You cannot see when a bad fact got in, what the agent knew before it went off track, or why it believes what it believes. You cannot fork the memory, try three approaches, and keep the best. And when two agents share one store, the last write wins.
+
+Version control solved exactly this for code. Agent memory needs the same, with merges that understand contradiction, not line diffs.
 
 ## What you get
 
