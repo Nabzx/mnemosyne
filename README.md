@@ -55,16 +55,20 @@ pip install mnemosyne-agents    # the python sdk
 ```python
 import mnem
 
-store = mnem.Store.open(".mnem")
-store.add({"claim": "the customer is on the Enterprise plan", "source": "ticket-4821"})
-store.commit("learn the plan tier from the support ticket")
+store = mnem.init("./agent-memory")
+store.add(
+    "customer-4821",
+    "the customer is on the Enterprise plan",
+    provenance=mnem.Provenance(source="ticket-4821"),
+)
+store.commit("learn the plan tier from the support ticket", author="support-agent")
 
-# try an idea without touching the main line of memory
-with store.branch("assume-downgrade"):
-    ...
+for c in store.log():
+    print(c.id[:12], c.message)
 
-# why does the agent believe this?
-store.blame("the customer is on the Enterprise plan")
+# v0.2 and beyond
+#   with store.branch("assume-downgrade"): ...   try an idea off the main line
+#   store.blame("customer-4821")                 why does the agent believe this?
 ```
 
 ## Where this goes
