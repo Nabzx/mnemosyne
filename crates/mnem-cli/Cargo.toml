@@ -18,5 +18,5 @@ anyhow = { workspace = true }
 clap = { workspace = true }
 serde_json = { workspace = true }
 
-[lints.clippy]
-all = "warn"
+[lints]
+workspace = true

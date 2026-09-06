@@ -22,5 +22,5 @@ serde_json = { workspace = true }
 # libpython, the host resolves it at import time.
 pyo3 = { version = "0.29", features = ["extension-module", "abi3-py310"] }
 
-[lints.clippy]
-all = "warn"
+[lints]
+workspace = true
