@@ -5,11 +5,11 @@
 //! on-disk store, the commit graph, and the deterministic operations built on
 //! them.
 //!
-//! Phase 1 is building this out. So far: the object model ([`object`]), object
-//! identity ([`id`]), the canonical encoding ([`codec`]), the content-addressed
-//! object database ([`objects`]), the store lifecycle ([`store`]), the ref
-//! store ([`refs`]) and [`head`], and staging plus [`commit`]. The log lands in
-//! the next ticket. See `ROADMAP.md`.
+//! Phase 1's core is complete: the object model ([`object`]), object identity
+//! ([`id`]), the canonical encoding ([`codec`]), the content-addressed object
+//! database ([`objects`]), the store lifecycle ([`store`]), the ref store
+//! ([`refs`]) and [`head`], staging plus [`commit`], and the [`log`] walk. Next
+//! are the CLI and the Python SDK. See `ROADMAP.md`.
 
 #![forbid(unsafe_code)]
 
@@ -19,6 +19,7 @@ pub mod config;
 pub mod error;
 pub mod head;
 pub mod id;
+pub mod log;
 pub mod object;
 pub mod objects;
 pub mod refs;
