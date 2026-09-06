@@ -73,7 +73,7 @@ The content-addressed object store and the commit graph.
 - [x] `mnem init`, `mnem add`, `mnem commit`, `mnem log`
 - [x] The Rust core bound into the Python SDK through maturin (the boundary set by ADR-0004)
 - [x] Python SDK: `Store.open`, `store.add`, `store.commit`, `store.log`
-- [ ] The on-disk format written up in `docs/format/` and frozen for the `0.0.x` line
+- [x] The on-disk format written up in `docs/format/` and frozen for the `0.0.x` line
 
 **Definition of done:** an agent loop can persist its memory as a commit history and read it back, with round trips verified byte for byte. Tag `v0.0.2`.
 

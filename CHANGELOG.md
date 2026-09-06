@@ -17,6 +17,8 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 - The Python binding (`mnem._mnem`, pyo3 + maturin) and the agent-facing SDK
   (`mnem.Store`, the `Provenance` / `MemoryNode` / `Commit` dataclasses).
 - The round-trip test: a fixed synthetic run reloaded from disk byte for byte.
+- `docs/format/`: the full on-disk format specification and golden vectors,
+  frozen for the `0.0.x` line at `format_version` 1, pinned by a test.
 - ADR-0008 (object encoding and the store engine), ADR-0009 (the ref model),
   ADR-0010 (what 1.0 means, and the 0.0.x roadmap).
 
