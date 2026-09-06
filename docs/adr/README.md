@@ -11,6 +11,9 @@ change is a new ADR that supersedes the old one.
 | ADR | Title | Status |
 | --- | --- | --- |
 | [0001](0001-record-architecture-decisions.md) | Record architecture decisions | Accepted |
-| 0002 | On-disk object format | Proposed (Phase 0 map) |
-| 0003 | The memory node model | Proposed (Phase 0 map) |
-| 0004 | Rust core and Python SDK boundary | Proposed (Phase 0 map) |
+| [0002](0002-on-disk-object-format.md) | On-disk object format | Accepted |
+| 0003 | The memory node model | Proposed (Phase 0 map, #6) |
+| 0004 | Rust core and Python SDK boundary | Proposed (Phase 0 map, #7) |
+| 0005 | Commit identity, hashing and signing | Proposed (Phase 0 map, #16) |
+| 0007 | Versioning and release policy | Proposed (Phase 0 map, #17) |
+| 0008 | Object encoding and the store engine | Proposed (Phase 1 map, #20) |
