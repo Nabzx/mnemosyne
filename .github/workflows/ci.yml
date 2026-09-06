@@ -38,3 +38,14 @@ jobs:
       - run: uv pip install -e ".[dev]"
       - run: uv run ruff check python
       - run: uv run pytest python/tests -q
+
+  msrv:
+    name: msrv (rust 1.85)
+    runs-on: ubuntu-latest
+    env:
+      RUSTUP_TOOLCHAIN: "1.85.0"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.85.0
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo check --all --all-features
