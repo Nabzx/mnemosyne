@@ -19,3 +19,4 @@ change is a new ADR that supersedes the old one.
 | [0008](0008-object-encoding-and-store-engine.md) | Object encoding and the store engine | Accepted |
 | [0009](0009-ref-model.md) | The ref model | Accepted |
 | [0010](0010-what-1.0-means.md) | What 1.0 means, and the 0.0.x roadmap | Accepted |
+| [0011](0011-conventional-commits-and-issue-lifecycle.md) | Conventional commits and the issue lifecycle | Accepted |
