@@ -9,7 +9,7 @@ use std::collections::BTreeMap;
 use crate::error::{MnemError, Result};
 use crate::head::Head;
 use crate::id::ObjectId;
-use crate::object::{MemoryNode, Object};
+use crate::object::MemoryNode;
 use crate::store::Store;
 use crate::{objects, refs, staging};
 
@@ -24,33 +24,14 @@ pub enum Checkout {
     AlreadyThere,
 }
 
-fn require_node(txn: &redb::ReadTransaction, id: ObjectId) -> Result<MemoryNode> {
-    match objects::require(txn, id)? {
-        Object::MemoryNode(node) => Ok(node),
-        other => Err(MnemError::CorruptStore(format!(
-            "{id} is a {}, not a memory node",
-            other.kind()
-        ))),
-    }
-}
-
 impl Store {
     /// The `nodes` map of the `HEAD` commit's state, or empty when `HEAD` has no
     /// commit yet.
     fn head_state_map(&self, txn: &redb::ReadTransaction) -> Result<BTreeMap<String, ObjectId>> {
-        let Some(tip) = self.resolve_head(txn)? else {
-            return Ok(BTreeMap::new());
-        };
-        let Object::Commit(commit) = objects::require(txn, tip)? else {
-            return Err(MnemError::CorruptStore(format!("{tip} is not a commit")));
-        };
-        let Object::State(state) = objects::require(txn, commit.state)? else {
-            return Err(MnemError::CorruptStore(format!(
-                "{} is not a state",
-                commit.state
-            )));
-        };
-        Ok(state.nodes)
+        match self.resolve_head(txn)? {
+            Some(tip) => self.state_map_at_in(txn, tip),
+            None => Ok(BTreeMap::new()),
+        }
     }
 
     /// Move `HEAD` to `target` (a branch name or a commit-ish). A branch target
@@ -107,13 +88,13 @@ impl Store {
 
         let mut out: BTreeMap<String, MemoryNode> = BTreeMap::new();
         for (id, object_id) in self.head_state_map(&txn)? {
-            out.insert(id, require_node(&txn, object_id)?);
+            out.insert(id, objects::require_node(&txn, object_id)?);
         }
         for id in staging::tombstones(&txn)? {
             out.remove(&id);
         }
         for (id, object_id) in staging::list(&txn)? {
-            out.insert(id, require_node(&txn, object_id)?);
+            out.insert(id, objects::require_node(&txn, object_id)?);
         }
         Ok(out)
     }
@@ -123,13 +104,13 @@ impl Store {
         let txn = self.begin_read()?;
 
         if let Some((_, object_id)) = staging::list(&txn)?.into_iter().find(|(sid, _)| sid == id) {
-            return Ok(Some(require_node(&txn, object_id)?));
+            return Ok(Some(objects::require_node(&txn, object_id)?));
         }
         if staging::tombstones(&txn)?.iter().any(|t| t == id) {
             return Ok(None);
         }
         match self.head_state_map(&txn)?.get(id) {
-            Some(&object_id) => Ok(Some(require_node(&txn, object_id)?)),
+            Some(&object_id) => Ok(Some(objects::require_node(&txn, object_id)?)),
             None => Ok(None),
         }
     }
