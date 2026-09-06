@@ -4,5 +4,5 @@ components = ["rustfmt", "clippy"]
 profile = "default"
 
 # The dev toolchain tracks stable so fmt and clippy match CI.
-# The minimum supported Rust version is pinned separately as
-# `rust-version` in Cargo.toml, and is checked by the `msrv` CI job.
+# The minimum supported Rust version is 1.85, declared as `rust-version` in
+# Cargo.toml and checked by the `msrv` CI job.

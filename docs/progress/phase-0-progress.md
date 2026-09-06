@@ -42,7 +42,7 @@ Bootstrap. Get to "clone and build" with the process scaffolding in place.
   (core and SDK boundary) and ADR-0005 (commit identity) all Accepted.
 - Repo hygiene (#18): `SECURITY.md`, `CODE_OF_CONDUCT.md`, `.github/dependabot.yml`
   (cargo, pip, github-actions), `rust-toolchain.toml`, and an `msrv` CI job at
-  Rust 1.82.
+  Rust 1.85 (the floor set by `clap`'s `edition2024` transitive requirement).
 
 ## Pending
 
