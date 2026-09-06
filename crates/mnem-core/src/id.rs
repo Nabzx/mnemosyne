@@ -84,14 +84,19 @@ impl FromStr for ObjectId {
         if s.len() != 64 {
             return Err(ParseIdError::WrongLength(s.len()));
         }
-        let mut bytes = [0u8; 32];
+
+        fn nibble(c: u8) -> Result<u8, ParseIdError> {
+            match c {
+                b'0'..=b'9' => Ok(c - b'0'),
+                b'a'..=b'f' => Ok(c - b'a' + 10),
+                _ => Err(ParseIdError::NotHex),
+            }
+        }
+
         let raw = s.as_bytes();
+        let mut bytes = [0u8; 32];
         for (i, byte) in bytes.iter_mut().enumerate() {
-            let hi = (raw[i * 2] as char).to_digit(16).ok_or(ParseIdError::NotHex)?;
-            let lo = (raw[i * 2 + 1] as char)
-                .to_digit(16)
-                .ok_or(ParseIdError::NotHex)?;
-            *byte = ((hi << 4) | lo) as u8;
+            *byte = (nibble(raw[i * 2])? << 4) | nibble(raw[i * 2 + 1])?;
         }
         Ok(Self(bytes))
     }
