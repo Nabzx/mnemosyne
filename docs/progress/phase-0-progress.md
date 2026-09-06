@@ -23,20 +23,37 @@ Bootstrap. Get to "clone and build" with the process scaffolding in place.
 - Labels: `phase-0` to `phase-7`, the `wayfinder:*` set, `ready-for-agent`,
   `track-a` / `track-b`, `adr`, `format`, `benchmark`, `spike`.
 - Milestones: `v0.1` to `v1.0`.
-- The Phase 0 Wayfinder map (#1) with six child tickets (#2 to #7), sub-issue
-  linked, with #4 blocked by #3 and #6 blocked by #5.
+- The Phase 0 Wayfinder map (#1), now with ten child tickets: #2 to #7 plus #15
+  to #18 (commit hashing research and ADR-0005, ADR-0007 versioning, repo
+  hygiene).
+- Maps for Phases 1 to 6 (#9 to #14), each a kept-open epic with a checklist
+  comment linking its children.
+- The full backlog: 68 issues in total. 57 granular one-PR-sized child tickets
+  across the six phase maps, sub-issue linked, with 48 `blocked_by` dependency
+  edges. Every task ticket is scoped to something a single pull request could
+  close.
 - The scaffold (#2) built on `chore/phase-0-scaffold`, merged via PR #8 with
   green CI.
+- Tag `v0.0.1` pushed.
+- The GitHub project ([Mnemosyne roadmap](https://github.com/users/Nabzx/projects/1)),
+  linked to the repo, with all open issues added.
 
 ## Pending
 
-- Tag `v0.0.1` and cut the release (blocked in this session; to be done by the
-  maintainer).
-- The GitHub project board (needs the `project` token scope:
-  `gh auth refresh -s project,read:project`).
-- The Phase 0 frontier: #3 (research, object format), #5 (research, memory
-  model), #7 (grill, Rust and Python boundary). #4 and #6 stay blocked until
-  their research tickets close.
+- The `v0.0.1` GitHub release. The tag is pushed; the release page was blocked
+  by a session safety check. Cut it from the tag in the web UI, or add a Bash
+  permission rule for `gh release`.
+- Project board views. The project has all items; add a "group by Milestone"
+  view for the roadmap and a "group by Status" board in the UI.
+- The Phase 0 frontier: #3, #5, #15 (research) and #7, #17 (grilling), none
+  blocked. #4 (blocked by #3), #6 (blocked by #5) and #16 (blocked by #15) open
+  once their research closes.
+
+## Frontier, in order
+
+Phase 0: #3, #5, #15, #7, #17, then #4, #6, #16. Once the Phase 0 ADRs (0002 to
+0005, 0007) are Accepted, Phase 1 build tickets open, starting with #22 (object
+types), which is blocked only by ADR-0008 (#20).
 
 ## Notes
 

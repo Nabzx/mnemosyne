@@ -19,6 +19,23 @@ reshaping the work. Until then the phases run in order.
   depends on. Research and grilling tickets resolve them into ADRs before the
   build tickets start.
 
+## The tracker
+
+Every phase is a kept-open map issue with its child tickets in a checklist
+comment. The full backlog is filed ahead of time.
+
+| Phase | Map | Milestone |
+| --- | --- | --- |
+| 0 | [#1](https://github.com/Nabzx/mnemosyne/issues/1) | v0.1 |
+| 1 | [#9](https://github.com/Nabzx/mnemosyne/issues/9) | v0.1 |
+| 2 | [#10](https://github.com/Nabzx/mnemosyne/issues/10) | v0.2 |
+| 3 | [#11](https://github.com/Nabzx/mnemosyne/issues/11) | v0.3 |
+| 4 | [#12](https://github.com/Nabzx/mnemosyne/issues/12) | v0.4 |
+| 5 | [#13](https://github.com/Nabzx/mnemosyne/issues/13) | v0.5 |
+| 6 | [#14](https://github.com/Nabzx/mnemosyne/issues/14) | v1.0 |
+
+Board: [Mnemosyne roadmap](https://github.com/users/Nabzx/projects/1).
+
 ---
 
 ## Phase 0: Bootstrap
