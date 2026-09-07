@@ -23,6 +23,7 @@ USER_FACING_PREFIXES = (
     "crates/mnem-cli/src/",
     "crates/mnem-py/src/",
     "python/mnem/",
+    "packages/",
     "docs/format/",
 )
 EXEMPT_SUFFIXES = ("/tests/", "test_")

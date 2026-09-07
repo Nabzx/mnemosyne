@@ -48,6 +48,24 @@ jobs:
       - run: uv run ruff check python scripts
       - run: uv run pytest python/tests scripts -q
 
+  adapters:
+    name: adapters (mcp)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.93.0
+      - uses: Swatinem/rust-cache@v2
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+      # The SDK (built through maturin), then each adapter package under
+      # packages/ with its own deps. Adapters live outside the workspace and
+      # test against the SDK (ADR-0004, ADR-0016).
+      - run: uv pip install -e ".[dev]"
+      - run: uv pip install -e "./packages/mnem-mcp[dev]"
+      - run: uv run ruff check packages
+      - run: uv run pytest packages -q
+
   wheel:
     name: python (wheel)
     runs-on: ubuntu-latest
