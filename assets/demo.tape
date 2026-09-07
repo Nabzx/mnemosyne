@@ -34,7 +34,7 @@ Type `mnem commit -m "open the case" --author agent`
 Enter
 Sleep 1400ms
 
-Type "# fork the memory to test a hunch — the main line keeps its own"
+Type "# fork the memory to test a hunch; the main line keeps its own"
 Enter
 Type "mnem checkout -b what-if-downgraded"
 Enter

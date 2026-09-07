@@ -10,16 +10,17 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Added
 
-- `mnem` CLI: coloured output when stdout is a terminal — commit ids, branch
-  names, `diff` and `show --stat` markers, and the `blame` / `bisect` provenance.
-  Output stays plain when piped, redirected, or when `NO_COLOR` is set.
+- `mnem` CLI: coloured output when stdout is a terminal, covering commit ids,
+  branch names, `diff` and `show --stat` markers, and the `blame` / `bisect`
+  provenance. Output stays plain when piped, redirected, or when `NO_COLOR` is
+  set.
 
 ### Changed
 
-- README: rebuilt and trimmed. A colour demo GIF that runs the full arc —
-  record, branch, the bug, then `bisect` and `blame` finding it — leads the
-  page, followed by a compact command table, an SVG panel of a Claude agent
-  loop calling the SDK, and a one-block quickstart.
+- README: rebuilt and trimmed. A colour demo GIF leads the page, running the
+  full arc (record, branch, the bug, then `bisect` and `blame` finding it),
+  followed by a compact command table, an SVG panel of a Claude agent loop
+  calling the SDK, and a one-block quickstart.
 
 ## [0.0.5] - 2026-09-07
 
