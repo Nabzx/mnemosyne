@@ -6,6 +6,73 @@ for you.
 
 ---
 
+## v0.0.4 — merging
+
+**The one-line version:** two branches of an agent's memory can now be combined
+back into one. Where they don't overlap, it just works. Where they do, you get a
+clear list of the clashes and simple ways to settle each one.
+
+**New this release:**
+
+- **Merge.** `mnem merge experiment` takes everything that happened on the
+  `experiment` branch and folds it into the branch you are on.
+- **Clean merges just happen.** If the two branches changed different memories
+  (or one branch only added things), there is nothing to decide — the merge goes
+  through and makes one new snapshot with both sets of changes.
+- **Fast-forward.** If your branch has not moved on and the other one has, the
+  merge is free: your branch just catches up to the other. No extra snapshot.
+- **Conflicts are objects, not text.** When both branches changed the *same*
+  memory to *different* things, that memory becomes a conflict. The merge stops
+  and shows you, for each clash: the original value, your value, and their
+  value. Nothing is written until you resolve it.
+- **Resolving.** Per clash you can say `--resolve <name>=ours`, `=theirs`,
+  `=base` (the original), or `=delete`. Or settle every clash the same way with
+  `--strategy ours` / `--strategy theirs`. Then run the merge again.
+- **In Python:**
+
+  ```python
+  result = store.merge("experiment")
+  if not result.ok:
+      for c in result.conflicts:
+          print(c.id, c.ours.content, "vs", c.theirs.content)
+      store.merge("experiment", resolutions={"plan": "theirs"})
+  ```
+
+  You can also hand in a brand-new `MemoryNode` as the resolution for a clash.
+
+**What is guaranteed:**
+
+- The merge is deterministic and structural: it works on *which* memory changed,
+  never on *what the text says*. Same inputs, same result, every time — swapping
+  which branch is "ours" gives the identical merged memory.
+- A conflicted merge writes **nothing**. You never end up in a half-merged state.
+- A seeded chaos harness builds thousands of random branch histories and checks
+  the merge never loses a write, never leaves a memory in a limbo state, and
+  that merging two branches together and then back again lands on exactly the
+  same memory. 50,000 cases in the last sweep, no failures
+  (`docs/chaos-report.md`).
+- Still no internet, still no AI model calls, still one on-disk format
+  (`format_version` 1). A merge snapshot is just an ordinary snapshot with two
+  parents.
+
+**What it still does not do** (next phases):
+
+- No *semantic* merge. It won't read two versions of a belief and reconcile the
+  wording — that is a later era.
+- No criss-crossed histories. If two branches were already merged into each
+  other in a tangle, `mnem merge` asks you to merge one side by hand first. A
+  single agent with a person in the loop rarely hits this.
+- No blame or bisect yet (tracing a belief back to where it came from). That is
+  the next release.
+- No sharing between two agents yet.
+
+**Under the hood:** the Rust engine gained the three-way merge, the merge-base
+walk, and the conflict/resolution types; the `mnem` CLI and the Python package
+both gained `merge`. Decisions written up in ADR-0013 and ADR-0014. Still built
+from source; not on PyPI or Homebrew.
+
+---
+
 ## v0.0.3 — branches and time travel
 
 **The one-line version:** the agent can now try an idea on a copy of its memory
