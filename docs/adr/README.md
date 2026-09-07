@@ -24,3 +24,4 @@ change is a new ADR that supersedes the old one.
 | [0013](0013-deterministic-merge-algorithm.md) | The deterministic merge algorithm | Accepted |
 | [0014](0014-conflict-object-and-resolution-api.md) | The conflict object and the resolution API | Accepted |
 | [0015](0015-provenance-index-blame-and-bisect.md) | The provenance index, blame and bisect | Accepted |
+| [0016](0016-mcp-tools-and-the-adapter-contract.md) | The MCP tools and the adapter contract | Accepted |

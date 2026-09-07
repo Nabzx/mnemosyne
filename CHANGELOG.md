@@ -14,6 +14,11 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   branch names, `diff` and `show --stat` markers, and the `blame` / `bisect`
   provenance. Output stays plain when piped, redirected, or when `NO_COLOR` is
   set.
+- ADR-0016 (the MCP tools and the adapter contract): the `mnem-mcp` tool and
+  resource surface, a no-staging one-commit-per-call write contract, stateless
+  one-store-per-process binding, a shared `mnem.agents` helper module, and the
+  LangGraph `BaseStore` mapping. Packaged under `packages/`; stdio only for
+  `v0.0.6`.
 
 ### Changed
 
