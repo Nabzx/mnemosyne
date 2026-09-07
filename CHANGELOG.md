@@ -16,10 +16,10 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Changed
 
-- README: a rebuilt tour. A colour demo GIF that runs the full arc — record,
-  branch, the bug, then `bisect` and `blame` finding it — leads the page; the
-  feature set is grouped into record / explore / explain, each with a short
-  worked example; and an SVG panel shows a Claude agent loop calling the SDK.
+- README: rebuilt and trimmed. A colour demo GIF that runs the full arc —
+  record, branch, the bug, then `bisect` and `blame` finding it — leads the
+  page, followed by a compact command table, an SVG panel of a Claude agent
+  loop calling the SDK, and a one-block quickstart.
 
 ## [0.0.5] - 2026-09-07
 
