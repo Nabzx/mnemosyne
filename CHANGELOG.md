@@ -19,6 +19,11 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   one-store-per-process binding, a shared `mnem.agents` helper module, and the
   LangGraph `BaseStore` mapping. Packaged under `packages/`; stdio only for
   `v0.0.6`.
+- Python SDK: `mnem.agents` with `remember` / `remember_many` / `forget`, each a
+  stage-then-commit in one call with a bounded retry on a lost write race. The
+  `Blame` / `NodeChange` / `Commit` / `MemoryNode` / `Conflict` / `MergeResult`
+  / `Provenance` dataclasses gain `to_dict()` for the JSON boundary. `Store`'s
+  docstring documents that a handle is one-per-thread.
 
 ### Changed
 

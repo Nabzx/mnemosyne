@@ -19,6 +19,7 @@ See ``ROADMAP.md`` for the plan.
 
 from __future__ import annotations
 
+from . import agents
 from ._mnem import (
     ConflictError,
     CorruptStoreError,
@@ -64,6 +65,7 @@ __all__ = [
     "StoreExistsError",
     "StoreIoError",
     "__version__",
+    "agents",
     "init",
     "open",
     "version",

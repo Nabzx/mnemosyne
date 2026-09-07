@@ -52,6 +52,16 @@ class Provenance:
             note=d.get("note"),
         )
 
+    def to_dict(self) -> dict[str, Any]:
+        """A plain, JSON-serialisable dict. All five fields, ``None`` kept."""
+        return {
+            "agent_step": self.agent_step,
+            "observation": self.observation,
+            "tool_call": self.tool_call,
+            "source": self.source,
+            "note": self.note,
+        }
+
 
 @dataclass(slots=True)
 class MemoryNode:
@@ -73,6 +83,17 @@ class MemoryNode:
             event_time=d.get("event_time"),
         )
 
+    def to_dict(self) -> dict[str, Any]:
+        """A plain, JSON-serialisable dict. ``content`` is the decoded value,
+        not a JSON string; ``provenance`` is a nested dict."""
+        return {
+            "id": self.id,
+            "content": self.content,
+            "content_kind": self.content_kind,
+            "provenance": self.provenance.to_dict(),
+            "event_time": self.event_time,
+        }
+
 
 @dataclass(frozen=True, slots=True)
 class NodeChange:
@@ -93,6 +114,15 @@ class NodeChange:
             old=MemoryNode._from_dict(old) if old is not None else None,
             new=MemoryNode._from_dict(new) if new is not None else None,
         )
+
+    def to_dict(self) -> dict[str, Any]:
+        """A plain, JSON-serialisable dict."""
+        return {
+            "id": self.id,
+            "kind": self.kind,
+            "old": self.old.to_dict() if self.old is not None else None,
+            "new": self.new.to_dict() if self.new is not None else None,
+        }
 
 
 @dataclass(frozen=True, slots=True)
@@ -116,6 +146,17 @@ class Commit:
             author=row["author"],
             time=row["time"],
         )
+
+    def to_dict(self) -> dict[str, Any]:
+        """A plain, JSON-serialisable dict. ``parents`` becomes a list."""
+        return {
+            "id": self.id,
+            "parents": list(self.parents),
+            "state": self.state,
+            "message": self.message,
+            "author": self.author,
+            "time": self.time,
+        }
 
 
 @dataclass(frozen=True, slots=True)
@@ -141,6 +182,20 @@ class Conflict:
             theirs=side(d["theirs"]),
         )
 
+    def to_dict(self) -> dict[str, Any]:
+        """A plain, JSON-serialisable dict."""
+
+        def side(node: MemoryNode | None) -> dict[str, Any] | None:
+            return node.to_dict() if node is not None else None
+
+        return {
+            "id": self.id,
+            "kind": self.kind,
+            "base": side(self.base),
+            "ours": side(self.ours),
+            "theirs": side(self.theirs),
+        }
+
 
 @dataclass(frozen=True, slots=True)
 class MergeResult:
@@ -162,6 +217,14 @@ class MergeResult:
             commit=d["commit"],
             conflicts=tuple(Conflict._from_dict(row) for row in d["conflicts"]),
         )
+
+    def to_dict(self) -> dict[str, Any]:
+        """A plain, JSON-serialisable dict."""
+        return {
+            "status": self.status,
+            "commit": self.commit,
+            "conflicts": [c.to_dict() for c in self.conflicts],
+        }
 
 
 @dataclass(frozen=True, slots=True)
@@ -185,6 +248,14 @@ class Blame:
             time=d["time"],
         )
 
+    def to_dict(self) -> dict[str, Any]:
+        """A plain, JSON-serialisable dict."""
+        return {
+            "commit": self.commit,
+            "node": self.node.to_dict(),
+            "time": self.time,
+        }
+
 
 def _resolve_author(author: str | None) -> str:
     """Match the CLI: an explicit author, then ``$MNEM_AUTHOR``, then ``unknown``."""
@@ -196,7 +267,13 @@ def _now_ms() -> int:
 
 
 class Store:
-    """An open Mnemosyne store. Use :func:`open` or :func:`init` to get one."""
+    """An open Mnemosyne store. Use :func:`open` or :func:`init` to get one.
+
+    A handle is **not safe to share across threads**; open one per thread
+    (:func:`open` is cheap, it is a file handle). Writes to a store serialise
+    regardless of how many handles are open: a losing writer sees
+    :class:`~mnem.ConflictError`, which :mod:`mnem.agents` retries.
+    """
 
     __slots__ = ("_inner",)
 
