@@ -96,10 +96,10 @@ Isolation and history.
 
 Deterministic merge, the last purely mechanical piece.
 
-- [ ] Three-way merge with a shared base
-- [ ] Structural conflict detection and conflict objects
-- [ ] A resolution API: take mine, take theirs, or supply a value
-- [ ] A property and chaos harness proving merge is order-independent and associative where it must be, in the spirit of the ephor exactly-once tests
+- [x] Three-way merge with a shared base
+- [x] Structural conflict detection and conflict objects
+- [x] A resolution API: take mine, take theirs, or supply a value
+- [x] A property and chaos harness proving merge is order-independent and associative where it must be, in the spirit of the ephor exactly-once tests
 
 **Definition of done:** non-overlapping changes merge clean; overlapping changes produce conflict objects you can inspect and resolve; the harness runs in CI. Tag `v0.0.4`.
 
