@@ -21,6 +21,9 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 - `mnem-core`: the merge algorithm. `merge::merge_state_maps` (the per-id
   three-way table), `Conflict` / `ConflictKind` / `StateMerge`, and
   `Store::merge_states`.
+- `mnem-core`: `Store::merge` (the merge flow): merge base, fast-forward,
+  `Resolution` (`Ours` / `Theirs` / `Base` / `Delete` / `Set`), `MergeStrategy`,
+  and `MergeOutcome`. Stateless: a conflicted merge writes nothing.
 
 ### Changed
 
