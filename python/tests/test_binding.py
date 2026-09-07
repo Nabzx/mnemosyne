@@ -14,8 +14,8 @@ from mnem import _mnem
 
 
 def test_version_is_exposed() -> None:
-    assert _mnem.__version__ == "0.0.4"
-    assert _mnem.version() == "0.0.4"
+    assert _mnem.__version__ == "0.0.5"
+    assert _mnem.version() == "0.0.5"
 
 
 def test_commit_and_log_round_trip(tmp_path: object) -> None:

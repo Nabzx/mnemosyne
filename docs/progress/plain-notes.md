@@ -6,6 +6,59 @@ for you.
 
 ---
 
+## v0.0.5 — explaining
+
+**The one-line version:** you can now ask the agent's memory two questions —
+"where did this belief come from?" and "when did this go wrong?" — and get an
+exact commit back, not a guess.
+
+**New this release:**
+
+- **Blame.** `mnem blame plan` tells you which commit last set the memory called
+  `plan`, when, and — if the agent recorded it — which step of the run and which
+  observation it came from. Like `git blame`, but for one memory instead of one
+  line of code.
+- **Blame sees through merges.** If a belief came in from a branch you merged,
+  blame follows it back to the commit that actually wrote it, not just to the
+  merge.
+- **Bisect.** `mnem bisect --node plan --equals '"pro"'` binary-searches the
+  history for the first commit where `plan` became `"pro"`. It does about
+  `log2(n)` checks, not `n`, so it stays fast over long runs. You can also ask
+  `--absent` (first commit where a memory is gone) or `--present` (first commit
+  where it appears).
+- **Bisect explains itself.** When it finds the commit, it immediately runs
+  `blame` on it, so one command tells you both *where* the bad belief entered
+  and *what caused it*.
+- **`mnem show <commit> --stat`.** A quick list of which memories a commit
+  added, changed or removed, without printing all their contents.
+
+**What is guaranteed:**
+
+- Blame and bisect are exact and deterministic. There is a test fixture — a
+  synthetic support-agent run that misreads a billing note and writes the wrong
+  plan tier — and the tests assert that bisect lands on exactly that commit and
+  blame names exactly that observation.
+- A small index (`commit_nodes`) makes some of this faster, but it is never
+  trusted: every answer is recomputable from the history alone, and a missing or
+  stale index just means a slightly slower walk, never a wrong answer.
+- Still no internet, still no AI model calls, still one on-disk format
+  (`format_version` 1).
+
+**What it still does not do** (next phases):
+
+- No `bisect run <command>` yet (handing bisect an arbitrary script). The
+  built-in `--node` predicates cover the common case.
+- Bisect assumes the thing you are looking for, once true, stays true, and walks
+  a single line of history — same simplification `git bisect` makes.
+- No sharing between two agents yet. That is the collaboration era.
+
+**Under the hood:** the Rust engine gained `blame`, `bisect` and the
+`commit_nodes` index; the `mnem` CLI and the Python package both gained `blame`,
+`bisect`, `changed_by` and `show --stat`. Decisions in ADR-0015. Still built from
+source; not on PyPI or Homebrew.
+
+---
+
 ## v0.0.4 — merging
 
 **The one-line version:** two branches of an agent's memory can now be combined

@@ -109,10 +109,10 @@ Deterministic merge, the last purely mechanical piece.
 
 The debugging layer, still deterministic.
 
-- [ ] The provenance index in `mnem-core`
-- [ ] `mnem blame <node>`: the introducing commit and its provenance
-- [ ] `mnem bisect`: find the commit where a supplied predicate first holds
-- [ ] A synthetic buggy-run fixture the tests bisect against
+- [x] The provenance index in `mnem-core`
+- [x] `mnem blame <node>`: the introducing commit and its provenance
+- [x] `mnem bisect`: find the commit where a supplied predicate first holds
+- [x] A synthetic buggy-run fixture the tests bisect against
 
 **Definition of done:** `blame` resolves any node to its origin; `bisect` finds the fault commit over the fixture. Tag `v0.0.5`.
 
