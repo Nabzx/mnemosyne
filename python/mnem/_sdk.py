@@ -10,6 +10,7 @@ from __future__ import annotations
 import json
 import os
 import time
+from collections.abc import Callable
 from contextlib import AbstractContextManager
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -18,6 +19,7 @@ from typing import Any
 from . import _mnem
 
 __all__ = [
+    "Blame",
     "Commit",
     "Conflict",
     "MemoryNode",
@@ -159,6 +161,28 @@ class MergeResult:
             status=d["status"],
             commit=d["commit"],
             conflicts=tuple(Conflict._from_dict(row) for row in d["conflicts"]),
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class Blame:
+    """The result of :meth:`Store.blame`."""
+
+    commit: str
+    node: MemoryNode
+    time: int  # the node's event_time, or the commit's record time
+
+    @property
+    def provenance(self) -> Provenance:
+        """Shorthand for ``self.node.provenance``."""
+        return self.node.provenance
+
+    @classmethod
+    def _from_dict(cls, d: dict[str, Any]) -> Blame:
+        return cls(
+            commit=d["commit"],
+            node=MemoryNode._from_dict(d["node"]),
+            time=d["time"],
         )
 
 
@@ -388,6 +412,44 @@ class Store:
             time_ms=_now_ms() if time_ms is None else time_ms,
         )
         return MergeResult._from_dict(row)
+
+    # --- Phase 4 (ADR-0015) ---
+
+    def blame(self, node_id: str, at: str | None = None) -> Blame:
+        """Resolve ``node_id`` to the commit, and the node, that gave it its
+        current value as of ``at`` (a commit-ish; ``None`` is ``HEAD``).
+
+        Follows the contributing parent through merges. Raises
+        :class:`InvalidRefError` if the node is not in memory at ``at``.
+        """
+        return Blame._from_dict(self._inner.blame(node_id, at))
+
+    def bisect(
+        self,
+        predicate: Callable[[dict[str, MemoryNode]], bool],
+        *,
+        bad: str | None = None,
+        good: str | None = None,
+    ) -> str:
+        """The first commit where ``predicate`` holds.
+
+        ``predicate`` is called with the memory at a commit (``{node_id:
+        MemoryNode}``). ``bad`` defaults to ``HEAD``, ``good`` to the root of
+        ``bad``'s first-parent chain; ``predicate`` must be false at ``good``
+        and true at ``bad``, and is assumed monotonic between them. Returns the
+        boundary commit id.
+        """
+
+        def wrapped(raw: dict[str, Any]) -> bool:
+            state = {k: MemoryNode._from_dict(v) for k, v in raw.items()}
+            return bool(predicate(state))
+
+        return self._inner.bisect(wrapped, bad=bad, good=good)
+
+    def changed_by(self, commit: str) -> dict[str, str]:
+        """The node ids a commit changed against its first parent, each mapped
+        to ``"added"``, ``"modified"`` or ``"removed"``."""
+        return dict(self._inner.changed_by(commit))
 
     def branch(self, name: str, *, start: str | None = None) -> _BranchScope:
         """Create ``name`` (at ``start`` or ``HEAD``) and return a context

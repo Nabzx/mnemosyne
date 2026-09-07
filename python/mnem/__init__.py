@@ -33,6 +33,7 @@ from ._mnem import (
     version,
 )
 from ._sdk import (
+    Blame,
     Commit,
     Conflict,
     MemoryNode,
@@ -45,6 +46,7 @@ from ._sdk import (
 )
 
 __all__ = [
+    "Blame",
     "Commit",
     "Conflict",
     "ConflictError",

@@ -200,3 +200,60 @@ def test_merge_set_resolution_with_a_memory_node(tmp_path: object) -> None:
     merged = store.merge("feature", resolutions={"plan": pick})
     assert merged.status == "merged"
     assert store.working_node("plan").content == "starter"
+
+
+def test_blame_resolves_a_node_to_its_introducing_commit(tmp_path: object) -> None:
+    store = mnem.init(tmp_path)
+    store.add("plan", "enterprise", provenance=mnem.Provenance(source="ticket-1"))
+    c1 = store.commit("one", author="agent", time_ms=1000)
+    store.add("plan", "pro", provenance=mnem.Provenance(observation="obs-7"))
+    c2 = store.commit("two", author="agent", time_ms=2000)
+    store.add("note", "unrelated")
+    store.commit("three", author="agent", time_ms=3000)
+
+    blame = store.blame("plan")
+    assert blame.commit == c2
+    assert blame.node.content == "pro"
+    assert blame.provenance.observation == "obs-7"
+    assert blame.time == 2000  # falls back to the commit time
+
+    # and at an explicit past commit
+    assert store.blame("plan", c1).commit == c1
+
+    with pytest.raises(mnem.InvalidRefError):
+        store.blame("ghost")
+
+
+def test_bisect_finds_the_first_commit_where_a_predicate_holds(tmp_path: object) -> None:
+    store = mnem.init(tmp_path)
+    store.add("plan", "enterprise")
+    store.commit("c0", author="agent", time_ms=1000)
+    ids = []
+    for i in range(1, 10):
+        if i == 6:
+            store.add("plan", "pro")  # the wrong belief enters here, and stays
+        store.add("seats", str(i))
+        ids.append(store.commit(f"c{i}", author="agent", time_ms=1000 + i * 1000))
+
+    boundary = store.bisect(
+        lambda state: "plan" in state and state["plan"].content == "pro"
+    )
+    assert boundary == ids[5]  # the i == 6 commit
+
+
+def test_changed_by_lists_a_commits_change_set(tmp_path: object) -> None:
+    store = mnem.init(tmp_path)
+    store.add("plan", "enterprise")
+    store.add("owner", "alice")
+    store.commit("one", author="agent", time_ms=1000)
+
+    store.add("plan", "pro")
+    store.add("region", "eu")
+    store.rm("owner")
+    c2 = store.commit("two", author="agent", time_ms=2000)
+
+    assert store.changed_by(c2) == {
+        "plan": "modified",
+        "region": "added",
+        "owner": "removed",
+    }
