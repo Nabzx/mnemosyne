@@ -7,7 +7,7 @@ _default:
     @just --list
 
 # Everything CI runs, in the same order. Run this before opening a pull request.
-ci: fmt-check clippy test build deny py checks commits
+ci: fmt-check clippy test build deny py adapters checks commits
 
 # Format the whole workspace.
 fmt:
@@ -42,6 +42,12 @@ py:
     maturin develop -m crates/mnem-py/Cargo.toml
     ruff check python scripts
     pytest python/tests scripts -q
+
+# Lint and test the adapter packages (needs the SDK installed, e.g. via `just py`).
+adapters:
+    pip install -e "./packages/mnem-mcp[dev]"
+    ruff check packages
+    pytest packages -q
 
 # Build the release wheel and check it against the SDK tests.
 wheel:

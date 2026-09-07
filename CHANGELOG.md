@@ -24,6 +24,10 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   `Blame` / `NodeChange` / `Commit` / `MemoryNode` / `Conflict` / `MergeResult`
   / `Provenance` dataclasses gain `to_dict()` for the JSON boundary. `Store`'s
   docstring documents that a handle is one-per-thread.
+- `mnemosyne-mcp` (`packages/mnem-mcp/`): an MCP server exposing a store as
+  tools (`remember`, `recall`, `why`, `when_did`, ...) and resources
+  (`mnem://memory`, `mnem://log`, `mnem://commit/{id}`). `mnem-mcp --store PATH`
+  speaks MCP over stdio; `--tools all` adds `branch` / `switch` / `merge`.
 
 ### Changed
 
