@@ -59,6 +59,11 @@ checks:
 commits:
     python scripts/conventional_commits.py --range main..HEAD
 
+# Regenerate the README demo GIF (needs `vhs` on PATH).
+demo:
+    cargo build --release -p mnem-cli
+    vhs assets/demo.tape
+
 # Install the repo git hooks into .git/hooks.
 install-hooks:
     git config core.hooksPath .githooks

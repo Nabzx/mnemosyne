@@ -13,7 +13,7 @@
 </div>
 
 <p align="center">
-  <img src="assets/hero.svg" alt="An agent's memory as a commit graph: commits on a main line, a hypothesis branch, a merge, and a blame arrow tracing a belief back to the observation that produced it." width="920" />
+  <img src="assets/demo.gif" alt="An agent records a belief with provenance, forks its memory to test a hunch, then — after a wrong answer — uses bisect and blame to find the commit where a misread observation entered." width="900" />
 </p>
 
 An AI agent builds up memory as it works: facts it learns, decisions it makes, conclusions it reaches. Frameworks store that as state the agent overwrites as it goes — so the moment it gets something wrong, the history is gone.
@@ -28,27 +28,55 @@ You go to debug it, and all you have is the memory as it stands right now. You c
 
 Version control solved exactly this for code. Agent memory needs the same.
 
----
-
 ## Record
 
-Every change the agent makes to its memory is a commit: an immutable, content-addressed snapshot, stamped with **where each fact came from** (`--source`, `--step`, the observation behind it). `log` walks the history; `show <commit>` reconstructs the memory exactly as it stood at any point in the past.
+Every change the agent makes to its memory is a commit: an immutable, content-addressed snapshot, stamped with **where each fact came from**. `log` walks the history; `show <commit>` reconstructs the memory exactly as it stood at any point in the past.
 
-<p align="center"><img src="assets/panel-record.svg" alt="mnem add with provenance, mnem commit, mnem log, and mnem show reconstructing a past state" width="840" /></p>
+```console
+$ mnem add customer-4821 "on the Enterprise plan" --source ticket-4821
+Staged customer-4821 as 9f2c1a7b4e08
+$ mnem commit -m "open the case" --author support-agent
+[a17e42c9] open the case
+
+$ mnem show a17e42c9              # the memory exactly as it stood then
+customer-4821  "on the Enterprise plan"
+```
 
 ## Explore
 
 `branch` forks the memory for the price of a pointer. The agent tries a hypothesis — *what if the customer downgraded?* — on its own line, and you `diff` the two. `merge` brings a branch back; where both lines changed the same fact to different things, you get a **conflict object you can inspect and resolve**, not a silent overwrite.
 
-<p align="center"><img src="assets/panel-explore.svg" alt="mnem checkout -b, mnem diff, and mnem merge surfacing an edit/edit conflict that is then resolved" width="840" /></p>
+```console
+$ mnem checkout -b what-if-downgraded
+$ mnem add customer-4821 "downgraded to Pro"
+$ mnem diff
+~ customer-4821
+  - "on the Enterprise plan"
+  + "downgraded to Pro"
+
+$ mnem merge what-if-downgraded          # back on main
+Merge conflict in 1 node(s):
+  customer-4821 (edit/edit)
+    ours:    "on the Enterprise plan"
+    theirs:  "downgraded to Pro"
+```
 
 ## Explain
 
 An hour later, a wrong answer. `bisect` binary-searches the run for the first commit where the bad belief appears. `blame` resolves any fact to the commit that set it — following it back through merges — and the provenance recorded with it. One command tells you **where the belief entered and what caused it.**
 
-<p align="center"><img src="assets/panel-explain.svg" alt="mnem bisect finding the commit where a belief went wrong, and mnem blame naming the misread observation behind it" width="840" /></p>
+```console
+$ mnem bisect --node customer-4821 --equals '"downgraded to Pro last month"'
+b3d90f2a  reconcile the plan tier from billing
+  customer-4821 set here, from step step-31, source billing-note-8842
 
----
+$ mnem blame customer-4821
+b3d90f2a  2026-02-14 09:41Z
+  commit:  reconcile the plan tier from billing
+  content: "downgraded to Pro last month"
+  step:    step-31
+  source:  billing-note-8842        ← the misread observation
+```
 
 ## From your agent code
 

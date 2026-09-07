@@ -16,10 +16,10 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Changed
 
-- README: a rebuilt visual tour. A commit-graph hero image and four hand-authored
-  SVG terminal panels (record / explore / explain / a Claude agent loop) replace
-  the single scrolling demo GIF, and the feature set is grouped into record,
-  explore and explain.
+- README: a rebuilt tour. A colour demo GIF that runs the full arc — record,
+  branch, the bug, then `bisect` and `blame` finding it — leads the page; the
+  feature set is grouped into record / explore / explain, each with a short
+  worked example; and an SVG panel shows a Claude agent loop calling the SDK.
 
 ## [0.0.5] - 2026-09-07
 
