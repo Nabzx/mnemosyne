@@ -13,6 +13,7 @@
 
 #![forbid(unsafe_code)]
 
+pub mod blame;
 pub mod branch;
 pub mod checkout;
 pub mod codec;
@@ -34,6 +35,7 @@ pub mod staging;
 pub mod store;
 pub mod timetravel;
 
+pub use blame::Blame;
 pub use checkout::Checkout;
 pub use config::Config;
 pub use diff::{DiffTarget, NodeChange};

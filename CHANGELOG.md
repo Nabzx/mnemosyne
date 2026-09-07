@@ -20,6 +20,10 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   commit's change set (`ChangeKind` per node id) against its first parent, in
   the commit's own write transaction. `Store::changed_by` reads it, recomputing
   on a miss; `Store::rebuild_index` rewrites the table from history.
+- `mnem-core`: `Store::blame(node_id, at)` returning a `Blame` (commit, node,
+  effective time). Walks to the commit that set the node's current value,
+  following the contributing parent through merges; errors if the node is absent
+  at `at`.
 
 ## [0.0.4] - 2026-09-07
 
