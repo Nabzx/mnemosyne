@@ -13,6 +13,7 @@
 
 #![forbid(unsafe_code)]
 
+pub mod bisect;
 pub mod blame;
 pub mod branch;
 pub mod checkout;

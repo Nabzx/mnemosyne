@@ -24,6 +24,10 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   effective time). Walks to the commit that set the node's current value,
   following the contributing parent through merges; errors if the node is absent
   at `at`.
+- `mnem-core`: `Store::bisect(bad, good, predicate)` — binary-search the
+  first-parent chain for the first commit where a state predicate holds. `bad`
+  defaults to `HEAD`, `good` to the chain's root. Predicate constructors
+  `bisect::node_content_is` / `node_absent` / `node_present`.
 
 ## [0.0.4] - 2026-09-07
 
