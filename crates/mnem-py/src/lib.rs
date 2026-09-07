@@ -6,14 +6,17 @@
 //! ergonomic layer (context managers, dataclasses) is the `mnem` Python package
 //! built on top of this, see #30.
 
+use std::cell::RefCell;
+use std::collections::BTreeMap;
+
 use pyo3::create_exception;
 use pyo3::exceptions::{PyException, PyValueError};
 use pyo3::prelude::*;
-use pyo3::types::{PyDict, PyList};
+use pyo3::types::{PyAny, PyDict, PyList};
 
 use mnem_core::{
-    Checkout, ConflictKind, ContentKind, DiffTarget, MemoryNode, MergeOutcome, MergeStrategy,
-    MnemError, NodeChange, ObjectId, Provenance, Resolution, Store,
+    ChangeKind, Checkout, ConflictKind, ContentKind, DiffTarget, MemoryNode, MergeOutcome,
+    MergeStrategy, MnemError, NodeChange, ObjectId, Provenance, Resolution, Store,
 };
 
 create_exception!(
@@ -472,6 +475,86 @@ impl PyStore {
             }
         }
         Ok(out)
+    }
+
+    /// Blame `node_id` to the commit that set its current value as of `at` (a
+    /// commit-ish; `None` is `HEAD`). Returns `{commit, node, time}`; raises
+    /// `InvalidRefError` if the node is absent at `at`.
+    #[pyo3(signature = (node_id, at = None))]
+    fn blame<'py>(
+        &self,
+        py: Python<'py>,
+        node_id: &str,
+        at: Option<&str>,
+    ) -> PyResult<Bound<'py, PyDict>> {
+        let blame = self.inner.blame(node_id, at).map_err(to_py_err)?;
+        let out = PyDict::new(py);
+        out.set_item("commit", blame.commit.to_hex())?;
+        out.set_item("node", node_to_dict(py, &blame.node)?)?;
+        out.set_item("time", blame.time)?;
+        Ok(out)
+    }
+
+    /// Bisect for the first commit where `predicate` holds. `predicate` is
+    /// called with `{node_id: node_dict}` for the memory at a commit. `bad`
+    /// defaults to `HEAD`, `good` to the first-parent chain's root. Returns the
+    /// commit hex.
+    #[pyo3(signature = (predicate, *, bad = None, good = None))]
+    fn bisect(
+        &self,
+        py: Python<'_>,
+        predicate: &Bound<'_, PyAny>,
+        bad: Option<&str>,
+        good: Option<&str>,
+    ) -> PyResult<String> {
+        let captured: RefCell<Option<PyErr>> = RefCell::new(None);
+        let call = |state: &BTreeMap<String, MemoryNode>| -> bool {
+            if captured.borrow().is_some() {
+                return false;
+            }
+            let dict = PyDict::new(py);
+            for (id, node) in state {
+                match node_to_dict(py, node).and_then(|d| dict.set_item(id, d)) {
+                    Ok(()) => {}
+                    Err(e) => {
+                        *captured.borrow_mut() = Some(e);
+                        return false;
+                    }
+                }
+            }
+            match predicate.call1((dict,)).and_then(|r| r.is_truthy()) {
+                Ok(truthy) => truthy,
+                Err(e) => {
+                    *captured.borrow_mut() = Some(e);
+                    false
+                }
+            }
+        };
+
+        let result = self.inner.bisect(bad, good, call);
+        if let Some(e) = captured.into_inner() {
+            return Err(e);
+        }
+        result.map(|id| id.to_hex()).map_err(to_py_err)
+    }
+
+    /// The node ids a commit changed against its first parent, as
+    /// `{node_id: "added" | "modified" | "removed"}`.
+    fn changed_by<'py>(&self, py: Python<'py>, commit: &str) -> PyResult<Bound<'py, PyDict>> {
+        let id = self.inner.resolve_commitish(commit).map_err(to_py_err)?;
+        let out = PyDict::new(py);
+        for (node_id, kind) in self.inner.changed_by(id).map_err(to_py_err)? {
+            out.set_item(node_id, change_kind_name(kind))?;
+        }
+        Ok(out)
+    }
+}
+
+fn change_kind_name(kind: ChangeKind) -> &'static str {
+    match kind {
+        ChangeKind::Added => "added",
+        ChangeKind::Modified => "modified",
+        ChangeKind::Removed => "removed",
     }
 }
 

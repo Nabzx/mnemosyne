@@ -28,6 +28,16 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   first-parent chain for the first commit where a state predicate holds. `bad`
   defaults to `HEAD`, `good` to the chain's root. Predicate constructors
   `bisect::node_content_is` / `node_absent` / `node_present`.
+- `mnem` CLI: `blame <node-id> [<commit>]`, `bisect --node <id>
+  (--equals <json> | --absent | --present) [--good <commit>] [<bad>]` (which also
+  prints the boundary's `blame`), and `show <commit> --stat`.
+- Python SDK: `store.blame(node_id, at)` returning a `Blame` (with a
+  `provenance` shortcut), `store.bisect(predicate, *, bad, good)` taking a
+  callable over `{id: MemoryNode}`, and `store.changed_by(commit)`.
+- The buggy-run fixture (`crates/mnem-core/tests/buggy_run.rs`): a synthetic
+  support-agent run where a misread observation writes a wrong plan tier;
+  `bisect` lands on that commit and `blame` surfaces the observation. Phase 4's
+  definition of done.
 
 ## [0.0.4] - 2026-09-07
 

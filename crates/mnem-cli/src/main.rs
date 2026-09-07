@@ -2,8 +2,8 @@
 //!
 //! Each subcommand is a thin wrapper over `mnem-core` (ADR-0004). Phase 1:
 //! `init`, `add`, `commit`, `log`. Phase 2 (ADR-0012): `branch`, `checkout`,
-//! `show`, `diff`, `status`, `rm`. Phase 3 (ADR-0013, ADR-0014): `merge`. See
-//! `ROADMAP.md`.
+//! `show`, `diff`, `status`, `rm`. Phase 3 (ADR-0013, ADR-0014): `merge`.
+//! Phase 4 (ADR-0015): `blame`, `bisect`, `show --stat`. See `ROADMAP.md`.
 
 use std::collections::BTreeMap;
 use std::fs;
@@ -13,8 +13,8 @@ use std::path::PathBuf;
 use anyhow::{Context, Result};
 use clap::{Parser, Subcommand};
 use mnem_core::{
-    Checkout, Conflict, ConflictKind, ContentKind, DiffTarget, Head, MemoryNode, MergeOutcome,
-    MergeStrategy, NodeChange, ObjectId, Provenance, Resolution, Store,
+    bisect, ChangeKind, Checkout, Conflict, ConflictKind, ContentKind, DiffTarget, Head,
+    MemoryNode, MergeOutcome, MergeStrategy, NodeChange, ObjectId, Provenance, Resolution, Store,
 };
 
 /// Version control for AI agent memory.
@@ -104,6 +104,36 @@ enum Command {
     Show {
         /// A branch name or commit id.
         rev: Option<String>,
+        /// Instead of the memory, list the node ids this commit changed.
+        #[arg(long)]
+        stat: bool,
+    },
+    /// Resolve a memory node to the commit and provenance that introduced it.
+    Blame {
+        /// The node id to blame.
+        node_id: String,
+        /// Blame as of this branch or commit (default: HEAD).
+        rev: Option<String>,
+    },
+    /// Find the first commit where a memory node reaches a given state.
+    Bisect {
+        /// The node id the predicate is about.
+        #[arg(long)]
+        node: String,
+        /// True when the node's content equals this JSON value.
+        #[arg(long, value_name = "JSON", conflicts_with_all = ["absent", "present"])]
+        equals: Option<String>,
+        /// True when the node is not in memory.
+        #[arg(long, conflicts_with = "present")]
+        absent: bool,
+        /// True when the node is in memory.
+        #[arg(long)]
+        present: bool,
+        /// A commit where the predicate is false (default: the history root).
+        #[arg(long)]
+        good: Option<String>,
+        /// A commit where the predicate is true (default: HEAD).
+        bad: Option<String>,
     },
     /// Merge another branch or commit into the current branch.
     Merge {
@@ -172,7 +202,16 @@ fn main() -> Result<()> {
             create,
             discard,
         }) => cmd_checkout(rev, create, discard),
-        Some(Command::Show { rev }) => cmd_show(rev),
+        Some(Command::Show { rev, stat }) => cmd_show(rev, stat),
+        Some(Command::Blame { node_id, rev }) => cmd_blame(node_id, rev),
+        Some(Command::Bisect {
+            node,
+            equals,
+            absent,
+            present,
+            good,
+            bad,
+        }) => cmd_bisect(node, equals, absent, present, good, bad),
         Some(Command::Merge {
             theirs,
             resolve,
@@ -381,8 +420,32 @@ fn cmd_checkout(rev: Option<String>, create: Option<String>, discard: bool) -> R
     Ok(())
 }
 
-fn cmd_show(rev: Option<String>) -> Result<()> {
+fn cmd_show(rev: Option<String>, stat: bool) -> Result<()> {
     let store = open_store()?;
+
+    if stat {
+        let commit = match rev {
+            Some(spec) => store.resolve_commitish(&spec)?,
+            None => store
+                .head_commit()?
+                .context("nothing to show: HEAD has no commit")?,
+        };
+        let changed = store.changed_by(commit)?;
+        if changed.is_empty() {
+            println!("no changes");
+            return Ok(());
+        }
+        for (id, kind) in changed {
+            let marker = match kind {
+                ChangeKind::Added => '+',
+                ChangeKind::Modified => '~',
+                ChangeKind::Removed => '-',
+            };
+            println!("{marker} {id}");
+        }
+        return Ok(());
+    }
+
     let memory = match rev {
         Some(spec) => store.state_at(store.resolve_commitish(&spec)?)?,
         None => store.working_memory()?,
@@ -394,6 +457,96 @@ fn cmd_show(rev: Option<String>) -> Result<()> {
     for (id, node) in memory {
         println!("{id}");
         println!("  {}", serde_json::to_string(&node.content)?);
+    }
+    Ok(())
+}
+
+fn cmd_blame(node_id: String, rev: Option<String>) -> Result<()> {
+    let store = open_store()?;
+    let blame = store.blame(&node_id, rev.as_deref())?;
+
+    println!("{}  {}", short(&blame.commit), render_time(blame.time));
+    println!("  commit: {}", tip_message(&store, blame.commit)?);
+    println!("  content: {}", serde_json::to_string(&blame.node.content)?);
+
+    let p = &blame.node.provenance;
+    let fields = [
+        ("step", &p.agent_step),
+        ("observation", &p.observation),
+        ("tool_call", &p.tool_call),
+        ("source", &p.source),
+        ("note", &p.note),
+    ];
+    let mut any = false;
+    for (label, value) in fields {
+        if let Some(v) = value {
+            println!("  {label}: {v}");
+            any = true;
+        }
+    }
+    if !any {
+        println!("  (no provenance recorded)");
+    }
+    Ok(())
+}
+
+fn cmd_bisect(
+    node: String,
+    equals: Option<String>,
+    absent: bool,
+    present: bool,
+    good: Option<String>,
+    bad: Option<String>,
+) -> Result<()> {
+    let store = open_store()?;
+
+    let boundary = if let Some(json) = &equals {
+        let value: serde_json::Value = serde_json::from_str(json)
+            .with_context(|| format!("--equals {json:?} is not valid JSON"))?;
+        store.bisect(
+            bad.as_deref(),
+            good.as_deref(),
+            bisect::node_content_is(node.clone(), value),
+        )?
+    } else if absent {
+        store.bisect(
+            bad.as_deref(),
+            good.as_deref(),
+            bisect::node_absent(node.clone()),
+        )?
+    } else if present {
+        store.bisect(
+            bad.as_deref(),
+            good.as_deref(),
+            bisect::node_present(node.clone()),
+        )?
+    } else {
+        anyhow::bail!("bisect needs one of --equals <json>, --absent or --present");
+    };
+
+    println!("{}  {}", short(&boundary), tip_message(&store, boundary)?);
+
+    // explain the boundary: blame the node there
+    match store.blame(&node, Some(&boundary.to_hex())) {
+        Ok(blame) => {
+            let p = &blame.node.provenance;
+            let mut bits = Vec::new();
+            if let Some(s) = &p.agent_step {
+                bits.push(format!("step {s}"));
+            }
+            if let Some(o) = &p.observation {
+                bits.push(format!("observation {o}"));
+            }
+            if let Some(s) = &p.source {
+                bits.push(format!("source {s}"));
+            }
+            if bits.is_empty() {
+                println!("  {node} set here, no provenance recorded");
+            } else {
+                println!("  {node} set here, from {}", bits.join(", "));
+            }
+        }
+        Err(_) => println!("  {node} is absent here"),
     }
     Ok(())
 }
