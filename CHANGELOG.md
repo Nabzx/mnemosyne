@@ -8,6 +8,15 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ## [Unreleased]
 
+### Added
+
+- ADR-0015 (the provenance index, blame and bisect): `blame` is a first-parent
+  walk to the commit that changed a node's value (following the contributing
+  parent through merges); `bisect` binary-searches the first-parent chain with a
+  state predicate; a `commit_nodes` reverse index (`commit -> changed node ids`)
+  is built in the commit transaction. The forward index and the reflog are
+  deferred with named triggers.
+
 ## [0.0.4] - 2026-09-07
 
 Era 1, "it merges". `format_version` 1.
