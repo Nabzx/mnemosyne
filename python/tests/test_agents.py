@@ -18,6 +18,7 @@ def test_remember_is_one_commit_with_provenance(tmp_path: object) -> None:
         source="ticket-4821",
         step="step-3",
         author="support-agent",
+        time_ms=1000,
     )
 
     assert store.head_commit() == commit
@@ -43,6 +44,7 @@ def test_remember_many_is_a_single_commit(tmp_path: object) -> None:
             {"id": "renewal", "content": "2027-01"},
         ],
         summary="learn the account",
+        time_ms=1000,
     )
 
     assert store.head_commit() == commit
@@ -55,10 +57,10 @@ def test_remember_many_is_a_single_commit(tmp_path: object) -> None:
 
 def test_forget_tombstones_in_one_commit(tmp_path: object) -> None:
     store = mnem.init(tmp_path)
-    agents.remember(store, "temp", "scratch note")
-    agents.remember(store, "keep", "real belief")
+    agents.remember(store, "temp", "scratch note", time_ms=1000)
+    agents.remember(store, "keep", "real belief", time_ms=2000)
 
-    commit = agents.forget(store, "temp")
+    commit = agents.forget(store, "temp", time_ms=3000)
     assert store.head_commit() == commit
     assert store.working_node("temp") is None
     assert store.working_node("keep").content == "real belief"
@@ -67,18 +69,22 @@ def test_forget_tombstones_in_one_commit(tmp_path: object) -> None:
 
 def test_default_commit_messages(tmp_path: object) -> None:
     store = mnem.init(tmp_path)
-    agents.remember(store, "a", 1)
-    agents.remember_many(store, [{"id": "b", "content": 2}])
-    agents.remember_many(store, [{"id": "c", "content": 3}, {"id": "d", "content": 4}])
+    agents.remember(store, "a", 1, time_ms=1000)
+    agents.remember_many(store, [{"id": "b", "content": 2}], time_ms=2000)
+    agents.remember_many(
+        store, [{"id": "c", "content": 3}, {"id": "d", "content": 4}], time_ms=3000
+    )
     messages = [c.message for c in store.log()]
     assert messages == ["remember 2 nodes", "remember 1 node", "remember a"]
 
 
 def test_to_dict_is_json_serialisable(tmp_path: object) -> None:
     store = mnem.init(tmp_path)
-    agents.remember(store, "plan", "enterprise", source="ticket-4821", step="s1")
+    agents.remember(
+        store, "plan", "enterprise", source="ticket-4821", step="s1", time_ms=1000
+    )
     first = store.head_commit()
-    agents.remember(store, "plan", "pro", observation="obs-7")
+    agents.remember(store, "plan", "pro", observation="obs-7", time_ms=2000)
 
     blame = store.blame("plan")
     bd = blame.to_dict()
