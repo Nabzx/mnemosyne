@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 300" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13">
+  <rect x="1" y="1" width="878" height="298" rx="11" fill="#0b0e14" stroke="#222831"/>
+  <circle cx="26" cy="24" r="5.5" fill="#ff5f56"/>
+  <circle cx="46" cy="24" r="5.5" fill="#ffbd2e"/>
+  <circle cx="66" cy="24" r="5.5" fill="#27c93f"/>
+  <text x="440" y="28" text-anchor="middle" fill="#6b7280" font-size="12">explain — an hour later, a wrong answer. trace it.</text>
+  <line x1="0" y1="45" x2="880" y2="45" stroke="#191e27"/>
+
+  <g xml:space="preserve">
+    <text x="24" y="76"><tspan fill="#3fb950">$ </tspan><tspan fill="#c9d1d9">mnem bisect --node customer-4821 --equals </tspan><tspan fill="#a5d6ff">'"downgraded to Pro last month"'</tspan></text>
+    <text x="24" y="97"><tspan fill="#79c0ff">  b3d90f2a</tspan><tspan fill="#c9d1d9">  reconcile the plan tier from billing</tspan></text>
+    <text x="24" y="118"><tspan fill="#f0883e">    customer-4821 set here</tspan><tspan fill="#8b949e">, from step step-31, source billing-note-8842</tspan></text>
+
+    <text x="24" y="160"><tspan fill="#3fb950">$ </tspan><tspan fill="#c9d1d9">mnem blame customer-4821</tspan></text>
+    <text x="24" y="181"><tspan fill="#79c0ff">  b3d90f2a</tspan><tspan fill="#8b949e">  2026-02-14 09:41Z</tspan></text>
+    <text x="24" y="202"><tspan fill="#8b949e">    commit:  </tspan><tspan fill="#c9d1d9">reconcile the plan tier from billing</tspan></text>
+    <text x="24" y="223"><tspan fill="#8b949e">    content: </tspan><tspan fill="#a5d6ff">"downgraded to Pro last month"</tspan></text>
+    <text x="24" y="244"><tspan fill="#8b949e">    step:    </tspan><tspan fill="#c9d1d9">step-31</tspan></text>
+    <text x="24" y="265"><tspan fill="#8b949e">    source:  </tspan><tspan fill="#c9d1d9">billing-note-8842</tspan><tspan fill="#6e7681">   ← the misread observation</tspan></text>
+  </g>
+</svg>
