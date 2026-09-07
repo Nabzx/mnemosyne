@@ -32,15 +32,27 @@ from ._mnem import (
     __version__,
     version,
 )
-from ._sdk import Commit, MemoryNode, NodeChange, Provenance, Store, init, open
+from ._sdk import (
+    Commit,
+    Conflict,
+    MemoryNode,
+    MergeResult,
+    NodeChange,
+    Provenance,
+    Store,
+    init,
+    open,
+)
 
 __all__ = [
     "Commit",
+    "Conflict",
     "ConflictError",
     "CorruptStoreError",
     "FormatVersionError",
     "InvalidRefError",
     "MemoryNode",
+    "MergeResult",
     "MnemError",
     "NoStoreError",
     "NodeChange",

@@ -24,6 +24,12 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 - `mnem-core`: `Store::merge` (the merge flow): merge base, fast-forward,
   `Resolution` (`Ours` / `Theirs` / `Base` / `Delete` / `Set`), `MergeStrategy`,
   and `MergeOutcome`. Stateless: a conflicted merge writes nothing.
+- `mnem` CLI: `merge <theirs>` with `--resolve <id>=<ours|theirs|base|delete>`,
+  `--strategy ours|theirs`, `--message` and `--author`. A conflicted merge
+  prints each conflict's three sides and exits non-zero.
+- Python SDK: `store.merge(theirs, resolutions=..., strategy=...)` returning a
+  `MergeResult` (`status` / `commit` / `conflicts`), with `Conflict` dataclasses
+  carrying the base, ours and theirs nodes.
 
 ### Changed
 

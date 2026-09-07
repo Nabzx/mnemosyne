@@ -131,3 +131,72 @@ def test_checkout_refuses_a_dirty_index(tmp_path: object) -> None:
         store.checkout("other")
     store.checkout("other", discard=True)
     assert store.staged() == []
+
+
+def test_merge_clean_fast_forward_and_up_to_date(tmp_path: object) -> None:
+    store = mnem.init(tmp_path)
+    store.add("plan", "enterprise")
+    store.commit("base", author="agent", time_ms=1)
+    store.new_branch("feature")
+
+    store.checkout("feature")
+    store.add("region", "eu")
+    store.commit("feature work", author="agent", time_ms=2)
+
+    store.checkout("main")
+    ff = store.merge("feature")
+    assert ff.status == "fast-forwarded"
+    assert ff.ok
+    assert store.working_node("region").content == "eu"
+
+    again = store.merge("feature")
+    assert again.status == "up-to-date"
+
+
+def test_merge_conflict_then_resolution(tmp_path: object) -> None:
+    store = mnem.init(tmp_path)
+    store.add("plan", "enterprise")
+    store.commit("base", author="agent", time_ms=1)
+    store.new_branch("feature")
+
+    store.checkout("feature")
+    store.add("plan", "pro")
+    store.commit("theirs", author="agent", time_ms=2)
+
+    store.checkout("main")
+    store.add("plan", "team")
+    store.commit("ours", author="agent", time_ms=3)
+
+    conflicted = store.merge("feature")
+    assert not conflicted.ok
+    assert conflicted.status == "conflicts"
+    assert conflicted.commit is None
+    assert [c.id for c in conflicted.conflicts] == ["plan"]
+    assert conflicted.conflicts[0].kind == "edit/edit"
+    assert conflicted.conflicts[0].ours.content == "team"
+    assert conflicted.conflicts[0].theirs.content == "pro"
+
+    merged = store.merge("feature", resolutions={"plan": "theirs"})
+    assert merged.status == "merged"
+    assert merged.commit is not None
+    assert store.working_node("plan").content == "pro"
+
+
+def test_merge_set_resolution_with_a_memory_node(tmp_path: object) -> None:
+    store = mnem.init(tmp_path)
+    store.add("plan", "enterprise")
+    store.commit("base", author="agent", time_ms=1)
+    store.new_branch("feature")
+
+    store.checkout("feature")
+    store.add("plan", "pro")
+    store.commit("theirs", author="agent", time_ms=2)
+
+    store.checkout("main")
+    store.add("plan", "team")
+    store.commit("ours", author="agent", time_ms=3)
+
+    pick = mnem.MemoryNode(id="plan", content="starter")
+    merged = store.merge("feature", resolutions={"plan": pick})
+    assert merged.status == "merged"
+    assert store.working_node("plan").content == "starter"

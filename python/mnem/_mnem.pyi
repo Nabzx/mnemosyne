@@ -50,6 +50,16 @@ class Store:
     def diff(
         self, from_ref: str | None = ..., to_ref: str | None = ...
     ) -> list[dict[str, object]]: ...
+    def merge(
+        self,
+        theirs: str,
+        *,
+        resolutions: dict[str, object] | None = ...,
+        strategy: str | None = ...,
+        message: str | None = ...,
+        author: str = ...,
+        time_ms: int = ...,
+    ) -> dict[str, object]: ...
 
 class MnemError(Exception): ...
 class NotFoundError(MnemError): ...

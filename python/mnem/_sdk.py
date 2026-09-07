@@ -19,7 +19,9 @@ from . import _mnem
 
 __all__ = [
     "Commit",
+    "Conflict",
     "MemoryNode",
+    "MergeResult",
     "NodeChange",
     "Provenance",
     "Store",
@@ -111,6 +113,52 @@ class Commit:
             message=row["message"],
             author=row["author"],
             time=row["time"],
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class Conflict:
+    """One unresolved node in a merge (ADR-0014). Transient: not stored."""
+
+    id: str
+    kind: str  # "edit/edit" | "delete/edit" | "edit/delete" | "add/add"
+    base: MemoryNode | None
+    ours: MemoryNode | None
+    theirs: MemoryNode | None
+
+    @classmethod
+    def _from_dict(cls, d: dict[str, Any]) -> Conflict:
+        def side(v: dict[str, Any] | None) -> MemoryNode | None:
+            return MemoryNode._from_dict(v) if v is not None else None
+
+        return cls(
+            id=d["id"],
+            kind=d["kind"],
+            base=side(d["base"]),
+            ours=side(d["ours"]),
+            theirs=side(d["theirs"]),
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class MergeResult:
+    """The outcome of :meth:`Store.merge`."""
+
+    status: str  # "up-to-date" | "fast-forwarded" | "merged" | "conflicts"
+    commit: str | None
+    conflicts: tuple[Conflict, ...]
+
+    @property
+    def ok(self) -> bool:
+        """Whether the merge finished. ``False`` means unresolved conflicts."""
+        return self.status != "conflicts"
+
+    @classmethod
+    def _from_dict(cls, d: dict[str, Any]) -> MergeResult:
+        return cls(
+            status=d["status"],
+            commit=d["commit"],
+            conflicts=tuple(Conflict._from_dict(row) for row in d["conflicts"]),
         )
 
 
@@ -298,6 +346,48 @@ class Store:
         """Changes between two states. ``frm`` defaults to the ``HEAD`` commit,
         ``to`` to working memory."""
         return [NodeChange._from_dict(row) for row in self._inner.diff(frm, to)]
+
+    # --- Phase 3 (ADR-0013, ADR-0014) ---
+
+    def merge(
+        self,
+        theirs: str,
+        *,
+        resolutions: dict[str, str | MemoryNode] | None = None,
+        strategy: str | None = None,
+        message: str | None = None,
+        author: str | None = None,
+        time_ms: int | None = None,
+    ) -> MergeResult:
+        """Merge ``theirs`` (a commit-ish) into the current branch.
+
+        ``resolutions`` maps a conflicting node id to ``"ours"``, ``"theirs"``,
+        ``"base"``, ``"delete"``, or a :class:`MemoryNode` to set directly.
+        ``strategy`` (``"ours"`` or ``"theirs"``) resolves any conflict not in
+        the map. A merge with conflicts left unresolved writes nothing and
+        returns a result whose ``status`` is ``"conflicts"``; call again with a
+        fuller ``resolutions`` map.
+        """
+        wire: dict[str, Any] | None = None
+        if resolutions is not None:
+            wire = {}
+            for node_id, pick in resolutions.items():
+                if isinstance(pick, MemoryNode):
+                    wire[node_id] = {
+                        "content": json.dumps(pick.content),
+                        "content_kind": pick.content_kind,
+                    }
+                else:
+                    wire[node_id] = pick
+        row = self._inner.merge(
+            theirs,
+            resolutions=wire,
+            strategy=strategy,
+            message=message,
+            author=_resolve_author(author),
+            time_ms=_now_ms() if time_ms is None else time_ms,
+        )
+        return MergeResult._from_dict(row)
 
     def branch(self, name: str, *, start: str | None = None) -> _BranchScope:
         """Create ``name`` (at ``start`` or ``HEAD``) and return a context
