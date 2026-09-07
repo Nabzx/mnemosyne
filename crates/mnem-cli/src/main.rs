@@ -4,6 +4,9 @@
 //! `init`, `add`, `commit`, `log`. Phase 2 (ADR-0012): `branch`, `checkout`,
 //! `show`, `diff`, `status`, `rm`. Phase 3 (ADR-0013, ADR-0014): `merge`.
 //! Phase 4 (ADR-0015): `blame`, `bisect`, `show --stat`. See `ROADMAP.md`.
+//!
+//! Output is coloured when stdout is a terminal (see [`style`]); piped or
+//! redirected output, and output with `NO_COLOR` set, stays plain.
 
 use std::collections::BTreeMap;
 use std::fs;
@@ -16,6 +19,8 @@ use mnem_core::{
     bisect, ChangeKind, Checkout, Conflict, ConflictKind, ContentKind, DiffTarget, Head,
     MemoryNode, MergeOutcome, MergeStrategy, NodeChange, ObjectId, Provenance, Resolution, Store,
 };
+
+mod style;
 
 /// Version control for AI agent memory.
 #[derive(Parser)]
@@ -275,14 +280,18 @@ fn cmd_add(
 
     let store = open_store()?;
     let object_id = store.stage(&node)?;
-    println!("Staged {id} as {}", short(&object_id));
+    println!(
+        "Staged {} as {}",
+        style::id(&id),
+        style::dim(&short(&object_id))
+    );
     Ok(())
 }
 
 fn cmd_rm(id: String) -> Result<()> {
     let store = open_store()?;
     store.rm(&id)?;
-    println!("Staged deletion of {id}");
+    println!("Staged deletion of {}", style::id(&id));
     Ok(())
 }
 
@@ -297,8 +306,8 @@ fn cmd_commit(message: String, author: Option<String>) -> Result<()> {
     }
     let id = store.commit(&message, &author, now_ms())?;
     println!(
-        "[{}] {}",
-        short(&id),
+        "{} {}",
+        style::good(&format!("[{}]", short(&id))),
         message.lines().next().unwrap_or_default()
     );
     Ok(())
@@ -315,13 +324,13 @@ fn cmd_log(first_parent: bool, max_count: Option<usize>, oneline: bool) -> Resul
         if oneline {
             println!(
                 "{} {}",
-                short(&id),
+                style::id(&short(&id)),
                 commit.message.lines().next().unwrap_or_default()
             );
         } else {
-            println!("commit {id}");
-            println!("Author: {}", commit.author);
-            println!("Date:   {}", render_time(commit.time));
+            println!("commit {}", style::id(&id.to_hex()));
+            println!("Author: {}", style::dim(&commit.author));
+            println!("Date:   {}", style::dim(&render_time(commit.time)));
             println!();
             for line in commit.message.lines() {
                 println!("    {line}");
@@ -335,16 +344,16 @@ fn cmd_log(first_parent: bool, max_count: Option<usize>, oneline: bool) -> Resul
 fn cmd_status() -> Result<()> {
     let store = open_store()?;
     match store.head()? {
-        Head::Attached(name) => println!("On branch {name}"),
-        Head::Detached(id) => println!("HEAD detached at {}", short(&id)),
+        Head::Attached(name) => println!("On branch {}", style::branch(&name)),
+        Head::Detached(id) => println!("HEAD detached at {}", style::id(&short(&id))),
     }
 
     match store.head_commit()? {
         Some(tip) => {
             let msg = tip_message(&store, tip)?;
-            println!("  {}  {msg}", short(&tip));
+            println!("  {}  {msg}", style::id(&short(&tip)));
         }
-        None => println!("  (no commits yet)"),
+        None => println!("  {}", style::dim("(no commits yet)")),
     }
 
     let from = head_diff_target(&store)?;
@@ -354,7 +363,10 @@ fn cmd_status() -> Result<()> {
     } else {
         println!("Staged:");
         for change in changes {
-            println!("  {} {}", marker(&change), change.id());
+            println!(
+                "  {}",
+                paint_change(&format!("{} {}", marker(&change), change.id()), &change)
+            );
         }
     }
     Ok(())
@@ -365,7 +377,7 @@ fn cmd_branch(name: Option<String>, start: Option<String>, delete: Option<String
 
     if let Some(name) = delete {
         if store.delete_branch(&name)? {
-            println!("Deleted branch '{name}'");
+            println!("Deleted branch {}", style::branch(&name));
             return Ok(());
         }
         anyhow::bail!("no branch '{name}'");
@@ -375,7 +387,11 @@ fn cmd_branch(name: Option<String>, start: Option<String>, delete: Option<String
         Some(name) => {
             store.branch(&name, start.as_deref())?;
             let at = store.resolve_commitish(&name)?;
-            println!("Created branch '{name}' at {}", short(&at));
+            println!(
+                "Created branch {} at {}",
+                style::branch(&name),
+                style::id(&short(&at))
+            );
         }
         None => {
             let current = match store.head()? {
@@ -388,13 +404,19 @@ fn cmd_branch(name: Option<String>, start: Option<String>, delete: Option<String
                 return Ok(());
             }
             for (name, tip) in branches {
-                let flag = if Some(&name) == current.as_ref() {
-                    "*"
+                let here = Some(&name) == current.as_ref();
+                let flag = if here {
+                    style::good("*")
                 } else {
-                    " "
+                    " ".to_string()
+                };
+                let shown = if here {
+                    style::good(&name)
+                } else {
+                    style::branch(&name)
                 };
                 let msg = tip_message(&store, tip)?;
-                println!("{flag} {name}  {}  {msg}", short(&tip));
+                println!("{flag} {shown}  {}  {msg}", style::id(&short(&tip)));
             }
         }
     }
@@ -413,9 +435,13 @@ fn cmd_checkout(rev: Option<String>, create: Option<String>, discard: bool) -> R
     };
 
     match store.checkout(&target, discard)? {
-        Checkout::SwitchedToBranch(name) => println!("Switched to branch '{name}'"),
-        Checkout::DetachedAt(id) => println!("HEAD is now at {} (detached)", short(&id)),
-        Checkout::AlreadyThere => println!("Already on '{target}'"),
+        Checkout::SwitchedToBranch(name) => {
+            println!("Switched to branch {}", style::branch(&name));
+        }
+        Checkout::DetachedAt(id) => {
+            println!("HEAD is now at {} (detached)", style::id(&short(&id)));
+        }
+        Checkout::AlreadyThere => println!("Already on {}", style::branch(&target)),
     }
     Ok(())
 }
@@ -436,12 +462,12 @@ fn cmd_show(rev: Option<String>, stat: bool) -> Result<()> {
             return Ok(());
         }
         for (id, kind) in changed {
-            let marker = match kind {
-                ChangeKind::Added => '+',
-                ChangeKind::Modified => '~',
-                ChangeKind::Removed => '-',
+            let line = match kind {
+                ChangeKind::Added => style::good(&format!("+ {id}")),
+                ChangeKind::Modified => style::changed(&format!("~ {id}")),
+                ChangeKind::Removed => style::bad(&format!("- {id}")),
             };
-            println!("{marker} {id}");
+            println!("{line}");
         }
         return Ok(());
     }
@@ -451,11 +477,11 @@ fn cmd_show(rev: Option<String>, stat: bool) -> Result<()> {
         None => store.working_memory()?,
     };
     if memory.is_empty() {
-        println!("(empty)");
+        println!("{}", style::dim("(empty)"));
         return Ok(());
     }
     for (id, node) in memory {
-        println!("{id}");
+        println!("{}", style::id(&id));
         println!("  {}", serde_json::to_string(&node.content)?);
     }
     Ok(())
@@ -465,9 +491,21 @@ fn cmd_blame(node_id: String, rev: Option<String>) -> Result<()> {
     let store = open_store()?;
     let blame = store.blame(&node_id, rev.as_deref())?;
 
-    println!("{}  {}", short(&blame.commit), render_time(blame.time));
-    println!("  commit: {}", tip_message(&store, blame.commit)?);
-    println!("  content: {}", serde_json::to_string(&blame.node.content)?);
+    println!(
+        "{}  {}",
+        style::id(&short(&blame.commit)),
+        style::dim(&render_time(blame.time))
+    );
+    println!(
+        "  {} {}",
+        style::dim("commit: "),
+        tip_message(&store, blame.commit)?
+    );
+    println!(
+        "  {} {}",
+        style::dim("content:"),
+        serde_json::to_string(&blame.node.content)?
+    );
 
     let p = &blame.node.provenance;
     let fields = [
@@ -480,12 +518,12 @@ fn cmd_blame(node_id: String, rev: Option<String>) -> Result<()> {
     let mut any = false;
     for (label, value) in fields {
         if let Some(v) = value {
-            println!("  {label}: {v}");
+            println!("  {} {}", style::dim(&format!("{label}:")), style::warn(v));
             any = true;
         }
     }
     if !any {
-        println!("  (no provenance recorded)");
+        println!("  {}", style::dim("(no provenance recorded)"));
     }
     Ok(())
 }
@@ -524,7 +562,11 @@ fn cmd_bisect(
         anyhow::bail!("bisect needs one of --equals <json>, --absent or --present");
     };
 
-    println!("{}  {}", short(&boundary), tip_message(&store, boundary)?);
+    println!(
+        "{}  {}",
+        style::id(&short(&boundary)),
+        tip_message(&store, boundary)?
+    );
 
     // explain the boundary: blame the node there
     match store.blame(&node, Some(&boundary.to_hex())) {
@@ -540,13 +582,17 @@ fn cmd_bisect(
             if let Some(s) = &p.source {
                 bits.push(format!("source {s}"));
             }
+            let here = style::warn(&format!("{node} set here"));
             if bits.is_empty() {
-                println!("  {node} set here, no provenance recorded");
+                println!("  {here}{}", style::dim(", no provenance recorded"));
             } else {
-                println!("  {node} set here, from {}", bits.join(", "));
+                println!(
+                    "  {here}{}",
+                    style::dim(&format!(", from {}", bits.join(", ")))
+                );
             }
         }
-        Err(_) => println!("  {node} is absent here"),
+        Err(_) => println!("  {}", style::dim(&format!("{node} is absent here"))),
     }
     Ok(())
 }
@@ -602,14 +648,21 @@ fn cmd_merge(
     )? {
         MergeOutcome::AlreadyUpToDate => println!("Already up to date."),
         MergeOutcome::FastForwarded(id) => {
-            println!("Fast-forwarded '{branch}' to {}", short(&id));
+            println!(
+                "Fast-forwarded {} to {}",
+                style::branch(&branch),
+                style::id(&short(&id))
+            );
         }
         MergeOutcome::Merged(id) => {
             let msg = tip_message(&store, id)?;
-            println!("[{}] {msg}", short(&id));
+            println!("{} {msg}", style::good(&format!("[{}]", short(&id))));
         }
         MergeOutcome::Conflicts(conflicts) => {
-            println!("Merge conflict in {} node(s):", conflicts.len());
+            println!(
+                "{}",
+                style::warn(&format!("Merge conflict in {} node(s):", conflicts.len()))
+            );
             for conflict in &conflicts {
                 print_conflict(&store, conflict)?;
             }
@@ -622,11 +675,16 @@ fn cmd_merge(
 }
 
 fn print_conflict(store: &Store, conflict: &Conflict) -> Result<()> {
-    println!("  {} ({})", conflict.id, conflict_kind_label(conflict.kind));
+    println!(
+        "  {} {}",
+        style::id(&conflict.id),
+        style::dim(&format!("({})", conflict_kind_label(conflict.kind)))
+    );
     let show = |label: &str, side: Option<ObjectId>| -> Result<()> {
+        let label = style::dim(&format!("{label:<7}"));
         match side {
-            Some(object_id) => println!("    {label:<7} {}", node_content(store, object_id)?),
-            None => println!("    {label:<7} (deleted)"),
+            Some(object_id) => println!("    {label} {}", node_content(store, object_id)?),
+            None => println!("    {label} (deleted)"),
         }
         Ok(())
     };
@@ -671,20 +729,35 @@ fn cmd_diff(from: Option<String>, to: Option<String>, stat: bool, name_only: boo
             println!("{}", change.id());
             continue;
         }
-        println!("{} {}", marker(change), change.id());
+        println!(
+            "{}",
+            paint_change(&format!("{} {}", marker(change), change.id()), change)
+        );
         if stat {
             continue;
         }
         match change {
             NodeChange::Added { new, .. } => {
-                println!("  + {}", node_content(&store, *new)?);
+                println!(
+                    "{}",
+                    style::good(&format!("  + {}", node_content(&store, *new)?))
+                );
             }
             NodeChange::Removed { old, .. } => {
-                println!("  - {}", node_content(&store, *old)?);
+                println!(
+                    "{}",
+                    style::bad(&format!("  - {}", node_content(&store, *old)?))
+                );
             }
             NodeChange::Modified { old, new, .. } => {
-                println!("  - {}", node_content(&store, *old)?);
-                println!("  + {}", node_content(&store, *new)?);
+                println!(
+                    "{}",
+                    style::bad(&format!("  - {}", node_content(&store, *old)?))
+                );
+                println!(
+                    "{}",
+                    style::good(&format!("  + {}", node_content(&store, *new)?))
+                );
             }
         }
     }
@@ -722,6 +795,15 @@ fn marker(change: &NodeChange) -> char {
         NodeChange::Added { .. } => '+',
         NodeChange::Removed { .. } => '-',
         NodeChange::Modified { .. } => '~',
+    }
+}
+
+/// Colour `line` by the kind of change it represents.
+fn paint_change(line: &str, change: &NodeChange) -> String {
+    match change {
+        NodeChange::Added { .. } => style::good(line),
+        NodeChange::Removed { .. } => style::bad(line),
+        NodeChange::Modified { .. } => style::changed(line),
     }
 }
 

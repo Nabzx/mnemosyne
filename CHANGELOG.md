@@ -8,6 +8,12 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ## [Unreleased]
 
+### Added
+
+- `mnem` CLI: coloured output when stdout is a terminal — commit ids, branch
+  names, `diff` and `show --stat` markers, and the `blame` / `bisect` provenance.
+  Output stays plain when piped, redirected, or when `NO_COLOR` is set.
+
 ### Changed
 
 - README: a rebuilt visual tour. A commit-graph hero image and four hand-authored
