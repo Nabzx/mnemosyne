@@ -123,6 +123,10 @@ impl Store {
         let default_message = format!("merge {theirs} into {ours_branch_label}");
         let message = message.unwrap_or(&default_message);
 
+        // The merge commit is indexed against its first parent, `ours`.
+        let ours_map = self.state_map_at(ours_tip)?;
+        let changes = crate::index::changes_between(&ours_map, &merged);
+
         let txn = self.begin_write()?;
         for node in &set_nodes {
             objects::put(&txn, &Object::MemoryNode(node.clone()))?;
@@ -136,6 +140,7 @@ impl Store {
             time: time_ms,
         };
         let commit_id = objects::put(&txn, &Object::Commit(commit))?;
+        crate::index::put(&txn, commit_id, &changes)?;
         refs::compare_and_set(&txn, &branch, Some(ours_tip), commit_id)?;
         txn.commit()?;
 

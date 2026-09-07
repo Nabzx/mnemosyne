@@ -15,7 +15,7 @@ use crate::head::Head;
 use crate::id::ObjectId;
 use crate::object::{Commit, MemoryNode, Object, State};
 use crate::store::Store;
-use crate::{objects, refs, staging};
+use crate::{index, objects, refs, staging};
 
 fn load_object(txn: &redb::WriteTransaction, id: ObjectId) -> Result<Object> {
     let table = txn.open_table(objects::OBJECTS).map_err(err)?;
@@ -117,6 +117,7 @@ impl Store {
             None => BTreeMap::new(),
         };
 
+        let base_nodes = nodes.clone();
         for (node_id, object_id) in staging::list_in_write(&txn)? {
             nodes.insert(node_id, object_id);
         }
@@ -124,6 +125,7 @@ impl Store {
             nodes.remove(&node_id);
         }
 
+        let changes = index::changes_between(&base_nodes, &nodes);
         let state_id = write_object(&txn, &Object::State(State { nodes }))?;
 
         let commit = Commit {
@@ -134,6 +136,7 @@ impl Store {
             time: time_ms,
         };
         let commit_id = write_object(&txn, &Object::Commit(commit))?;
+        index::put(&txn, commit_id, &changes)?;
 
         // Move the branch, compare-and-swap against the parent tip (ADR-0009).
         {

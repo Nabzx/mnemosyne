@@ -16,6 +16,10 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   state predicate; a `commit_nodes` reverse index (`commit -> changed node ids`)
   is built in the commit transaction. The forward index and the reflog are
   deferred with named triggers.
+- `mnem-core`: the `commit_nodes` index. `commit` and `merge` record each
+  commit's change set (`ChangeKind` per node id) against its first parent, in
+  the commit's own write transaction. `Store::changed_by` reads it, recomputing
+  on a miss; `Store::rebuild_index` rewrites the table from history.
 
 ## [0.0.4] - 2026-09-07
 
