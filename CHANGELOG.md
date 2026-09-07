@@ -13,6 +13,11 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 - `mnem-core`: `Store::ancestors` / `is_ancestor` / `merge_bases` / `merge_base`
   (commit-graph queries for Phase 3's merge; `merge_base` refuses a criss-cross
   history).
+- ADR-0013 (the deterministic merge algorithm): a structural three-way merge
+  over the `State` map, a single required merge base, fast-forward, and a
+  stateless merge call. ADR-0014 (the conflict object and resolution API):
+  transient `Conflict` values and `ours` / `theirs` / `base` / `delete` /
+  `set` resolutions.
 
 ### Changed
 
