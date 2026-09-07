@@ -30,6 +30,11 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 - Python SDK: `store.merge(theirs, resolutions=..., strategy=...)` returning a
   `MergeResult` (`status` / `commit` / `conflicts`), with `Conflict` dataclasses
   carrying the base, ours and theirs nodes.
+- The merge chaos harness (`crates/mnem-core/tests/merge_chaos.rs`): seeded
+  random histories check totality, no-lost-writes, clean-merge symmetry,
+  idempotence, base identity and convergence. CI runs a small trial count;
+  `docs/chaos-report.md` records a 50,000-case sweep. Phase 3's definition of
+  done.
 
 ### Changed
 
