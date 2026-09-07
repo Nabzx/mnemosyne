@@ -8,6 +8,13 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ## [Unreleased]
 
+### Changed
+
+- README: a rebuilt visual tour. A commit-graph hero image and four hand-authored
+  SVG terminal panels (record / explore / explain / a Claude agent loop) replace
+  the single scrolling demo GIF, and the feature set is grouped into record,
+  explore and explain.
+
 ## [0.0.5] - 2026-09-07
 
 Era 1, "it explains". `format_version` 1.

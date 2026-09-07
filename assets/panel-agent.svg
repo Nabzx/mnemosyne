@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 386" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13">
+  <rect x="1" y="1" width="878" height="384" rx="11" fill="#0b0e14" stroke="#222831"/>
+  <circle cx="26" cy="24" r="5.5" fill="#ff5f56"/>
+  <circle cx="46" cy="24" r="5.5" fill="#ffbd2e"/>
+  <circle cx="66" cy="24" r="5.5" fill="#27c93f"/>
+  <text x="440" y="28" text-anchor="middle" fill="#6b7280" font-size="12">agent_loop.py — a Claude agent whose memory is versioned</text>
+  <line x1="0" y1="45" x2="880" y2="45" stroke="#191e27"/>
+  <rect x="1" y="46" width="44" height="338" fill="#0a0d12"/>
+
+  <g fill="#4b5261" font-size="11.5" text-anchor="end" xml:space="preserve">
+    <text x="36" y="76">1</text><text x="36" y="97">2</text><text x="36" y="118">3</text><text x="36" y="139">4</text>
+    <text x="36" y="160">5</text><text x="36" y="181">6</text><text x="36" y="202">7</text><text x="36" y="223">8</text>
+    <text x="36" y="244">9</text><text x="36" y="265">10</text><text x="36" y="286">11</text><text x="36" y="307">12</text>
+    <text x="36" y="328">13</text><text x="36" y="349">14</text>
+  </g>
+
+  <g xml:space="preserve">
+    <text x="58" y="76"><tspan fill="#ff7b72">import</tspan><tspan fill="#c9d1d9"> anthropic, mnem</tspan></text>
+
+    <text x="58" y="118"><tspan fill="#c9d1d9">store  = mnem.</tspan><tspan fill="#d2a8ff">open</tspan><tspan fill="#c9d1d9">(</tspan><tspan fill="#a5d6ff">"./agent-memory"</tspan><tspan fill="#c9d1d9">)</tspan></text>
+    <text x="58" y="139"><tspan fill="#c9d1d9">client = anthropic.</tspan><tspan fill="#d2a8ff">Anthropic</tspan><tspan fill="#c9d1d9">()</tspan></text>
+
+    <text x="58" y="181"><tspan fill="#6e7681"># the agent reasons, then records what it learned — with provenance</tspan></text>
+    <text x="58" y="202"><tspan fill="#c9d1d9">reply = client.messages.</tspan><tspan fill="#d2a8ff">create</tspan><tspan fill="#c9d1d9">(model=</tspan><tspan fill="#a5d6ff">"claude-sonnet-5"</tspan><tspan fill="#c9d1d9">, messages=history)</tspan></text>
+    <text x="58" y="223"><tspan fill="#c9d1d9">store.</tspan><tspan fill="#d2a8ff">add</tspan><tspan fill="#c9d1d9">(</tspan><tspan fill="#a5d6ff">"customer-4821"</tspan><tspan fill="#c9d1d9">, reply.belief,</tspan></text>
+    <text x="58" y="244"><tspan fill="#c9d1d9">          provenance=mnem.</tspan><tspan fill="#d2a8ff">Provenance</tspan><tspan fill="#c9d1d9">(observation=reply.source, agent_step=step))</tspan></text>
+    <text x="58" y="265"><tspan fill="#c9d1d9">store.</tspan><tspan fill="#d2a8ff">commit</tspan><tspan fill="#c9d1d9">(reply.summary, author=</tspan><tspan fill="#a5d6ff">"support-agent"</tspan><tspan fill="#c9d1d9">)</tspan></text>
+
+    <text x="58" y="307"><tspan fill="#6e7681"># a wrong answer, an hour later — trace the belief to where it entered</tspan></text>
+    <text x="58" y="328"><tspan fill="#c9d1d9">b = store.</tspan><tspan fill="#d2a8ff">blame</tspan><tspan fill="#c9d1d9">(</tspan><tspan fill="#a5d6ff">"customer-4821"</tspan><tspan fill="#c9d1d9">)</tspan></text>
+    <text x="58" y="349"><tspan fill="#d2a8ff">print</tspan><tspan fill="#c9d1d9">(b.commit[:</tspan><tspan fill="#79c0ff">8</tspan><tspan fill="#c9d1d9">], b.provenance.observation)</tspan><tspan fill="#6e7681">   # b3d90f2a  billing-note-8842</tspan></text>
+  </g>
+</svg>
