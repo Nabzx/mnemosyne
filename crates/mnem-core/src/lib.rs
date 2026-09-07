@@ -24,6 +24,7 @@ pub mod graph;
 pub mod head;
 pub mod id;
 pub mod log;
+pub mod merge;
 pub mod object;
 pub mod objects;
 pub mod refs;
@@ -37,6 +38,7 @@ pub use diff::{DiffTarget, NodeChange};
 pub use error::{MnemError, Result};
 pub use head::Head;
 pub use id::ObjectId;
+pub use merge::{Conflict, ConflictKind, StateMerge};
 pub use object::{Commit, ContentKind, MemoryNode, Object, Provenance, State};
 pub use store::Store;
 
