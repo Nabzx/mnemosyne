@@ -20,6 +20,7 @@ pub mod commit;
 pub mod config;
 pub mod diff;
 pub mod error;
+pub mod graph;
 pub mod head;
 pub mod id;
 pub mod log;

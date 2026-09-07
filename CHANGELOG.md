@@ -8,6 +8,12 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ## [Unreleased]
 
+### Added
+
+- `mnem-core`: `Store::ancestors` / `is_ancestor` / `merge_bases` / `merge_base`
+  (commit-graph queries for Phase 3's merge; `merge_base` refuses a criss-cross
+  history).
+
 ### Changed
 
 - README: the demo GIF now shows branching and `diff`, not just `commit` / `log`.
