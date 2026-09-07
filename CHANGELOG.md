@@ -18,6 +18,9 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   stateless merge call. ADR-0014 (the conflict object and resolution API):
   transient `Conflict` values and `ours` / `theirs` / `base` / `delete` /
   `set` resolutions.
+- `mnem-core`: the merge algorithm. `merge::merge_state_maps` (the per-id
+  three-way table), `Conflict` / `ConflictKind` / `StateMerge`, and
+  `Store::merge_states`.
 
 ### Changed
 
