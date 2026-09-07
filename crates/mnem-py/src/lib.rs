@@ -12,8 +12,8 @@ use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyList};
 
 use mnem_core::{
-    Checkout, ContentKind, DiffTarget, MemoryNode, MnemError, NodeChange, ObjectId, Provenance,
-    Store,
+    Checkout, ConflictKind, ContentKind, DiffTarget, MemoryNode, MergeOutcome, MergeStrategy,
+    MnemError, NodeChange, ObjectId, Provenance, Resolution, Store,
 };
 
 create_exception!(
@@ -404,9 +404,148 @@ impl PyStore {
         }
         Ok(out)
     }
+
+    /// Merge `theirs` (a commit-ish) into the current branch. `resolutions` maps
+    /// a conflicting node id to `"ours"` / `"theirs"` / `"base"` / `"delete"`,
+    /// or to a node dict for a `set` resolution. `strategy` is `"ours"` or
+    /// `"theirs"`. Returns a dict with `status`
+    /// (`"up-to-date"` / `"fast-forwarded"` / `"merged"` / `"conflicts"`),
+    /// `commit`, and `conflicts`.
+    #[pyo3(signature = (theirs, *, resolutions = None, strategy = None, message = None, author = "unknown", time_ms = 0))]
+    #[allow(clippy::too_many_arguments)]
+    fn merge<'py>(
+        &self,
+        py: Python<'py>,
+        theirs: &str,
+        resolutions: Option<&Bound<'py, PyDict>>,
+        strategy: Option<&str>,
+        message: Option<&str>,
+        author: &str,
+        time_ms: i64,
+    ) -> PyResult<Bound<'py, PyDict>> {
+        let resolutions = parse_resolutions(resolutions)?;
+        let strategy = match strategy {
+            None => None,
+            Some("ours") => Some(MergeStrategy::Ours),
+            Some("theirs") => Some(MergeStrategy::Theirs),
+            Some(other) => {
+                return Err(PyValueError::new_err(format!(
+                    "strategy must be \"ours\" or \"theirs\", got {other:?}"
+                )));
+            }
+        };
+
+        let outcome = self
+            .inner
+            .merge(theirs, &resolutions, strategy, message, author, time_ms)
+            .map_err(to_py_err)?;
+
+        let out = PyDict::new(py);
+        out.set_item("conflicts", PyList::empty(py))?;
+        match outcome {
+            MergeOutcome::AlreadyUpToDate => {
+                out.set_item("status", "up-to-date")?;
+                out.set_item("commit", py.None())?;
+            }
+            MergeOutcome::FastForwarded(id) => {
+                out.set_item("status", "fast-forwarded")?;
+                out.set_item("commit", id.to_hex())?;
+            }
+            MergeOutcome::Merged(id) => {
+                out.set_item("status", "merged")?;
+                out.set_item("commit", id.to_hex())?;
+            }
+            MergeOutcome::Conflicts(conflicts) => {
+                out.set_item("status", "conflicts")?;
+                out.set_item("commit", py.None())?;
+                let list = PyList::empty(py);
+                for conflict in conflicts {
+                    let row = PyDict::new(py);
+                    row.set_item("id", &conflict.id)?;
+                    row.set_item("kind", conflict_kind_name(conflict.kind))?;
+                    row.set_item("base", self.opt_node_dict(py, conflict.base)?)?;
+                    row.set_item("ours", self.opt_node_dict(py, conflict.ours)?)?;
+                    row.set_item("theirs", self.opt_node_dict(py, conflict.theirs)?)?;
+                    list.append(row)?;
+                }
+                out.set_item("conflicts", list)?;
+            }
+        }
+        Ok(out)
+    }
+}
+
+fn conflict_kind_name(kind: ConflictKind) -> &'static str {
+    match kind {
+        ConflictKind::EditEdit => "edit/edit",
+        ConflictKind::DeleteEdit => "delete/edit",
+        ConflictKind::EditDelete => "edit/delete",
+        ConflictKind::AddAdd => "add/add",
+    }
+}
+
+fn parse_resolutions(
+    resolutions: Option<&Bound<'_, PyDict>>,
+) -> PyResult<std::collections::BTreeMap<String, Resolution>> {
+    let mut out = std::collections::BTreeMap::new();
+    let Some(dict) = resolutions else {
+        return Ok(out);
+    };
+    for (key, value) in dict.iter() {
+        let id: String = key.extract()?;
+        let resolution = if let Ok(side) = value.extract::<String>() {
+            match side.as_str() {
+                "ours" => Resolution::Ours,
+                "theirs" => Resolution::Theirs,
+                "base" => Resolution::Base,
+                "delete" => Resolution::Delete,
+                other => {
+                    return Err(PyValueError::new_err(format!(
+                        "resolution for {id:?} must be \"ours\", \"theirs\", \"base\", \"delete\", or a node dict, got {other:?}"
+                    )));
+                }
+            }
+        } else {
+            let node_dict: Bound<'_, PyDict> = value.extract()?;
+            Resolution::Set(node_from_dict(id.as_str(), &node_dict)?)
+        };
+        out.insert(id, resolution);
+    }
+    Ok(out)
+}
+
+fn node_from_dict(id: &str, dict: &Bound<'_, PyDict>) -> PyResult<MemoryNode> {
+    let content_str: String = dict
+        .get_item("content")?
+        .ok_or_else(|| PyValueError::new_err("a set resolution needs a \"content\" key"))?
+        .extract()?;
+    let content = serde_json::from_str(&content_str)
+        .map_err(|e| PyValueError::new_err(format!("content is not valid JSON: {e}")))?;
+    let content_kind = match dict.get_item("content_kind")? {
+        Some(v) => parse_content_kind(&v.extract::<String>()?)?,
+        None => ContentKind::Note,
+    };
+    Ok(MemoryNode {
+        id: id.to_string(),
+        content,
+        content_kind,
+        provenance: Provenance::default(),
+        event_time: None,
+    })
 }
 
 impl PyStore {
+    fn opt_node_dict<'py>(
+        &self,
+        py: Python<'py>,
+        object_id: Option<ObjectId>,
+    ) -> PyResult<Option<Bound<'py, PyDict>>> {
+        match object_id {
+            Some(id) => Ok(Some(self.node_dict(py, id)?)),
+            None => Ok(None),
+        }
+    }
+
     fn diff_target(&self, spec: Option<&str>, is_from: bool) -> PyResult<DiffTarget> {
         match spec {
             Some(s) => Ok(DiffTarget::Commit(

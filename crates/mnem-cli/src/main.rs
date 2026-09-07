@@ -2,8 +2,10 @@
 //!
 //! Each subcommand is a thin wrapper over `mnem-core` (ADR-0004). Phase 1:
 //! `init`, `add`, `commit`, `log`. Phase 2 (ADR-0012): `branch`, `checkout`,
-//! `show`, `diff`, `status`, `rm`. See `ROADMAP.md`.
+//! `show`, `diff`, `status`, `rm`. Phase 3 (ADR-0013, ADR-0014): `merge`. See
+//! `ROADMAP.md`.
 
+use std::collections::BTreeMap;
 use std::fs;
 use std::io::Read;
 use std::path::PathBuf;
@@ -11,7 +13,8 @@ use std::path::PathBuf;
 use anyhow::{Context, Result};
 use clap::{Parser, Subcommand};
 use mnem_core::{
-    Checkout, ContentKind, DiffTarget, Head, MemoryNode, NodeChange, ObjectId, Provenance, Store,
+    Checkout, Conflict, ConflictKind, ContentKind, DiffTarget, Head, MemoryNode, MergeOutcome,
+    MergeStrategy, NodeChange, ObjectId, Provenance, Resolution, Store,
 };
 
 /// Version control for AI agent memory.
@@ -102,6 +105,23 @@ enum Command {
         /// A branch name or commit id.
         rev: Option<String>,
     },
+    /// Merge another branch or commit into the current branch.
+    Merge {
+        /// A branch name or commit id to merge in.
+        theirs: String,
+        /// Resolve one conflict: `--resolve <id>=<ours|theirs|base|delete>`. Repeatable.
+        #[arg(long, value_name = "ID=SIDE")]
+        resolve: Vec<String>,
+        /// Resolve every conflict one way: `ours` or `theirs`.
+        #[arg(long, value_name = "SIDE")]
+        strategy: Option<String>,
+        /// Override the merge commit message.
+        #[arg(short, long)]
+        message: Option<String>,
+        /// Who or what made the merge. Falls back to $MNEM_AUTHOR, then "unknown".
+        #[arg(long)]
+        author: Option<String>,
+    },
     /// Show what changed between two memory states.
     Diff {
         /// The `from` side: a branch or commit. Default: the HEAD commit.
@@ -153,6 +173,13 @@ fn main() -> Result<()> {
             discard,
         }) => cmd_checkout(rev, create, discard),
         Some(Command::Show { rev }) => cmd_show(rev),
+        Some(Command::Merge {
+            theirs,
+            resolve,
+            strategy,
+            message,
+            author,
+        }) => cmd_merge(theirs, resolve, strategy, message, author),
         Some(Command::Diff {
             from,
             to,
@@ -369,6 +396,100 @@ fn cmd_show(rev: Option<String>) -> Result<()> {
         println!("  {}", serde_json::to_string(&node.content)?);
     }
     Ok(())
+}
+
+fn cmd_merge(
+    theirs: String,
+    resolve: Vec<String>,
+    strategy: Option<String>,
+    message: Option<String>,
+    author: Option<String>,
+) -> Result<()> {
+    let author = author
+        .or_else(|| std::env::var("MNEM_AUTHOR").ok())
+        .unwrap_or_else(|| "unknown".to_string());
+
+    let strategy = match strategy.as_deref() {
+        None => None,
+        Some("ours") => Some(MergeStrategy::Ours),
+        Some("theirs") => Some(MergeStrategy::Theirs),
+        Some(other) => anyhow::bail!("unknown --strategy {other:?}; use `ours` or `theirs`"),
+    };
+
+    let mut resolutions: BTreeMap<String, Resolution> = BTreeMap::new();
+    for spec in &resolve {
+        let (id, side) = spec.split_once('=').with_context(|| {
+            format!("--resolve {spec:?} must be <id>=<ours|theirs|base|delete>")
+        })?;
+        let resolution = match side {
+            "ours" => Resolution::Ours,
+            "theirs" => Resolution::Theirs,
+            "base" => Resolution::Base,
+            "delete" => Resolution::Delete,
+            other => anyhow::bail!(
+                "--resolve {spec:?}: unknown side {other:?}; use `ours`, `theirs`, `base` or `delete`"
+            ),
+        };
+        resolutions.insert(id.to_string(), resolution);
+    }
+
+    let store = open_store()?;
+    let branch = match store.head()? {
+        Head::Attached(name) => name,
+        Head::Detached(_) => anyhow::bail!("cannot merge from a detached HEAD; check out a branch"),
+    };
+
+    match store.merge(
+        &theirs,
+        &resolutions,
+        strategy,
+        message.as_deref(),
+        &author,
+        now_ms(),
+    )? {
+        MergeOutcome::AlreadyUpToDate => println!("Already up to date."),
+        MergeOutcome::FastForwarded(id) => {
+            println!("Fast-forwarded '{branch}' to {}", short(&id));
+        }
+        MergeOutcome::Merged(id) => {
+            let msg = tip_message(&store, id)?;
+            println!("[{}] {msg}", short(&id));
+        }
+        MergeOutcome::Conflicts(conflicts) => {
+            println!("Merge conflict in {} node(s):", conflicts.len());
+            for conflict in &conflicts {
+                print_conflict(&store, conflict)?;
+            }
+            anyhow::bail!(
+                "resolve with `--resolve <id>=<side>` (or `--strategy ours|theirs`) and merge again"
+            );
+        }
+    }
+    Ok(())
+}
+
+fn print_conflict(store: &Store, conflict: &Conflict) -> Result<()> {
+    println!("  {} ({})", conflict.id, conflict_kind_label(conflict.kind));
+    let show = |label: &str, side: Option<ObjectId>| -> Result<()> {
+        match side {
+            Some(object_id) => println!("    {label:<7} {}", node_content(store, object_id)?),
+            None => println!("    {label:<7} (deleted)"),
+        }
+        Ok(())
+    };
+    show("base:", conflict.base)?;
+    show("ours:", conflict.ours)?;
+    show("theirs:", conflict.theirs)?;
+    Ok(())
+}
+
+fn conflict_kind_label(kind: ConflictKind) -> &'static str {
+    match kind {
+        ConflictKind::EditEdit => "edit/edit",
+        ConflictKind::DeleteEdit => "delete/edit",
+        ConflictKind::EditDelete => "edit/delete",
+        ConflictKind::AddAdd => "add/add",
+    }
 }
 
 fn cmd_diff(from: Option<String>, to: Option<String>, stat: bool, name_only: bool) -> Result<()> {
