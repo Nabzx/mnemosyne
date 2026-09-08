@@ -32,6 +32,7 @@ pub mod mergeflow;
 pub mod object;
 pub mod objects;
 pub mod refs;
+pub mod semantic;
 pub mod staging;
 pub mod store;
 pub mod timetravel;
@@ -47,6 +48,7 @@ pub use index::ChangeKind;
 pub use merge::{Conflict, ConflictKind, StateMerge};
 pub use mergeflow::{MergeOutcome, MergeStrategy, Resolution};
 pub use object::{Commit, ContentKind, MemoryNode, Object, Provenance, State};
+pub use semantic::{ContradictionDraft, SemanticMerge, StructuralOnly, Verdict};
 pub use store::Store;
 
 /// The crate version, taken from `Cargo.toml` at build time.

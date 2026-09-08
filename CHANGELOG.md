@@ -26,6 +26,14 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 - A docs site (mdBook, `book.toml` + `docs/SUMMARY.md`), published to GitHub
   Pages by a `docs` workflow: the format spec, the benchmark, the ADRs and the
   research surveys, browsable.
+- ADR-0018 (the Era 2 seam): the `SemanticMerge` trait, where a content-aware
+  merge resolver attaches to the structural merge, and the named pieces of the
+  sync protocol (a `Remote`, content-addressed exchange, a reviewable
+  `Proposal`). The trait and its Era 1 impl `StructuralOnly` ship now in
+  `mnem-core`; `Store::merge_with(theirs, resolver, ..)` runs a resolver over
+  the conflicts the structural merge leaves open, and `Store::merge` is
+  `merge_with(&StructuralOnly, ..)`. No behaviour change, no `format_version`
+  change: the seam is proven before the Era 1 format freezes.
 
 ### Changed
 

@@ -15,6 +15,7 @@ use crate::head::Head;
 use crate::id::ObjectId;
 use crate::merge::{Conflict, StateMerge};
 use crate::object::{Commit, MemoryNode, Object, State};
+use crate::semantic::{SemanticMerge, StructuralOnly, Verdict};
 use crate::store::Store;
 use crate::{objects, refs};
 
@@ -63,9 +64,41 @@ impl Store {
     /// `resolutions` maps a conflicting node id to a [`Resolution`]; `strategy`
     /// resolves any conflict not in the map. Refused from a detached `HEAD` or
     /// with a dirty index (ADR-0013).
+    ///
+    /// This is [`merge_with`](Self::merge_with) with the Era 1 resolver
+    /// ([`StructuralOnly`]): the structural merge is the whole merge.
     pub fn merge(
         &self,
         theirs: &str,
+        resolutions: &BTreeMap<String, Resolution>,
+        strategy: Option<MergeStrategy>,
+        message: Option<&str>,
+        author: &str,
+        time_ms: i64,
+    ) -> Result<MergeOutcome> {
+        self.merge_with(
+            theirs,
+            &StructuralOnly,
+            resolutions,
+            strategy,
+            message,
+            author,
+            time_ms,
+        )
+    }
+
+    /// Merge `theirs` into the current branch, running `resolver` over the
+    /// conflicts the structural merge leaves open (ADR-0018).
+    ///
+    /// Per conflicting id the precedence is: an explicit `resolutions` entry,
+    /// then the resolver's [`Verdict`], then `strategy`, then unresolved. A
+    /// [`Verdict::Contradiction`] is treated as [`Verdict::Unresolved`] in
+    /// Era 1: the stored `Contradiction` object is `format_version` 2.
+    #[allow(clippy::too_many_arguments)]
+    pub fn merge_with(
+        &self,
+        theirs: &str,
+        resolver: &dyn SemanticMerge,
         resolutions: &BTreeMap<String, Resolution>,
         strategy: Option<MergeStrategy>,
         message: Option<&str>,
@@ -114,7 +147,7 @@ impl Store {
             merged,
             set_nodes,
             unresolved,
-        } = resolve(state_merge, resolutions, strategy)?;
+        } = resolve(self, resolver, state_merge, resolutions, strategy)?;
         if !unresolved.is_empty() {
             return Ok(MergeOutcome::Conflicts(unresolved));
         }
@@ -158,8 +191,11 @@ struct Resolved {
     unresolved: Vec<Conflict>,
 }
 
-/// Apply `resolutions` and `strategy` to the conflicts.
+/// Apply `resolutions`, then `resolver`, then `strategy` to the conflicts
+/// (ADR-0018). The first that settles an id wins.
 fn resolve(
+    store: &Store,
+    resolver: &dyn SemanticMerge,
     state_merge: StateMerge,
     resolutions: &BTreeMap<String, Resolution>,
     strategy: Option<MergeStrategy>,
@@ -177,17 +213,25 @@ fn resolve(
         }
     }
 
+    let strategy_pick = |s: MergeStrategy| match s {
+        MergeStrategy::Ours => Resolution::Ours,
+        MergeStrategy::Theirs => Resolution::Theirs,
+    };
+
     let mut merged = state_merge.merged;
     let mut set_nodes = Vec::new();
     let mut unresolved = Vec::new();
 
     for conflict in state_merge.conflicts {
-        let picked = resolutions.get(&conflict.id).cloned().or_else(|| {
-            strategy.map(|s| match s {
-                MergeStrategy::Ours => Resolution::Ours,
-                MergeStrategy::Theirs => Resolution::Theirs,
-            })
-        });
+        let picked = match resolutions.get(&conflict.id).cloned() {
+            Some(explicit) => Some(explicit),
+            None => match resolver.resolve(store, &conflict)? {
+                Verdict::Resolved(resolution) => Some(resolution),
+                // Era 1: no stored Contradiction (format_version 2). Fall
+                // through to the strategy, or hand the conflict back.
+                Verdict::Contradiction(_) | Verdict::Unresolved => strategy.map(strategy_pick),
+            },
+        };
 
         match picked {
             None => unresolved.push(conflict),
