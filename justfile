@@ -87,7 +87,7 @@ commits:
 
 # Regenerate the README demo GIF (needs `vhs` on PATH).
 demo:
-    cargo build --release -p mnem-cli
+    maturin develop -m crates/mnem-py/Cargo.toml
     vhs assets/demo.tape
 
 # Install the repo git hooks into .git/hooks.

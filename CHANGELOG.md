@@ -34,8 +34,15 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   the conflicts the structural merge leaves open, and `Store::merge` is
   `merge_with(&StructuralOnly, ..)`. No behaviour change, no `format_version`
   change: the seam is proven before the Era 1 format freezes.
+- `examples/claude_agent.py`: a support agent is told a past answer was wrong,
+  then uses `bisect` and `blame` to trace it to a misread observation and
+  commits a correction. Runs from a fixed script by default (CI checks it) or
+  as a real Claude tool-use loop with `--live`. This is the new README demo.
 
 ### Changed
+
+- The README demo GIF now shows the `claude_agent.py` session rather than a
+  raw `mnem` CLI walkthrough.
 
 - `docs/format/`: the on-disk format is declared **final for Era 1** at
   `format_version` 1. The next change is `format_version` 2 in Era 2.
