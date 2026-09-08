@@ -122,10 +122,10 @@ The debugging layer, still deterministic.
 
 Make it usable from a real agent.
 
-- [ ] The MCP server: memory operations exposed as tools
-- [ ] The LangGraph adapter
-- [ ] SDK hardening: errors, types, transactions
-- [ ] Three worked examples in `examples/`, each a real agent
+- [x] The MCP server: memory operations exposed as tools
+- [x] The LangGraph adapter
+- [x] SDK hardening: errors, types, transactions
+- [x] Three worked examples in `examples/`, each a real agent
 
 **Definition of done:** a LangGraph agent uses Mnemosyne as its memory with branch and blame working; an MCP-capable agent gets the same operations as tools. Tag `v0.0.6`.
 

@@ -6,6 +6,54 @@ for you.
 
 ---
 
+## v0.0.6 - plugging in
+
+**The one-line version:** Mnemosyne now drops into the two ways people actually
+build agents: as an MCP server, and as a LangGraph memory store. Your agent gets
+versioned memory without changing how it is written.
+
+**New this release:**
+
+- **An MCP server.** `mnem-mcp --store ./agent-memory` speaks the Model Context
+  Protocol over stdio. Any MCP-capable agent (Claude Desktop, an SDK client) can
+  call tools: `remember` a fact (with where it came from), `recall` one or all,
+  `why` did the agent conclude this, `when_did` a belief go wrong, and more. The
+  current memory is also readable as an MCP resource, so it can sit in the
+  agent's context without spending a tool call every turn.
+- **A LangGraph store.** `MnemosyneStore` is a drop-in `BaseStore`. Point a
+  LangGraph agent at it and its long-term memory gains history: every write is a
+  commit. Extra methods let a graph node `branch` to test a hunch, or ask `why`
+  a memory says what it does.
+- **`mnem.agents` in the SDK.** `remember` / `remember_many` / `forget`: one call
+  records a fact (or several) as one commit, and retries quietly if two writers
+  race. Every result type can now turn itself into plain JSON with `.to_dict()`.
+- **Three worked examples** in `examples/`, one per surface, each a short script
+  you can run: a support agent that traces a wrong answer, a LangGraph agent
+  with branching memory, and an MCP client talking to `mnem-mcp`.
+
+**What is guaranteed:**
+
+- The Rust core still never touches the network and never calls a model. The MCP
+  server and the LangGraph adapter are separate Python packages that sit on top
+  of the SDK; a CI check keeps the core clean.
+- Every write through an adapter is one commit, so the memory an agent builds
+  over a run is fully inspectable afterwards with `log`, `blame` and `bisect`.
+- Still one on-disk format (`format_version` 1).
+
+**What it still does not do** (next phases):
+
+- The MCP server speaks stdio only. A remote, multi-client HTTP transport (and
+  the auth that comes with it) is a later phase.
+- No shared memory between two agents yet. That is the collaboration era.
+- The LangGraph `search` is a plain text filter, not semantic. Wrap a vector
+  store if you need ranking.
+
+**Under the hood:** `packages/mnem-mcp/` (FastMCP over the SDK) and
+`packages/mnem-langgraph/` (a `BaseStore` subclass), both new. `mnem.agents` and
+`to_dict()` added to the SDK. Design in ADR-0016. Not on PyPI yet.
+
+---
+
 ## v0.0.5 — explaining
 
 **The one-line version:** you can now ask the agent's memory two questions —
