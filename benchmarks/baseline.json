@@ -1,0 +1,5 @@
+{
+  "_comment": "Overhead numbers at MNEM_BENCH_STEPS=256 (the CI default). The benchmark job fails if a measurement exceeds 2x these. Seeded loosely by #64; #65 re-measures on the CI runner and tightens. Bump deliberately, in its own commit, on an intended change.",
+  "write_ms_p50": 40.0,
+  "bytes_per_step": 10321.0
+}
