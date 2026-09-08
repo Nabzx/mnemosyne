@@ -19,6 +19,10 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   metrics, seeded, `MNEM_BENCH_*` overrides) and `benchmarks/overhead.py` (the
   overhead comparison and the audit-query table). A new `benchmark` CI job runs
   the latter with a 2x-regression gate against `benchmarks/baseline.json`.
+- `docs/benchmark.md`: the first published run. All eight correctness metrics
+  hold over 720 seeded runs; a commit costs about 12 ms and single-digit KB;
+  the audit-query table shows what version control buys over a dict and a JSONL
+  log.
 
 ## [0.0.6] - 2026-09-08
 
