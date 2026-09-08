@@ -8,6 +8,14 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ## [Unreleased]
 
+### Added
+
+- ADR-0017 (the benchmark and its metrics): the `v0.0.7` benchmark measures
+  operational properties (reconstruction, `bisect` precision, `blame` accuracy,
+  merge correctness) at a hard 100% target and overhead (latency, `.mnem`
+  growth) against a `dict` and a JSONL baseline, not accuracy. A seeded
+  `benchmark.rs` plus `benchmarks/overhead.py`, feeding `docs/benchmark.md`.
+
 ## [0.0.6] - 2026-09-08
 
 Era 1, "it plugs in". `format_version` 1.
