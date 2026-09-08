@@ -49,7 +49,7 @@ jobs:
       - run: uv run pytest python/tests scripts -q
 
   adapters:
-    name: adapters (mcp)
+    name: adapters (mcp, langgraph)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -63,6 +63,7 @@ jobs:
       # test against the SDK (ADR-0004, ADR-0016).
       - run: uv pip install -e ".[dev]"
       - run: uv pip install -e "./packages/mnem-mcp[dev]"
+      - run: uv pip install -e "./packages/mnem-langgraph[dev]"
       - run: uv run ruff check packages
       - run: uv run pytest packages -q
 

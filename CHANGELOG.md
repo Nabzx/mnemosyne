@@ -28,6 +28,11 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   tools (`remember`, `recall`, `why`, `when_did`, ...) and resources
   (`mnem://memory`, `mnem://log`, `mnem://commit/{id}`). `mnem-mcp --store PATH`
   speaks MCP over stdio; `--tools all` adds `branch` / `switch` / `merge`.
+- `mnemosyne-langgraph` (`packages/mnem-langgraph/`): `MnemosyneStore`, a
+  LangGraph `BaseStore` whose every `put` is a commit. Namespace plus key maps
+  to a node id, a reserved `_meta` key carries provenance, `search` is a plain
+  filter, and `branch` / `why` / `history` are extra methods for a graph node.
+  Sync, with async methods that run in a worker thread.
 
 ### Changed
 
