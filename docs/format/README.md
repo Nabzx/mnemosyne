@@ -13,10 +13,11 @@ store written by one reads on every other, and the substrate (commit, branch,
 merge, blame, bisect, time travel) needs no further field. The benchmark
 (`docs/benchmark.md`) is the evidence that it does what it claims.
 
-The next change is **`format_version` 2 in Era 2**, the collaboration layer: a
-stored `Contradiction` object (a kept record of an incompatible-claims merge),
-whatever the sync protocol adds to a `Commit` or the refs, and the prolly-tree
-`State` form if the benchmark's storage numbers cross the trigger in ADR-0017.
+The next change is **`format_version` 2 in Era 2**, the collaboration layer,
+whose pieces are named in ADR-0018: a stored `Contradiction` object (a kept
+record of an incompatible-claims merge), whatever the sync protocol adds to a
+`Commit` or the refs, and the prolly-tree `State` form if the benchmark's
+storage numbers cross the trigger in ADR-0017.
 Those are additive where possible (ADR-0002); where not, `mnem migrate` ships
 with the release (ADR-0007). It is never a silent change: the golden-vector
 test fails first.

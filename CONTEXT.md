@@ -99,6 +99,27 @@ incompatible things about the same subject and cannot be auto-resolved. It is
 kept, not silently dropped.
 _Avoid_: conflict, disagreement
 
+**Semantic merge** (Era 2):
+The content-aware second pass over the conflicts the structural merge leaves
+open: a `SemanticMerge` impl reads the nodes on each side and either resolves
+the conflict or emits a `Contradiction`. The trait is defined in the core
+(ADR-0018); every impl that calls a model lives in a separate crate.
+_Avoid_: smart merge, AI merge, auto-merge
+
+### Collaboration (Era 2)
+
+**Remote**:
+A named pointer to another store, the way a branch is a named pointer to a
+commit. The thing `mnem push` and `mnem pull` act on. Shape declared in
+ADR-0018, built in Era 2.
+_Avoid_: origin, upstream, peer, server
+
+**Proposal**:
+A cross-store change offered for review before it lands in shared memory: a
+source ref, a target ref, the commit range, and a status. The "pull request for
+memory". Declared in ADR-0018, built in Era 2.
+_Avoid_: pull request, merge request, change set, patch
+
 ### Operations
 
 **Blame**:
