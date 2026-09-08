@@ -48,6 +48,23 @@ jobs:
       - run: uv run ruff check python scripts
       - run: uv run pytest python/tests scripts -q
 
+  benchmark:
+    name: benchmark (overhead)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.93.0
+      - uses: Swatinem/rust-cache@v2
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+      # The correctness metrics run in the `rust` job (benchmark.rs is a test).
+      # This is the overhead comparison against a dict and a JSONL baseline: it
+      # asserts the audit-query table and the 2x regression gate (ADR-0017).
+      - run: uv pip install -e ".[dev]"
+      - run: uv run ruff check benchmarks
+      - run: uv run python benchmarks/overhead.py
+
   adapters:
     name: adapters (mcp, langgraph)
     runs-on: ubuntu-latest

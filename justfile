@@ -7,7 +7,7 @@ _default:
     @just --list
 
 # Everything CI runs, in the same order. Run this before opening a pull request.
-ci: fmt-check clippy test build deny py adapters checks commits
+ci: fmt-check clippy test build deny py adapters benchmark checks commits
 
 # Format the whole workspace.
 fmt:
@@ -42,6 +42,16 @@ py:
     maturin develop -m crates/mnem-py/Cargo.toml
     ruff check python scripts
     pytest python/tests scripts -q
+
+# The overhead benchmark: dict / JSONL / mnem, the audit table, the regression gate.
+benchmark:
+    ruff check benchmarks
+    python benchmarks/overhead.py
+
+# The full published sweeps. Slow; produces the numbers for docs/*.md.
+bench-sweep:
+    MNEM_BENCH_RUNS=2000 MNEM_BENCH_LENGTHS=16,64,256,1024 cargo test -p mnem-core --test benchmark --release -- --nocapture
+    MNEM_BENCH_STEPS=1024 python benchmarks/overhead.py
 
 # Lint and test the adapter packages and run the examples (needs `just py` first).
 adapters:

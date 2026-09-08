@@ -15,6 +15,10 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   merge correctness) at a hard 100% target and overhead (latency, `.mnem`
   growth) against a `dict` and a JSONL baseline, not accuracy. A seeded
   `benchmark.rs` plus `benchmarks/overhead.py`, feeding `docs/benchmark.md`.
+- The benchmark harnesses: `crates/mnem-core/tests/benchmark.rs` (correctness
+  metrics, seeded, `MNEM_BENCH_*` overrides) and `benchmarks/overhead.py` (the
+  overhead comparison and the audit-query table). A new `benchmark` CI job runs
+  the latter with a 2x-regression gate against `benchmarks/baseline.json`.
 
 ## [0.0.6] - 2026-09-08
 
