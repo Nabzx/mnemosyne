@@ -28,6 +28,7 @@
 - [0015 The provenance index, blame and bisect](adr/0015-provenance-index-blame-and-bisect.md)
 - [0016 The MCP tools and the adapter contract](adr/0016-mcp-tools-and-the-adapter-contract.md)
 - [0017 The benchmark and its metrics](adr/0017-the-benchmark-and-its-metrics.md)
+- [0018 The Era 2 seam](adr/0018-the-era-2-seam.md)
 
 # Research
 
