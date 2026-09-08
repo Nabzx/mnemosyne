@@ -148,7 +148,7 @@ fn generate(store: &Store, rng: &mut Lcg, length: usize, fault_fraction: f64) ->
         }
         let commit = commit_now(store, c);
         // fill in the real commit id for keys set this commit
-        for (_, entry) in set_at.iter_mut() {
+        for entry in set_at.values_mut() {
             if entry.0 == ObjectId::from_bytes([0; 32]) {
                 entry.0 = commit;
             }
