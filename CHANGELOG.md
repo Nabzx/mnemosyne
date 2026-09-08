@@ -33,6 +33,10 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   to a node id, a reserved `_meta` key carries provenance, `search` is a plain
   filter, and `branch` / `why` / `history` are extra methods for a graph node.
   Sync, with async methods that run in a worker thread.
+- `examples/`: three runnable, self-asserting scripts, one per surface: a
+  support agent using the SDK (`support_agent.py`), a LangGraph agent using
+  `MnemosyneStore` (`langgraph_memory.py`), and an MCP client driving `mnem-mcp`
+  over stdio (`mcp_client.py`). CI runs all three.
 
 ### Changed
 
