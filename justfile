@@ -45,7 +45,7 @@ py:
 
 # Lint and test the adapter packages (needs the SDK installed, e.g. via `just py`).
 adapters:
-    pip install -e "./packages/mnem-mcp[dev]"
+    pip install -e "./packages/mnem-mcp[dev]" -e "./packages/mnem-langgraph[dev]"
     ruff check packages
     pytest packages -q
 
