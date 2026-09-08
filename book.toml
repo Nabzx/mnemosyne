@@ -1,0 +1,20 @@
+[book]
+title = "Mnemosyne"
+description = "Version control for AI agent memory."
+authors = ["Nabil Shah"]
+src = "docs"
+language = "en"
+
+[build]
+create-missing = false
+
+[output.html]
+git-repository-url = "https://github.com/Nabzx/mnemosyne"
+edit-url-template = "https://github.com/Nabzx/mnemosyne/edit/main/{path}"
+default-theme = "ayu"
+preferred-dark-theme = "ayu"
+no-section-label = true
+
+[output.html.fold]
+enable = true
+level = 1

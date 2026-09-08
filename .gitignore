@@ -38,3 +38,6 @@ uv.lock
 
 # built wheels
 /dist/
+
+# mdbook output
+/book
