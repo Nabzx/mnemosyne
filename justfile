@@ -62,6 +62,13 @@ adapters:
     python examples/langgraph_memory.py
     python examples/mcp_client.py
 
+# Build the docs site into ./book (needs `mdbook` on PATH). `just docs-serve` to preview.
+docs:
+    mdbook build
+
+docs-serve:
+    mdbook serve --open
+
 # Build the release wheel and check it against the SDK tests.
 wheel:
     rm -rf dist

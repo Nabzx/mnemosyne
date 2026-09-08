@@ -5,11 +5,21 @@ The layout of a `.mnem/` store: the object database, the refs, `HEAD`, and
 language, and it is checked against the implementation by the tests in
 `crates/mnem-core` and the [golden vectors](golden-vectors.md).
 
-## Status: frozen for the `0.0.x` line
+## Status: final for Era 1
 
-This describes **`format_version` 1**. It is frozen for the whole `0.0.x`
-roadmap (ADR-0010): every `0.0.x` release reads and writes `format_version` 1,
-and a store written by one `0.0.x` release is readable by every other.
+This describes **`format_version` 1**, and as of `v0.0.7` it is **final for the
+Era 1 substrate**. Every `0.0.x` release reads and writes `format_version` 1, a
+store written by one reads on every other, and the substrate (commit, branch,
+merge, blame, bisect, time travel) needs no further field. The benchmark
+(`docs/benchmark.md`) is the evidence that it does what it claims.
+
+The next change is **`format_version` 2 in Era 2**, the collaboration layer: a
+stored `Contradiction` object (a kept record of an incompatible-claims merge),
+whatever the sync protocol adds to a `Commit` or the refs, and the prolly-tree
+`State` form if the benchmark's storage numbers cross the trigger in ADR-0017.
+Those are additive where possible (ADR-0002); where not, `mnem migrate` ships
+with the release (ADR-0007). It is never a silent change: the golden-vector
+test fails first.
 
 The software version is `0.0.x` initial development, where the public API may
 change on any release. The **`format_version` integer is the data contract**,

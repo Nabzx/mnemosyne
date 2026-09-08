@@ -23,6 +23,14 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   hold over 720 seeded runs; a commit costs about 12 ms and single-digit KB;
   the audit-query table shows what version control buys over a dict and a JSONL
   log.
+- A docs site (mdBook, `book.toml` + `docs/SUMMARY.md`), published to GitHub
+  Pages by a `docs` workflow: the format spec, the benchmark, the ADRs and the
+  research surveys, browsable.
+
+### Changed
+
+- `docs/format/`: the on-disk format is declared **final for Era 1** at
+  `format_version` 1. The next change is `format_version` 2 in Era 2.
 
 ## [0.0.6] - 2026-09-08
 
