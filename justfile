@@ -43,11 +43,14 @@ py:
     ruff check python scripts
     pytest python/tests scripts -q
 
-# Lint and test the adapter packages (needs the SDK installed, e.g. via `just py`).
+# Lint and test the adapter packages and run the examples (needs `just py` first).
 adapters:
     pip install -e "./packages/mnem-mcp[dev]" -e "./packages/mnem-langgraph[dev]"
-    ruff check packages
+    ruff check packages examples
     pytest packages -q
+    python examples/support_agent.py
+    python examples/langgraph_memory.py
+    python examples/mcp_client.py
 
 # Build the release wheel and check it against the SDK tests.
 wheel:

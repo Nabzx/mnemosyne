@@ -64,8 +64,13 @@ jobs:
       - run: uv pip install -e ".[dev]"
       - run: uv pip install -e "./packages/mnem-mcp[dev]"
       - run: uv pip install -e "./packages/mnem-langgraph[dev]"
-      - run: uv run ruff check packages
+      - run: uv run ruff check packages examples
       - run: uv run pytest packages -q
+      # The worked examples double as end-to-end checks: each asserts its
+      # outcome and exits non-zero on failure (#60).
+      - run: uv run python examples/support_agent.py
+      - run: uv run python examples/langgraph_memory.py
+      - run: uv run python examples/mcp_client.py
 
   wheel:
     name: python (wheel)
