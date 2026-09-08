@@ -13,7 +13,7 @@
 </div>
 
 <p align="center">
-  <img src="assets/demo.gif" alt="An agent records a belief with provenance, forks its memory to test a hunch, then uses bisect and blame to find the commit where a misread observation entered." width="900" />
+  <img src="assets/demo.gif" alt="A support agent is told a past answer was wrong. It runs bisect to find the commit where the belief entered, blame to trace it to a misread billing note, then commits a correction. The history keeps both." width="900" />
 </p>
 
 An AI agent builds up memory as it works: facts it learns, decisions it makes. Frameworks store that as state it overwrites as it goes. Mnemosyne gives agent memory what Git gives code: **commits, branches, merge, blame and bisect.** A Rust core, a `mnem` CLI, and a Python SDK. Local, deterministic, no network, no model calls.
