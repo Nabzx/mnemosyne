@@ -3,7 +3,7 @@
 Canonical objects, their exact CBOR bytes, and their `ObjectId`. Format version
 1, frozen for the `0.0.x` line.
 
-These are pinned in `crates/mnem-core/tests/golden_vectors.rs`, and a test checks
+These are pinned in `crates/mnemosyne-store/tests/golden_vectors.rs`, and a test checks
 that every hex string below appears there verbatim. If a change to the encoder
 moves any byte, that test fails. Such a change is a `format_version` bump
 (ADR-0007, ADR-0010), never a silent one.

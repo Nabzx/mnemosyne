@@ -13,7 +13,7 @@ from typing import TypedDict
 
 from langgraph.graph import START, StateGraph
 from langgraph.store.base import BaseStore
-from mnem_langgraph import MnemosyneStore
+from mnemosyne_langgraph import MnemosyneStore
 
 import mnem
 

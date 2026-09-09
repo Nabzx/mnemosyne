@@ -15,8 +15,8 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   merge correctness) at a hard 100% target and overhead (latency, `.mnem`
   growth) against a `dict` and a JSONL baseline, not accuracy. A seeded
   `benchmark.rs` plus `benchmarks/overhead.py`, feeding `docs/benchmark.md`.
-- The benchmark harnesses: `crates/mnem-core/tests/benchmark.rs` (correctness
-  metrics, seeded, `MNEM_BENCH_*` overrides) and `benchmarks/overhead.py` (the
+- The benchmark harnesses: `crates/mnemosyne-store/tests/benchmark.rs`
+  (correctness metrics, seeded, `MNEM_BENCH_*` overrides) and `benchmarks/overhead.py` (the
   overhead comparison and the audit-query table). A new `benchmark` CI job runs
   the latter with a 2x-regression gate against `benchmarks/baseline.json`.
 - `docs/benchmark.md`: the first published run. All eight correctness metrics
@@ -30,7 +30,7 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   merge resolver attaches to the structural merge, and the named pieces of the
   sync protocol (a `Remote`, content-addressed exchange, a reviewable
   `Proposal`). The trait and its Era 1 impl `StructuralOnly` ship now in
-  `mnem-core`; `Store::merge_with(theirs, resolver, ..)` runs a resolver over
+  `mnemosyne-store`; `Store::merge_with(theirs, resolver, ..)` runs a resolver over
   the conflicts the structural merge leaves open, and `Store::merge` is
   `merge_with(&StructuralOnly, ..)`. No behaviour change, no `format_version`
   change: the seam is proven before the Era 1 format freezes.
@@ -41,9 +41,18 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Changed
 
+- **Crates renamed for the first crates.io publish**, because `mnem-core` and
+  `mnem-cli` were already taken by an unrelated project. `mnem-core` is now
+  **`mnemosyne-store`** (imported as `mnemosyne_store`), the CLI crate is
+  **`mnemosyne-git`** (the binary is still `mnem`), and `mnem-py` is
+  **`mnemosyne-py`** (never published). The MCP adapter is **`mnemosyne-agents-mcp`**
+  on PyPI (`mnemosyne-mcp` was taken), imported as `mnemosyne_mcp`, console
+  script `mnemosyne-agents-mcp`. The LangGraph adapter keeps its PyPI name and
+  is imported as `mnemosyne_langgraph`. The Python SDK (`mnemosyne-agents`,
+  `import mnem`) and the `.mnem/` store directory are unchanged. No behaviour or
+  `format_version` change. ADRs through 0018 still refer to the old crate names.
 - The README demo GIF now shows the `claude_agent.py` session rather than a
   raw `mnem` CLI walkthrough.
-
 - `docs/format/`: the on-disk format is declared **final for Era 1** at
   `format_version` 1. The next change is `format_version` 2 in Era 2.
 

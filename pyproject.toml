@@ -22,7 +22,10 @@ dependencies = []
 dynamic = ["version"]
 
 [project.urls]
+Homepage = "https://github.com/Nabzx/mnemosyne"
 Repository = "https://github.com/Nabzx/mnemosyne"
+Documentation = "https://nabzx.github.io/mnemosyne/"
+Issues = "https://github.com/Nabzx/mnemosyne/issues"
 
 [project.optional-dependencies]
 dev = ["pytest>=8", "ruff>=0.6"]
@@ -30,7 +33,7 @@ dev = ["pytest>=8", "ruff>=0.6"]
 [tool.maturin]
 # One version number, held in the Cargo workspace and read into the wheel at
 # build time (ADR-0004).
-manifest-path = "crates/mnem-py/Cargo.toml"
+manifest-path = "crates/mnemosyne-py/Cargo.toml"
 module-name = "mnem._mnem"
 python-source = "python"
 features = ["pyo3/extension-module"]

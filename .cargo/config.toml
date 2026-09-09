@@ -1,6 +1,6 @@
-# On macOS a Python extension module (`mnem-py`) is linked with unresolved
+# On macOS a Python extension module (`mnemosyne-py`) is linked with unresolved
 # libpython symbols; the host interpreter resolves them at import time. This
-# lets `cargo build -p mnem-py` work locally. Linux needs no such flag, and CI
+# lets `cargo build -p mnemosyne-py` work locally. Linux needs no such flag, and CI
 # builds the real wheel with maturin (see the `python` job and #33).
 [target.x86_64-apple-darwin]
 rustflags = ["-C", "link-arg=-undefined", "-C", "link-arg=dynamic_lookup"]
