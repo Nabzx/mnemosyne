@@ -8,6 +8,10 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ## [Unreleased]
 
+## [0.0.7] - 2026-09-09
+
+Era 1 complete: the substrate, with a benchmark and a docs site. `format_version` 1.
+
 ### Added
 
 - ADR-0017 (the benchmark and its metrics): the `v0.0.7` benchmark measures
@@ -252,7 +256,8 @@ Era 1, "it commits". `format_version` 1.
 - Initial bootstrap tag. Workspace, CI and process scaffolding only; no
   features.
 
-[Unreleased]: https://github.com/Nabzx/mnemosyne/compare/v0.0.6...HEAD
+[Unreleased]: https://github.com/Nabzx/mnemosyne/compare/v0.0.7...HEAD
+[0.0.7]: https://github.com/Nabzx/mnemosyne/compare/v0.0.6...v0.0.7
 [0.0.6]: https://github.com/Nabzx/mnemosyne/compare/v0.0.5...v0.0.6
 [0.0.5]: https://github.com/Nabzx/mnemosyne/compare/v0.0.4...v0.0.5
 [0.0.4]: https://github.com/Nabzx/mnemosyne/compare/v0.0.3...v0.0.4

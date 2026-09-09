@@ -6,6 +6,60 @@ for you.
 
 ---
 
+## v0.0.7 - the substrate, measured
+
+**The one-line version:** Era 1 is done. `mnem` is a working, single-agent memory
+version-control tool, and now there is a benchmark that says plainly what it does
+and does not buy you, plus a docs site and a frozen on-disk format.
+
+**New this release:**
+
+- **A benchmark.** `docs/benchmark.md` reports two things. First, correctness:
+  over thousands of seeded runs, reconstructing memory at any past commit is
+  exact, `bisect` lands on the exact commit a wrong belief entered, `blame`
+  names the right commit and observation, and the merge never loses a write.
+  All at 100%. Second, cost: about 12 ms and a few kilobytes per commit,
+  compared against a plain dict and a JSONL log. A CI check fails if either
+  number doubles.
+- **A docs site.** The format spec, the benchmark, every architecture decision
+  and every research survey, browsable at the project's GitHub Pages URL. Built
+  from the repo on every change.
+- **The on-disk format is frozen** for Era 1 at `format_version` 1. Every
+  `0.0.x` release reads and writes it; a store written by one works with every
+  other. The next format change is Era 2.
+- **The Era 2 seam is in place.** A `SemanticMerge` trait and a
+  `Store::merge_with` entry point exist in the core, with a no-op Era 1
+  implementation, so the "semantic merge" of Era 2 becomes a new package rather
+  than a rewrite. Nothing about today's behaviour changes. (ADR-0018.)
+- **A Claude agent demo.** `examples/claude_agent.py` and the README GIF: an
+  agent is told a past answer was wrong, then uses `bisect` and `blame` to trace
+  it to a misread note and commits a correction.
+
+**Named for publishing:** the Rust crates are `mnem-store` (the core) and
+`mnem-git` (the `mnem` command); the Python packages are `mnem-agents` (the SDK),
+`mnem-mcp` and `mnem-langgraph`. The `mnem` command itself, `import mnem`, and
+the `.mnem/` store directory are unchanged.
+
+**What is guaranteed:**
+
+- The core still never touches the network and never calls a model.
+- One on-disk format (`format_version` 1), now frozen for the `0.0.x` line.
+- The benchmark's correctness checks run on every push, so "time travel is
+  exact", "bisect is precise" and "blame is accurate" are tested, not claimed.
+
+**What it still does not do** (Era 2 and later):
+
+- No shared memory between two agents. No semantic merge, no sync between
+  stores, no review step. That is the whole of Era 2.
+- `mnem` does not make an agent give better answers. The benchmark says so
+  directly. It gives you history, audit and safe merging.
+
+**Under the hood:** `benchmarks/`, `book.toml` + `docs/SUMMARY.md`, the `docs`
+workflow, `crates/mnem-store/src/semantic.rs`. ADR-0017 and ADR-0018. Published
+to crates.io and PyPI for the first time with this tag.
+
+---
+
 ## v0.0.6 - plugging in
 
 **The one-line version:** Mnemosyne now drops into the two ways people actually
