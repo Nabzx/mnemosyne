@@ -38,8 +38,8 @@ Your agent runs for an hour, makes forty tool calls, and updates its memory the 
 ## Quickstart
 
 ```bash
-cargo build --release -p mnemosyne-git   # the mnem binary (crate: mnemosyne-git)
-pip install -e ".[dev]"                  # the mnemosyne-agents python sdk
+cargo build --release -p mnem-git   # the mnem binary (crate: mnem-git)
+pip install -e ".[dev]"                  # the mnem-agents python sdk
 ```
 
 ```python
@@ -77,8 +77,8 @@ Next: a LangGraph adapter and an MCP server. See [`ROADMAP.md`](ROADMAP.md) and 
 
 ## How it works
 
-- **`mnemosyne-store` (Rust)**: the object model, the content-addressed store, the commit graph. Never touches the network or a model; a `cargo deny` check enforces it.
-- **`mnem`**: the CLI (crate `mnemosyne-git`, Rust) and the SDK (`mnemosyne-agents`, Python) built on the core.
+- **`mnem-store` (Rust)**: the object model, the content-addressed store, the commit graph. Never touches the network or a model; a `cargo deny` check enforces it.
+- **`mnem`**: the CLI (crate `mnem-git`, Rust) and the SDK (`mnem-agents`, Python) built on the core.
 - **The store** is a `.mnem/` directory, format specified in [`docs/format/`](docs/format) and frozen for `0.0.x` at `format_version` 1. Decisions live in [`docs/adr/`](docs/adr).
 
 ## Prior work

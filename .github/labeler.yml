@@ -4,14 +4,14 @@
 track-a:
   - changed-files:
       - any-glob-to-any-file:
-          - "crates/mnemosyne-store/**"
-          - "crates/mnemosyne-git/**"
+          - "crates/mnem-store/**"
+          - "crates/mnem-git/**"
           - "deny.toml"
 
 track-b:
   - changed-files:
       - any-glob-to-any-file:
-          - "crates/mnemosyne-py/**"
+          - "crates/mnem-py/**"
           - "python/**"
           - "pyproject.toml"
 
@@ -19,9 +19,9 @@ format:
   - changed-files:
       - any-glob-to-any-file:
           - "docs/format/**"
-          - "crates/mnemosyne-store/src/codec.rs"
-          - "crates/mnemosyne-store/src/id.rs"
-          - "crates/mnemosyne-store/src/object.rs"
+          - "crates/mnem-store/src/codec.rs"
+          - "crates/mnem-store/src/id.rs"
+          - "crates/mnem-store/src/object.rs"
 
 adr:
   - changed-files:

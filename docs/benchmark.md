@@ -2,7 +2,7 @@
 
 What the substrate delivers, measured. Re-run and updated whenever the core
 changes. The design is ADR-0017; the harnesses are
-`crates/mnemosyne-store/tests/benchmark.rs` (correctness) and
+`crates/mnem-store/tests/benchmark.rs` (correctness) and
 `benchmarks/overhead.py` (overhead and the audit table).
 
 **Mnemosyne makes no accuracy claim.** The 2026 research is settled on this:
@@ -92,11 +92,11 @@ land quietly.
 
 ```
 # the correctness metrics (CI runs a small count on every push)
-cargo test -p mnemosyne-store --test benchmark
+cargo test -p mnem-store --test benchmark
 
 # the published correctness sweep (~20 min: fsync-bound)
 MNEM_BENCH_RUNS=80 MNEM_BENCH_LENGTHS=16,64,256 \
-  cargo test -p mnemosyne-store --test benchmark --release -- --nocapture
+  cargo test -p mnem-store --test benchmark --release -- --nocapture
 
 # the overhead comparison and the audit table
 python benchmarks/overhead.py                 # 256 steps, the CI scale

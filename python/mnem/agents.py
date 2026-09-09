@@ -2,8 +2,8 @@
 
 ``remember`` / ``remember_many`` / ``forget`` each do a stage-then-commit in one
 call and retry a few times if a concurrent writer holds the branch. This is the
-contract the MCP server (``mnemosyne-agents-mcp``) and the LangGraph adapter
-(``mnemosyne-langgraph``) share, kept here so the two do not drift.
+contract the MCP server (``mnem-mcp``) and the LangGraph adapter
+(``mnem-langgraph``) share, kept here so the two do not drift.
 
 There is no staging concept for a caller of this module: one call is one commit.
 """

@@ -1,0 +1,25 @@
+[package]
+name = "mnem-git"
+description = "The mnem CLI: version control for AI agent memory. Commit, branch, merge, blame and bisect an agent's memory."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+readme = "README.md"
+keywords = ["agent", "memory", "version-control", "cli", "llm"]
+categories = ["command-line-utilities", "development-tools"]
+
+[[bin]]
+name = "mnem"
+path = "src/main.rs"
+
+[dependencies]
+mnem-store = { workspace = true }
+anyhow = { workspace = true }
+clap = { workspace = true }
+serde_json = { workspace = true }
+
+[lints]
+workspace = true

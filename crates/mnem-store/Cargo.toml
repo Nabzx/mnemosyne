@@ -1,0 +1,28 @@
+[package]
+name = "mnem-store"
+description = "Core object model and storage engine for Mnemosyne, version control for AI agent memory."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+readme = "README.md"
+keywords = ["agent", "memory", "version-control", "provenance", "llm"]
+categories = ["data-structures", "database-implementations"]
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+blake3 = { workspace = true }
+ciborium = { workspace = true }
+redb = { workspace = true }
+thiserror = { workspace = true }
+
+[dev-dependencies]
+# the round-trip integration test (#31) reads the raw object table back
+redb = { workspace = true }
+serde_json = { workspace = true }
+
+[lints]
+workspace = true

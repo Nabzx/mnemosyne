@@ -30,9 +30,9 @@ Mnemosyne has a single maintainer, Nabil Shah. Every commit, issue, and pull
 request is authored by him. External pull requests are not merged; they are
 declined politely and closed. No commit carries a co-author trailer.
 
-### `mnemosyne-store` is offline and model-free
+### `mnem-store` is offline and model-free
 
-Nothing in `mnemosyne-store` opens a network connection or calls a model. The
+Nothing in `mnem-store` opens a network connection or calls a model. The
 substrate is deterministic. `deny.toml` bans every network, TLS and
 async-runtime crate from the workspace tree, and the `deny` CI job enforces it;
 this is the check ADR-0004 promised. The semantic layer (Era 2) lives behind a

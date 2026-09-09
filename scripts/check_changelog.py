@@ -19,9 +19,9 @@ import subprocess
 import sys
 
 USER_FACING_PREFIXES = (
-    "crates/mnemosyne-store/src/",
-    "crates/mnemosyne-git/src/",
-    "crates/mnemosyne-py/src/",
+    "crates/mnem-store/src/",
+    "crates/mnem-git/src/",
+    "crates/mnem-py/src/",
     "python/mnem/",
     "packages/",
     "docs/format/",
