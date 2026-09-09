@@ -21,25 +21,25 @@ fmt-check:
 clippy:
     cargo clippy --all-targets --all-features -- -D warnings
 
-# The Rust tests. `mnem-py` is excluded: its test binary needs libpython.
+# The Rust tests. `mnemosyne-py` is excluded: its test binary needs libpython.
 test:
-    cargo test --workspace --exclude mnem-py
+    cargo test --workspace --exclude mnemosyne-py
 
 # Release build of the shipping crates.
 build:
-    cargo build --workspace --exclude mnem-py --release
+    cargo build --workspace --exclude mnemosyne-py --release
 
 # The MSRV check, at Rust 1.85.
 msrv:
     RUSTUP_TOOLCHAIN=1.85.0 cargo check --all --all-features
 
-# `mnem-core` must stay offline: no network, TLS or async-runtime crate.
+# `mnemosyne-store` must stay offline: no network, TLS or async-runtime crate.
 deny:
     cargo deny check bans
 
 # Build the extension, then lint and test the Python side.
 py:
-    maturin develop -m crates/mnem-py/Cargo.toml
+    maturin develop -m crates/mnemosyne-py/Cargo.toml
     ruff check python scripts
     pytest python/tests scripts -q
 
@@ -50,12 +50,12 @@ benchmark:
 
 # The full published sweeps. Slow; produces the numbers for docs/*.md.
 bench-sweep:
-    MNEM_BENCH_RUNS=2000 MNEM_BENCH_LENGTHS=16,64,256,1024 cargo test -p mnem-core --test benchmark --release -- --nocapture
+    MNEM_BENCH_RUNS=2000 MNEM_BENCH_LENGTHS=16,64,256,1024 cargo test -p mnemosyne-store --test benchmark --release -- --nocapture
     MNEM_BENCH_STEPS=1024 python benchmarks/overhead.py
 
 # Lint and test the adapter packages and run the examples (needs `just py` first).
 adapters:
-    pip install -e "./packages/mnem-mcp[dev]" -e "./packages/mnem-langgraph[dev]"
+    pip install -e "./packages/mnemosyne-agents-mcp[dev]" -e "./packages/mnemosyne-langgraph[dev]"
     ruff check packages examples
     pytest packages -q
     python examples/support_agent.py
@@ -87,7 +87,7 @@ commits:
 
 # Regenerate the README demo GIF (needs `vhs` on PATH).
 demo:
-    maturin develop -m crates/mnem-py/Cargo.toml
+    maturin develop -m crates/mnemosyne-py/Cargo.toml
     vhs assets/demo.tape
 
 # Install the repo git hooks into .git/hooks.

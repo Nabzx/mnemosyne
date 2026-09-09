@@ -1,8 +1,8 @@
-"""Drive the mnem-mcp server from an MCP client, over stdio.
+"""Drive the mnemosyne-agents-mcp server from an MCP client, over stdio.
 
     python examples/mcp_client.py     # needs mnemosyne-mcp on PATH
 
-Spawns `mnem-mcp` as a subprocess and talks to it the way an MCP-capable agent
+Spawns `mnemosyne-agents-mcp` as a subprocess and talks to it the way an MCP-capable agent
 (Claude Desktop, an SDK client) would: record a belief, misread one, then use
 `when_did` to find the commit where the wrong belief entered.
 """
@@ -27,7 +27,7 @@ def data(result: object) -> object:
 
 async def run(store_dir: str) -> None:
     mnem.init(store_dir)
-    params = StdioServerParameters(command="mnem-mcp", args=["--store", store_dir])
+    params = StdioServerParameters(command="mnemosyne-agents-mcp", args=["--store", store_dir])
 
     async with Client(params, raise_exceptions=True) as client:
         await client.call_tool(

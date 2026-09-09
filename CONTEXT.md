@@ -139,7 +139,7 @@ _Avoid_: rewind, rollback, restore, replay
 ### Integration
 
 **Core**:
-The `mnem-core` Rust crate: the object model, the store, the commit graph, and
+The `mnemosyne-store` Rust crate: the object model, the store, the commit graph, and
 every deterministic operation on them. No network, no model calls, no CLI or
 Python or framework concerns. Its two consumers are the CLI and the binding.
 See ADR-0004.

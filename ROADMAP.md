@@ -53,7 +53,7 @@ Board: [Mnemosyne roadmap](https://github.com/users/Nabzx/projects/1).
 
 Get to "clone and build" with the process scaffolding in place.
 
-- [x] Rust workspace: `mnem-core` and `mnem-cli`, both compiling, `mnem --version` working
+- [x] Rust workspace: `mnemosyne-store` and `mnemosyne-git`, both compiling, `mnem --version` working
 - [x] Python SDK skeleton: installs, imports, raises a clear error on any unbuilt API
 - [x] CI on every pull request: `cargo fmt`, `cargo clippy -D warnings`, `cargo test`, `cargo build`, an `msrv` job, plus `ruff` and `pytest`
 - [x] Docs: `README.md`, `CONTEXT.md`, this file, `AGENTS.md`, `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`, `CHANGELOG.md`, the ADR template, the agent workflow docs
@@ -69,7 +69,7 @@ Get to "clone and build" with the process scaffolding in place.
 
 The content-addressed object store and the commit graph.
 
-- [x] The object model from ADR-0002 and ADR-0003, implemented in `mnem-core`
+- [x] The object model from ADR-0002 and ADR-0003, implemented in `mnemosyne-store`
 - [x] `mnem init`, `mnem add`, `mnem commit`, `mnem log`
 - [x] The Rust core bound into the Python SDK through maturin (the boundary set by ADR-0004)
 - [x] Python SDK: `Store.open`, `store.add`, `store.commit`, `store.log`
@@ -109,7 +109,7 @@ Deterministic merge, the last purely mechanical piece.
 
 The debugging layer, still deterministic.
 
-- [x] The provenance index in `mnem-core`
+- [x] The provenance index in `mnemosyne-store`
 - [x] `mnem blame <node>`: the introducing commit and its provenance
 - [x] `mnem bisect`: find the commit where a supplied predicate first holds
 - [x] A synthetic buggy-run fixture the tests bisect against

@@ -1,9 +1,9 @@
 # cargo-deny configuration.
 #
 # The `deny` CI job runs `cargo deny check bans`: no network-capable, TLS or
-# async-runtime crate may enter the workspace dependency tree. `mnem-core` is
+# async-runtime crate may enter the workspace dependency tree. `mnemosyne-store` is
 # offline and model-free by ADR-0004, and this is the check that ADR promised.
-# The `mnem` CLI and the `mnem-py` binding are held to the same bar.
+# The `mnem` CLI and the `mnemosyne-py` binding are held to the same bar.
 #
 # License and advisory checks are not wired into CI yet.
 
