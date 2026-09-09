@@ -4,7 +4,7 @@ Phase 3's definition of done: the merge is not just implemented, it is
 *hammered*. This is the first report. It will be re-run and updated whenever the
 merge algorithm or the store flow changes.
 
-The harness is `crates/mnemosyne-store/tests/merge_chaos.rs`. It is seeded (a
+The harness is `crates/mnem-store/tests/merge_chaos.rs`. It is seeded (a
 hand-rolled LCG, the same approach as `tests/time_travel.rs`), so every run is
 deterministic and a failing seed reproduces exactly. No property-test
 dependency is pulled in (ADR-0004: the core stays lean and offline).
@@ -58,7 +58,7 @@ a few seconds. The counts are overridable with `MNEM_CHAOS_ALGEBRA_TRIALS` and
 
 ```
 MNEM_CHAOS_ALGEBRA_TRIALS=50000 MNEM_CHAOS_STORE_TRIALS=250 \
-  cargo test -p mnemosyne-store --test merge_chaos --release
+  cargo test -p mnem-store --test merge_chaos --release
 # test merge_state_maps_algebra ... ok
 # test store_merge_converges ... ok
 # test result: ok. 2 passed; 0 failed; finished in 37.85s
@@ -73,7 +73,7 @@ failed since the harness was written.
 If CI ever reports a failing seed `N`, run it alone:
 
 ```
-MNEM_CHAOS_ALGEBRA_TRIALS=<N+1> cargo test -p mnemosyne-store --test merge_chaos -- merge_state_maps_algebra
+MNEM_CHAOS_ALGEBRA_TRIALS=<N+1> cargo test -p mnem-store --test merge_chaos -- merge_state_maps_algebra
 ```
 
 The assertion message names the seed and the id, and the LCG is pure, so the

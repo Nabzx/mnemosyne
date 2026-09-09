@@ -1,6 +1,6 @@
 """A LangGraph agent whose long-term memory is a Mnemosyne store.
 
-    python examples/langgraph_memory.py     # needs mnemosyne-langgraph
+    python examples/langgraph_memory.py     # needs mnem-langgraph
 
 Shows memory that outlives a single run, a hypothesis branch that never touches
 the main line, and `why` tracing a stored fact to where it came from.
@@ -13,7 +13,7 @@ from typing import TypedDict
 
 from langgraph.graph import START, StateGraph
 from langgraph.store.base import BaseStore
-from mnemosyne_langgraph import MnemosyneStore
+from mnem_langgraph import MnemosyneStore
 
 import mnem
 

@@ -3,7 +3,7 @@
 The layout of a `.mnem/` store: the object database, the refs, `HEAD`, and
 `config`. This is the specification. It is enough to write a reader in another
 language, and it is checked against the implementation by the tests in
-`crates/mnemosyne-store` and the [golden vectors](golden-vectors.md).
+`crates/mnem-store` and the [golden vectors](golden-vectors.md).
 
 ## Status: final for Era 1
 
@@ -229,6 +229,6 @@ creates its row. A reflog is reserved but not written in `format_version` 1.
 ## Golden vectors
 
 [`golden-vectors.md`](golden-vectors.md) lists concrete objects with their exact
-CBOR bytes and ids. `crates/mnemosyne-store/tests/golden_vectors.rs` pins them and
+CBOR bytes and ids. `crates/mnem-store/tests/golden_vectors.rs` pins them and
 checks the doc against the code, so neither can drift without a test failing.
 That failure is the signal that a `format_version` bump is due.

@@ -8,11 +8,12 @@ format, the object model, a public API surface, the merge algorithm, the Rust
 and Python boundary, or a new dependency. Accepted ADRs are immutable; a later
 change is a new ADR that supersedes the old one.
 
-> Naming note: ADRs 0001 to 0018 call the core crate `mnem-core`, the CLI crate
-> `mnem-cli`, the binding `mnem-py`, and the MCP package `mnemosyne-mcp`. Before
-> the first crates.io and PyPI publish these were renamed to `mnemosyne-store`,
-> `mnemosyne-git`, `mnemosyne-py` and `mnemosyne-agents-mcp` (the old names were
-> taken). The `mnem` binary, `import mnem`, and the `.mnem/` store directory are
+> Naming note: ADRs 0001 to 0018 call the core crate `mnem-core` and the CLI
+> crate `mnem-cli`. Because those names were already taken on crates.io, before
+> the first publish the core crate became `mnem-store` and the CLI crate
+> `mnem-git` (the binary is still `mnem`); the published packages are
+> `mnem-store`, `mnem-git`, and on PyPI `mnem-agents`, `mnem-mcp`,
+> `mnem-langgraph`. `import mnem` and the `.mnem/` store directory are
 > unchanged. See the `CHANGELOG.md` entry under Unreleased.
 
 | ADR | Title | Status |

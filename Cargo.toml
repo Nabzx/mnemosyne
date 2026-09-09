@@ -1,9 +1,9 @@
 [workspace]
 resolver = "2"
 members = [
-    "crates/mnemosyne-store",
-    "crates/mnemosyne-git",
-    "crates/mnemosyne-py",
+    "crates/mnem-store",
+    "crates/mnem-git",
+    "crates/mnem-py",
 ]
 
 [workspace.package]
@@ -26,7 +26,7 @@ unimplemented = "warn"
 mem_forget = "warn"
 
 [workspace.dependencies]
-mnemosyne-store = { path = "crates/mnemosyne-store", version = "0.0.6" }
+mnem-store = { path = "crates/mnem-store", version = "0.0.6" }
 anyhow = "1"
 clap = { version = "4", features = ["derive"] }
 # storage and encoding, per ADR-0002, ADR-0005, ADR-0008. Not wired into a

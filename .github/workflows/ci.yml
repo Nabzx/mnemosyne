@@ -25,13 +25,13 @@ jobs:
           components: rustfmt, clippy
       - uses: Swatinem/rust-cache@v2
       - run: cargo fmt --all --check
-      # clippy checks every crate, `mnemosyne-py` included: it is check-only, no link.
+      # clippy checks every crate, `mnem-py` included: it is check-only, no link.
       - run: cargo clippy --all-targets --all-features -- -D warnings
-      # `mnemosyne-py` is a Python extension module; its test binary would need
+      # `mnem-py` is a Python extension module; its test binary would need
       # libpython to link, and the wheel is maturin's job (see the python job
       # and #33). The pure-Rust crates carry the behaviour tests (ADR-0004).
-      - run: cargo test --workspace --exclude mnemosyne-py
-      - run: cargo build --workspace --exclude mnemosyne-py --release
+      - run: cargo test --workspace --exclude mnem-py
+      - run: cargo build --workspace --exclude mnem-py --release
 
   python:
     name: python (ruff, pytest)
@@ -43,7 +43,7 @@ jobs:
       - uses: astral-sh/setup-uv@v5
         with:
           python-version: "3.12"
-      # Builds the mnemosyne-py extension through maturin and installs it editable.
+      # Builds the mnem-py extension through maturin and installs it editable.
       - run: uv pip install -e ".[dev]"
       - run: uv run ruff check python scripts
       - run: uv run pytest python/tests scripts -q
@@ -79,8 +79,8 @@ jobs:
       # packages/ with its own deps. Adapters live outside the workspace and
       # test against the SDK (ADR-0004, ADR-0016).
       - run: uv pip install -e ".[dev]"
-      - run: uv pip install -e "./packages/mnemosyne-agents-mcp[dev]"
-      - run: uv pip install -e "./packages/mnemosyne-langgraph[dev]"
+      - run: uv pip install -e "./packages/mnem-mcp[dev]"
+      - run: uv pip install -e "./packages/mnem-langgraph[dev]"
       - run: uv run ruff check packages examples
       - run: uv run pytest packages -q
       # The worked examples double as end-to-end checks: each asserts its

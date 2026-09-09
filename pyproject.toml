@@ -3,7 +3,7 @@ requires = ["maturin>=1.7,<2"]
 build-backend = "maturin"
 
 [project]
-name = "mnemosyne-agents"
+name = "mnem-agents"
 description = "Version control for AI agent memory. Python SDK for Mnemosyne."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -33,7 +33,7 @@ dev = ["pytest>=8", "ruff>=0.6"]
 [tool.maturin]
 # One version number, held in the Cargo workspace and read into the wheel at
 # build time (ADR-0004).
-manifest-path = "crates/mnemosyne-py/Cargo.toml"
+manifest-path = "crates/mnem-py/Cargo.toml"
 module-name = "mnem._mnem"
 python-source = "python"
 features = ["pyo3/extension-module"]
