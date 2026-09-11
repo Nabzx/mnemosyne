@@ -6,7 +6,7 @@ tools and resources, so the agent records what it learns, and you can trace a
 wrong belief later.
 
 ```bash
-pip install mnem-mcp        # not published yet; build from the repo
+pip install mnem-mcp
 mnem-mcp --store ./agent-memory  # speaks MCP over stdio
 ```
 
@@ -26,9 +26,11 @@ client keeps the current memory in context without a tool call every turn.
 
 ## How it binds
 
-One store per server process, from `--store` or `$MNEM_STORE`. The server holds
-no state between calls (the 2026-07-28 MCP transport is stateless); it opens the
-store fresh each time. Concurrent writes serialise and retry; a persistent loser
-returns the `conflict` code.
+One store per server process, from `--store` or `$MNEM_STORE`: a single handle
+is opened at startup and reused for every call (redb allows only one open
+handle per file per process). This is not protocol state: the 2026-07-28 MCP
+transport is stateless, and branch state still lives in the store's `HEAD`
+file, which the handle re-reads on every operation. Concurrent writes
+serialise and retry; a persistent loser returns the `conflict` code.
 
-See [ADR-0016](../../docs/adr/0016-mcp-tools-and-the-adapter-contract.md).
+See [ADR-0016](https://github.com/Nabzx/mnemosyne/blob/main/docs/adr/0016-mcp-tools-and-the-adapter-contract.md).
