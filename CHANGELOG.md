@@ -8,6 +8,19 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ## [Unreleased]
 
+### Fixed
+
+- Every relative link and image path in a file that ships standalone to a
+  registry (the root `README.md`, published as the `mnem-agents` PyPI
+  description; `packages/mnem-mcp/README.md`; `packages/mnem-langgraph/README.md`)
+  now points at an absolute `github.com`/`raw.githubusercontent.com` URL. The
+  relative paths rendered as dead links, and the demo GIF and the agent-loop
+  SVG did not render at all, on the PyPI project pages.
+- `packages/mnem-mcp/README.md`: dropped the stale "not published yet" caveat,
+  and corrected "it opens the store fresh each time" to describe what the code
+  actually does (one handle opened at startup and reused; redb allows a single
+  open handle per file per process).
+
 ## [0.0.7] - 2026-09-09
 
 Era 1 complete: the substrate, with a benchmark and a docs site. `format_version` 1.

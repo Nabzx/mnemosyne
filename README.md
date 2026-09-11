@@ -4,7 +4,7 @@
 
 **Version control for AI agent memory.**
 
-[![Licence: Apache 2.0](https://img.shields.io/badge/licence-Apache_2.0-3b82f6.svg)](LICENSE)
+[![Licence: Apache 2.0](https://img.shields.io/badge/licence-Apache_2.0-3b82f6.svg)](https://github.com/Nabzx/mnemosyne/blob/main/LICENSE)
 &nbsp;[![CI](https://github.com/Nabzx/mnemosyne/actions/workflows/ci.yml/badge.svg)](https://github.com/Nabzx/mnemosyne/actions/workflows/ci.yml)
 &nbsp;![Status: early development](https://img.shields.io/badge/status-early_development-f59e0b.svg)
 &nbsp;![Rust](https://img.shields.io/badge/core-Rust-b7410e.svg)
@@ -13,7 +13,7 @@
 </div>
 
 <p align="center">
-  <img src="assets/demo.gif" alt="A support agent is told a past answer was wrong. It runs bisect to find the commit where the belief entered, blame to trace it to a misread billing note, then commits a correction. The history keeps both." width="900" />
+  <img src="https://raw.githubusercontent.com/Nabzx/mnemosyne/main/assets/demo.gif" alt="A support agent is told a past answer was wrong. It runs bisect to find the commit where the belief entered, blame to trace it to a misread billing note, then commits a correction. The history keeps both." width="900" />
 </p>
 
 An AI agent builds up memory as it works: facts it learns, decisions it makes. Frameworks store that as state it overwrites as it goes. Mnemosyne gives agent memory what Git gives code: **commits, branches, merge, blame and bisect.** A Rust core, a `mnem` CLI, and a Python SDK. Local, deterministic, no network, no model calls.
@@ -33,7 +33,7 @@ Your agent runs for an hour, makes forty tool calls, and updates its memory the 
 | `blame` | resolve any belief to the commit (through merges) and the observation that introduced it |
 | `bisect` | binary-search a run for the first commit where a wrong belief appears |
 
-<p align="center"><img src="assets/panel-agent.svg" alt="A Python agent loop: a Claude call, store.add with provenance, store.commit, and store.blame tracing a belief to its origin" width="820" /></p>
+<p align="center"><img src="https://raw.githubusercontent.com/Nabzx/mnemosyne/main/assets/panel-agent.svg" alt="A Python agent loop: a Claude call, store.add with provenance, store.commit, and store.blame tracing a belief to its origin" width="820" /></p>
 
 ## Quickstart
 
@@ -62,7 +62,7 @@ Git made source code collaborative; GitHub made it social. As software becomes a
 2. **The collaboration layer**: semantic merge that reasons about contradiction, a sync protocol, and a review step before a memory update lands in shared memory. Pull requests, for agent memory.
 3. **The platform** *(`1.0`)*: the whole agent (prompt, tools, memory, policy, evals) as one versioned, signed, forkable artefact, with a registry.
 
-The later two are the point. Everything today is `0.0.x` groundwork ([ADR-0010](docs/adr/0010-what-1-0-means.md)).
+The later two are the point. Everything today is `0.0.x` groundwork ([ADR-0010](https://github.com/Nabzx/mnemosyne/blob/main/docs/adr/0010-what-1-0-means.md)).
 
 ## Status
 
@@ -73,13 +73,13 @@ The later two are the point. Everything today is `0.0.x` groundwork ([ADR-0010](
 | `v0.0.4` | deterministic three-way `merge` with conflict objects |
 | `v0.0.5` | `blame` · `bisect`, the provenance index |
 
-Next: a LangGraph adapter and an MCP server. See [`ROADMAP.md`](ROADMAP.md) and [`CHANGELOG.md`](CHANGELOG.md).
+Next: a LangGraph adapter and an MCP server. See [`ROADMAP.md`](https://github.com/Nabzx/mnemosyne/blob/main/ROADMAP.md) and [`CHANGELOG.md`](https://github.com/Nabzx/mnemosyne/blob/main/CHANGELOG.md).
 
 ## How it works
 
 - **`mnem-store` (Rust)**: the object model, the content-addressed store, the commit graph. Never touches the network or a model; a `cargo deny` check enforces it.
 - **`mnem`**: the CLI (crate `mnem-git`, Rust) and the SDK (`mnem-agents`, Python) built on the core.
-- **The store** is a `.mnem/` directory, format specified in [`docs/format/`](docs/format) and frozen for `0.0.x` at `format_version` 1. Decisions live in [`docs/adr/`](docs/adr).
+- **The store** is a `.mnem/` directory, format specified in [`docs/format/`](https://github.com/Nabzx/mnemosyne/tree/main/docs/format) and frozen for `0.0.x` at `format_version` 1. Decisions live in [`docs/adr/`](https://github.com/Nabzx/mnemosyne/tree/main/docs/adr).
 
 ## Prior work
 
@@ -87,4 +87,4 @@ A wave of 2026 research points at this idea (Git4Data, GitOfThoughts, StateFuse,
 
 ## Contributing & licence
 
-Developed by a single maintainer; issues and feedback welcome, but not open to external pull requests at this stage ([`CONTRIBUTING.md`](CONTRIBUTING.md)). Apache 2.0 ([`LICENSE`](LICENSE)).
+Developed by a single maintainer; issues and feedback welcome, but not open to external pull requests at this stage ([`CONTRIBUTING.md`](https://github.com/Nabzx/mnemosyne/blob/main/CONTRIBUTING.md)). Apache 2.0 ([`LICENSE`](https://github.com/Nabzx/mnemosyne/blob/main/LICENSE)).

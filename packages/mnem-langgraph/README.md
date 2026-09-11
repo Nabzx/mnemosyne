@@ -36,4 +36,4 @@ directly from a node.
 Not on the `BaseStore` interface, for a graph node to call: `branch(name)`,
 `switch(target)`, `why(namespace, key)`, `history(limit=...)`.
 
-See [ADR-0016](../../docs/adr/0016-mcp-tools-and-the-adapter-contract.md).
+See [ADR-0016](https://github.com/Nabzx/mnemosyne/blob/main/docs/adr/0016-mcp-tools-and-the-adapter-contract.md).
