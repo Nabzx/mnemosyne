@@ -8,6 +8,15 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ## [Unreleased]
 
+### Changed
+
+- README: the quickstart now installs the published packages (`cargo install
+  mnem-git`, `pip install mnem-agents`) instead of the pre-publish build-from-
+  source workaround, and gains a CLI-only walkthrough alongside the Python
+  one. The status table catches up through `v0.0.7`. The badge row adds
+  crates.io, PyPI and docs-site badges; the "Prior work" section links
+  `docs/benchmark.md`, the evidence for the claim right above it.
+
 ### Fixed
 
 - Every relative link and image path in a file that ships standalone to a
