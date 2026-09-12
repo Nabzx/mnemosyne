@@ -6,9 +6,10 @@
 
 [![Licence: Apache 2.0](https://img.shields.io/badge/licence-Apache_2.0-3b82f6.svg)](https://github.com/Nabzx/mnemosyne/blob/main/LICENSE)
 &nbsp;[![CI](https://github.com/Nabzx/mnemosyne/actions/workflows/ci.yml/badge.svg)](https://github.com/Nabzx/mnemosyne/actions/workflows/ci.yml)
+&nbsp;[![crates.io](https://img.shields.io/crates/v/mnem-git.svg)](https://crates.io/crates/mnem-git)
+&nbsp;[![PyPI](https://img.shields.io/pypi/v/mnem-agents.svg)](https://pypi.org/project/mnem-agents/)
+&nbsp;[![Docs](https://img.shields.io/badge/docs-nabzx.github.io-1f6feb.svg)](https://nabzx.github.io/mnemosyne/)
 &nbsp;![Status: early development](https://img.shields.io/badge/status-early_development-f59e0b.svg)
-&nbsp;![Rust](https://img.shields.io/badge/core-Rust-b7410e.svg)
-&nbsp;![Python](https://img.shields.io/badge/sdk-Python-3776ab.svg)
 
 </div>
 
@@ -96,7 +97,7 @@ Era 1, the substrate, is complete. Era 2, the collaboration layer, is next. See 
 
 ## Prior work
 
-A wave of 2026 research points at this idea (Git4Data, GitOfThoughts, StateFuse, MemTX, LatticeMind), each a paper or a prototype. One finding is worth stating plainly: versioned memory does not make an agent give better answers. What it gives you is history, audit, and safe merging. That is the whole pitch, and it is enough.
+A wave of 2026 research points at this idea (Git4Data, GitOfThoughts, StateFuse, MemTX, LatticeMind), each a paper or a prototype. One finding is worth stating plainly: versioned memory does not make an agent give better answers. What it gives you is history, audit, and safe merging. That is the whole pitch, and it is enough. The [benchmark](https://github.com/Nabzx/mnemosyne/blob/main/docs/benchmark.md) has the numbers.
 
 ## Contributing & licence
 
