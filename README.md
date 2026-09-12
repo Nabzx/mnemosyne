@@ -38,9 +38,20 @@ Your agent runs for an hour, makes forty tool calls, and updates its memory the 
 ## Quickstart
 
 ```bash
-cargo build --release -p mnem-git   # the mnem binary (crate: mnem-git)
-pip install -e ".[dev]"                  # the mnem-agents python sdk
+cargo install mnem-git      # installs the `mnem` binary
+pip install mnem-agents     # the Python SDK; `import mnem`
 ```
+
+The CLI:
+
+```bash
+mnem init ./agent-memory && cd ./agent-memory
+mnem add customer-4821 "on the Enterprise plan" --source ticket-4821
+mnem commit -m "learn the plan tier" --author support-agent
+mnem blame customer-4821        # which commit set this, and why
+```
+
+The Python SDK:
 
 ```python
 import mnem
