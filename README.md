@@ -83,8 +83,10 @@ The later two are the point. Everything today is `0.0.x` groundwork ([ADR-0010](
 | `v0.0.3` | `branch` · `checkout` · `diff`, time travel |
 | `v0.0.4` | deterministic three-way `merge` with conflict objects |
 | `v0.0.5` | `blame` · `bisect`, the provenance index |
+| `v0.0.6` | an MCP server and a LangGraph adapter, so an agent uses `mnem` as its memory |
+| `v0.0.7` | a benchmark, a docs site, the on-disk format frozen; published to crates.io and PyPI |
 
-Next: a LangGraph adapter and an MCP server. See [`ROADMAP.md`](https://github.com/Nabzx/mnemosyne/blob/main/ROADMAP.md) and [`CHANGELOG.md`](https://github.com/Nabzx/mnemosyne/blob/main/CHANGELOG.md).
+Era 1, the substrate, is complete. Era 2, the collaboration layer, is next. See [`ROADMAP.md`](https://github.com/Nabzx/mnemosyne/blob/main/ROADMAP.md) and [`CHANGELOG.md`](https://github.com/Nabzx/mnemosyne/blob/main/CHANGELOG.md).
 
 ## How it works
 
