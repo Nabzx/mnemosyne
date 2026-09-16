@@ -33,9 +33,10 @@ build:
 msrv:
     RUSTUP_TOOLCHAIN=1.85.0 cargo check --all --all-features
 
-# `mnem-store` must stay offline: no network, TLS or async-runtime crate.
+# `mnem-store` must stay offline (no network, TLS or async-runtime crate),
+# plus licences, advisories and sources.
 deny:
-    cargo deny check bans
+    cargo deny check
 
 # Build the extension, then lint and test the Python side.
 py:

@@ -171,12 +171,13 @@ jobs:
       - run: cargo check --all --all-features
 
   deny:
-    name: deny (offline core)
+    name: deny (offline core, licences)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      # No network-capable or async-runtime crate may enter the tree
-      # (ADR-0004, deny.toml). This is the check ADR-0004 promised.
+      # bans: no network-capable or async-runtime crate may enter the tree
+      # (ADR-0004, deny.toml). licenses/advisories/sources: the rest of what
+      # cargo-deny checks, all four in one run.
       - uses: EmbarkStudios/cargo-deny-action@v2
         with:
-          command: check bans
+          command: check
