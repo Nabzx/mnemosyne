@@ -11,7 +11,7 @@ license = { text = "Apache-2.0" }
 authors = [{ name = "Nabil Shah", email = "nabilshahx@gmail.com" }]
 keywords = ["ai", "agents", "memory", "version-control", "provenance"]
 classifiers = [
-    "Development Status :: 2 - Pre-Alpha",
+    "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python :: 3",
