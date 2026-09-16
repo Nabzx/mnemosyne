@@ -43,13 +43,20 @@ cargo install mnem-git      # installs the `mnem` binary
 pip install mnem-agents     # the Python SDK; `import mnem`
 ```
 
-The CLI:
+The CLI, the whole arc in about a minute: record a fact, get it wrong, find out why.
 
 ```bash
 mnem init ./agent-memory && cd ./agent-memory
 mnem add customer-4821 "on the Enterprise plan" --source ticket-4821
-mnem commit -m "learn the plan tier" --author support-agent
-mnem blame customer-4821        # which commit set this, and why
+mnem commit -m "open the case" --author agent
+
+# an hour later, the agent misreads a billing note:
+mnem add customer-4821 "downgraded to Pro last month" --source billing-note-8842 --step step-31
+mnem commit -m "reconcile the plan tier" --author agent
+
+# a wrong answer surfaces. find where it entered, and why:
+mnem bisect --node customer-4821 --equals '"downgraded to Pro last month"'
+mnem blame customer-4821
 ```
 
 The Python SDK:
