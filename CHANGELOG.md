@@ -10,6 +10,11 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Added
 
+- `mnem completions <shell>`: prints a shell completion script (bash, zsh,
+  fish, powershell, elvish) via a new `clap_complete` dependency.
+
+### Added
+
 - `deny.toml`: a `[licenses]` policy, allow-listing every permissive licence
   actually in the dependency tree. The `deny` CI job now runs `cargo deny
   check` (bans, licences, advisories, sources), not just `check bans`.
