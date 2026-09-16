@@ -17,7 +17,8 @@ use std::io::Read;
 use std::path::PathBuf;
 
 use anyhow::{Context, Result};
-use clap::{Parser, Subcommand};
+use clap::{CommandFactory, Parser, Subcommand};
+use clap_complete::Shell;
 use mnem_store::{
     bisect, ChangeKind, Checkout, Conflict, ConflictKind, ContentKind, DiffTarget, Head,
     MemoryNode, MergeOutcome, MergeStrategy, NodeChange, ObjectId, Provenance, Resolution, Store,
@@ -173,6 +174,11 @@ enum Command {
         #[arg(long = "name-only")]
         name_only: bool,
     },
+    /// Print a shell completion script to stdout.
+    Completions {
+        /// Which shell to generate for.
+        shell: Shell,
+    },
 }
 
 fn main() -> Result<()> {
@@ -233,6 +239,7 @@ fn main() -> Result<()> {
             stat,
             name_only,
         }) => cmd_diff(from, to, stat, name_only),
+        Some(Command::Completions { shell }) => cmd_completions(shell),
     }
 }
 
@@ -764,6 +771,14 @@ fn cmd_diff(from: Option<String>, to: Option<String>, stat: bool, name_only: boo
             }
         }
     }
+    Ok(())
+}
+
+/// Print a completion script for `shell` to stdout. Does not need a store.
+fn cmd_completions(shell: Shell) -> Result<()> {
+    let mut cmd = Cli::command();
+    let name = cmd.get_name().to_string();
+    clap_complete::generate(shell, &mut cmd, name, &mut std::io::stdout());
     Ok(())
 }
 
