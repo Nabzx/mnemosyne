@@ -1,9 +1,12 @@
-//! `mnem`, the Mnemosyne command line interface.
+//! `mnem`, the Mnemosyne command line interface: version control for AI agent
+//! memory.
 //!
-//! Each subcommand is a thin wrapper over `mnem-store` (ADR-0004). Phase 1:
-//! `init`, `add`, `commit`, `log`. Phase 2 (ADR-0012): `branch`, `checkout`,
-//! `show`, `diff`, `status`, `rm`. Phase 3 (ADR-0013, ADR-0014): `merge`.
-//! Phase 4 (ADR-0015): `blame`, `bisect`, `show --stat`. See `ROADMAP.md`.
+//! `init` a store, `add` and `commit` memory with its provenance, `branch` and
+//! `checkout` to explore a hypothesis, `merge` two lines of memory back
+//! together, and `blame` or `bisect` to trace a wrong belief back to the
+//! observation that caused it. Every subcommand is a thin wrapper over
+//! `mnem-store` (ADR-0004); this crate holds no operation semantics of its
+//! own, only argument parsing, formatting and the exit codes.
 //!
 //! Output is coloured when stdout is a terminal (see [`style`]); piped or
 //! redirected output, and output with `NO_COLOR` set, stays plain.

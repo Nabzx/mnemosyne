@@ -133,11 +133,11 @@ Make it usable from a real agent.
 
 ## Phase 6 (v0.0.7): ship the substrate
 
-- [ ] A benchmark measuring what the substrate actually delivers: time-travel reproducibility, blame accuracy, merge correctness, against a no-version-control baseline, framed on the GitOfThoughts methodology
-- [ ] A short docs site and a recorded terminal demo in the README
-- [ ] `docs/format/` finalised for the substrate
-- [ ] Published to crates.io and PyPI
-- [ ] The Era 2 semantic layer declared behind a trait and a protocol, with no implementation
+- [x] A benchmark measuring what the substrate actually delivers: time-travel reproducibility, blame accuracy, merge correctness, against a no-version-control baseline, framed on the GitOfThoughts methodology
+- [x] A short docs site and a recorded terminal demo in the README
+- [x] `docs/format/` finalised for the substrate
+- [x] Published to crates.io and PyPI
+- [x] The Era 2 semantic layer declared behind a trait and a protocol, with no implementation
 - [ ] Public launch: Show HN and the relevant communities
 
 **Definition of done:** something you would hand a stranger, with a benchmark and published numbers. Era 1 is complete. Tag `v0.0.7`.

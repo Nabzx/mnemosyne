@@ -1,15 +1,23 @@
-//! Core object model and storage engine for Mnemosyne.
+//! Core object model and storage engine for Mnemosyne, version control for AI
+//! agent memory.
 //!
-//! Mnemosyne is version control for AI agent memory. This crate holds the parts
-//! that never touch the network and never call a model: the object model, the
-//! on-disk store, the commit graph, and the deterministic operations built on
-//! them.
+//! An agent's memory becomes an immutable, content-addressed history: every
+//! change is a [`commit`], memory can [`branch`] and [`merge`], any belief can
+//! be traced back to the commit and observation that produced it with
+//! [`blame`], and a run can be binary-searched for where a wrong belief
+//! entered with [`bisect`]. [`checkout`] and [`timetravel`] materialise memory
+//! as it stood at any past commit; [`diff`] and the change [`index`] show what
+//! one commit changed.
 //!
-//! Phase 1's core: the object model ([`object`]), object identity ([`id`]), the
-//! canonical encoding ([`codec`]), the content-addressed object database
-//! ([`objects`]), the store lifecycle ([`store`]), the ref store ([`refs`]) and
-//! [`head`], staging plus [`commit`], and the [`log`] walk. Phase 2 adds
-//! [`branch`] and, next, checkout and time travel. See `ROADMAP.md`.
+//! This crate never touches the network and never calls a model: [`object`]
+//! and [`codec`] define the on-disk shape, [`store`] and [`objects`] are the
+//! content-addressed database, [`refs`] and [`head`] track branches. The
+//! `SemanticMerge` seam for Era 2's content-aware merge lives in `semantic`,
+//! with a no-op implementation; nothing here calls out to reason about
+//! content.
+//!
+//! The on-disk format is specified in `docs/format/` and frozen for the
+//! `0.0.x` line at `format_version` 1.
 
 #![forbid(unsafe_code)]
 
