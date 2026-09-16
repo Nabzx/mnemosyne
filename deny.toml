@@ -1,14 +1,29 @@
 # cargo-deny configuration.
 #
-# The `deny` CI job runs `cargo deny check bans`: no network-capable, TLS or
-# async-runtime crate may enter the workspace dependency tree. `mnem-store` is
-# offline and model-free by ADR-0004, and this is the check that ADR promised.
-# The `mnem` CLI and the `mnem-py` binding are held to the same bar.
-#
-# License and advisory checks are not wired into CI yet.
+# The `deny` CI job runs `cargo deny check`: bans, licences, advisories and
+# sources, all four. Bans is the one ADR-0004 promises: no network-capable,
+# TLS or async-runtime crate may enter the workspace dependency tree.
+# `mnem-store` is offline and model-free, and the `mnem` CLI and the
+# `mnem-py` binding are held to the same bar.
 
 [graph]
 all-features = true
+
+[licenses]
+# Every permissive, OSI-approved licence actually in the dependency tree.
+# `cargo deny check licenses` lists exactly what to add here if a new
+# dependency brings something not already allowed.
+allow = [
+  "MIT",
+  "Apache-2.0",
+  "Apache-2.0 WITH LLVM-exception",
+  "BSD-2-Clause",
+  "Unicode-3.0",
+  "CC0-1.0",
+  "MIT-0",
+  "Unlicense",
+]
+confidence-threshold = 0.8
 
 [bans]
 multiple-versions = "allow"
