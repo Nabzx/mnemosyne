@@ -10,6 +10,15 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Changed
 
+- The crate-level doc comments for `mnem-store` and `mnem-git` (the public
+  docs.rs landing page and the crates.io description) now describe what each
+  crate does, rather than the phase history of how it was built.
+- The `Development Status` classifier on all three PyPI packages
+  (`mnem-agents`, `mnem-mcp`, `mnem-langgraph`) moves from `2 - Pre-Alpha` to
+  `3 - Alpha`.
+
+### Changed
+
 - README: the quickstart now installs the published packages (`cargo install
   mnem-git`, `pip install mnem-agents`) instead of the pre-publish build-from-
   source workaround, and gains a CLI-only walkthrough alongside the Python
