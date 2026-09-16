@@ -123,6 +123,18 @@ Era 1, the substrate, is complete. Era 2, the collaboration layer, is next. See 
 
 A wave of 2026 research points at this idea (Git4Data, GitOfThoughts, StateFuse, MemTX, LatticeMind), each a paper or a prototype. One finding is worth stating plainly: versioned memory does not make an agent give better answers. What it gives you is history, audit, and safe merging. That is the whole pitch, and it is enough. The [benchmark](https://github.com/Nabzx/mnemosyne/blob/main/docs/benchmark.md) has the numbers.
 
+## FAQ
+
+**Why not a vector store or RAG?** A different axis. Retrieval ranks by similarity; `mnem` versions and audits exact state. They compose rather than compete: searching inside a `mnem`-versioned memory is a reasonable future direction, not something this replaces.
+
+**Why not mem0, Zep, or a memory-layer product?** Those manage *what* an agent remembers: extraction, summarisation, retrieval. `mnem` manages the *history* of whatever memory representation you already have, closer to the substrate under those tools than a competitor to them.
+
+**Why not LangGraph's own checkpointer?** A checkpoint resumes a run. There is no `blame`, `bisect`, `merge`, or a long-lived branch model. `mnem-langgraph`'s `MnemosyneStore` targets `BaseStore` (long-term memory), not `BaseCheckpointSaver`.
+
+**Why not just append to a JSONL file?** That is Baseline B in [the benchmark](https://github.com/Nabzx/mnemosyne/blob/main/docs/benchmark.md). It answers "what was the state at step *t*", but not "which observation set this" or "merge two agents' memories, surfacing the conflicts". The benchmark's audit-query table has the full comparison.
+
+**Does this make my agent smarter?** No. See "Prior work" above: the pitch is history, audit, and safe merging, not accuracy.
+
 ## Contributing & licence
 
 Developed by a single maintainer; issues and feedback welcome, but not open to external pull requests at this stage ([`CONTRIBUTING.md`](https://github.com/Nabzx/mnemosyne/blob/main/CONTRIBUTING.md)). Apache 2.0 ([`LICENSE`](https://github.com/Nabzx/mnemosyne/blob/main/LICENSE)).
