@@ -29,6 +29,7 @@ mem_forget = "warn"
 mnem-store = { path = "crates/mnem-store", version = "0.0.7" }
 anyhow = "1"
 clap = { version = "4", features = ["derive"] }
+clap_complete = "4"
 # storage and encoding, per ADR-0002, ADR-0005, ADR-0008. Not wired into a
 # crate until the Phase 1 build tickets (#22 onward).
 redb = "2"
