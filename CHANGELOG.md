@@ -8,6 +8,21 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ## [Unreleased]
 
+### Added
+
+- README: a "Coming from Git" command cheat-sheet, and an FAQ answering the
+  usual "how is this different from a vector store / mem0 / Zep / a
+  checkpointer / a JSONL log" questions up front.
+- `packages/mnem-mcp/README.md`: a Claude Desktop `claude_desktop_config.json`
+  snippet, linked from the main README.
+- `CITATION.cff`.
+
+### Changed
+
+- README: the CLI quickstart is now the full arc the demo GIF tells (record a
+  fact, misread one an hour later, `bisect` and `blame` find it), not just
+  `init`/`add`/`commit`/`blame`.
+
 ### Changed
 
 - The crate-level doc comments for `mnem-store` and `mnem-git` (the public

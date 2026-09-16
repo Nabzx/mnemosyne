@@ -24,6 +24,32 @@ Every write tool is one commit. Provenance travels on `remember` as `source` /
 `mnem://memory`, `mnem://memory/{id}`, `mnem://log`, `mnem://commit/{id}`, so a
 client keeps the current memory in context without a tool call every turn.
 
+## Claude Desktop
+
+Add it to Claude Desktop's config: macOS,
+`~/Library/Application Support/Claude/claude_desktop_config.json`; Windows,
+`%APPDATA%\Claude\claude_desktop_config.json`.
+
+```json
+{
+  "mcpServers": {
+    "mnem": {
+      "command": "mnem-mcp",
+      "args": ["--store", "/absolute/path/to/agent-memory"]
+    }
+  }
+}
+```
+
+`mnem-mcp` needs to be on `PATH` (`pip install mnem-mcp`). Restart Claude
+Desktop, then ask it to remember something; later, ask `why` it believes what
+it does, or `when_did` a belief change. Add `"all"` for `--tools` to also
+expose `branch`, `switch` and `merge` to the model rather than just a harness:
+`"args": ["--store", "/absolute/path/to/agent-memory", "--tools", "all"]`.
+
+Any other MCP client wires up the same way: `command` is `mnem-mcp`, `args` is
+`--store <path>` plus, optionally, `--tools all`.
+
 ## How it binds
 
 One store per server process, from `--store` or `$MNEM_STORE`: a single handle

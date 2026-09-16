@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: mnem
+abstract: >-
+  Version control for AI agent memory: commit, branch, merge, blame and
+  bisect what an AI agent remembers. A Rust core, the mnem CLI, and a
+  Python SDK. Local, deterministic, no network, no model calls.
+authors:
+  - family-names: Shah
+    given-names: Nabil
+repository-code: "https://github.com/Nabzx/mnemosyne"
+url: "https://nabzx.github.io/mnemosyne/"
+license: Apache-2.0
+version: 0.0.7
+date-released: "2026-09-09"
+keywords:
+  - ai-agents
+  - agent-memory
+  - version-control
+  - provenance
+  - llm

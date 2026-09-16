@@ -43,13 +43,20 @@ cargo install mnem-git      # installs the `mnem` binary
 pip install mnem-agents     # the Python SDK; `import mnem`
 ```
 
-The CLI:
+The CLI, the whole arc in about a minute: record a fact, get it wrong, find out why.
 
 ```bash
 mnem init ./agent-memory && cd ./agent-memory
 mnem add customer-4821 "on the Enterprise plan" --source ticket-4821
-mnem commit -m "learn the plan tier" --author support-agent
-mnem blame customer-4821        # which commit set this, and why
+mnem commit -m "open the case" --author agent
+
+# an hour later, the agent misreads a billing note:
+mnem add customer-4821 "downgraded to Pro last month" --source billing-note-8842 --step step-31
+mnem commit -m "reconcile the plan tier" --author agent
+
+# a wrong answer surfaces. find where it entered, and why:
+mnem bisect --node customer-4821 --equals '"downgraded to Pro last month"'
+mnem blame customer-4821
 ```
 
 The Python SDK:
@@ -65,6 +72,23 @@ store.commit("learn the plan tier", author="support-agent")
 b = store.blame("customer-4821")       # which commit set this, and why
 print(b.commit[:8], b.provenance.source)
 ```
+
+## Coming from Git
+
+| Git | `mnem` |
+| --- | --- |
+| `git init` | `mnem init` |
+| `git add` | `mnem add` |
+| `git commit` | `mnem commit` |
+| `git log` | `mnem log` |
+| `git branch` | `mnem branch` |
+| `git checkout` | `mnem checkout` |
+| `git diff` | `mnem diff` |
+| `git merge` | `mnem merge` |
+| `git blame` | `mnem blame`, same idea |
+| `git bisect` | `mnem bisect`, same idea |
+
+What is missing on purpose, for now: `push` / `pull` / `clone` (the sync protocol between stores is Era 2), a staged hunk (`add -p`, staging is a whole node), and a text-merge conflict marker (a conflict is an object you resolve with `--resolve <id>=ours|theirs|base|delete` or `--strategy`, not an inline marker).
 
 ## The GitHub for AI agents
 
@@ -94,10 +118,23 @@ Era 1, the substrate, is complete. Era 2, the collaboration layer, is next. See 
 - **`mnem-store` (Rust)**: the object model, the content-addressed store, the commit graph. Never touches the network or a model; a `cargo deny` check enforces it.
 - **`mnem`**: the CLI (crate `mnem-git`, Rust) and the SDK (`mnem-agents`, Python) built on the core.
 - **The store** is a `.mnem/` directory, format specified in [`docs/format/`](https://github.com/Nabzx/mnemosyne/tree/main/docs/format) and frozen for `0.0.x` at `format_version` 1. Decisions live in [`docs/adr/`](https://github.com/Nabzx/mnemosyne/tree/main/docs/adr).
+- **Plug into an agent**: an MCP server ([`mnem-mcp`](https://github.com/Nabzx/mnemosyne/blob/main/packages/mnem-mcp/README.md#claude-desktop), works with Claude Desktop) or a LangGraph `BaseStore` ([`mnem-langgraph`](https://github.com/Nabzx/mnemosyne/blob/main/packages/mnem-langgraph/README.md)).
 
 ## Prior work
 
 A wave of 2026 research points at this idea (Git4Data, GitOfThoughts, StateFuse, MemTX, LatticeMind), each a paper or a prototype. One finding is worth stating plainly: versioned memory does not make an agent give better answers. What it gives you is history, audit, and safe merging. That is the whole pitch, and it is enough. The [benchmark](https://github.com/Nabzx/mnemosyne/blob/main/docs/benchmark.md) has the numbers.
+
+## FAQ
+
+**Why not a vector store or RAG?** A different axis. Retrieval ranks by similarity; `mnem` versions and audits exact state. They compose rather than compete: searching inside a `mnem`-versioned memory is a reasonable future direction, not something this replaces.
+
+**Why not mem0, Zep, or a memory-layer product?** Those manage *what* an agent remembers: extraction, summarisation, retrieval. `mnem` manages the *history* of whatever memory representation you already have, closer to the substrate under those tools than a competitor to them.
+
+**Why not LangGraph's own checkpointer?** A checkpoint resumes a run. There is no `blame`, `bisect`, `merge`, or a long-lived branch model. `mnem-langgraph`'s `MnemosyneStore` targets `BaseStore` (long-term memory), not `BaseCheckpointSaver`.
+
+**Why not just append to a JSONL file?** That is Baseline B in [the benchmark](https://github.com/Nabzx/mnemosyne/blob/main/docs/benchmark.md). It answers "what was the state at step *t*", but not "which observation set this" or "merge two agents' memories, surfacing the conflicts". The benchmark's audit-query table has the full comparison.
+
+**Does this make my agent smarter?** No. See "Prior work" above: the pitch is history, audit, and safe merging, not accuracy.
 
 ## Contributing & licence
 
