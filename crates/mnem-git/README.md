@@ -21,4 +21,10 @@ The crate is named `mnem-git`; the installed binary is `mnem`. The library
 core is [`mnem-store`](https://crates.io/crates/mnem-store); the Python
 SDK is `mnem-agents` on PyPI.
 
+## Shell completions
+
+```bash
+mnem completions zsh > ~/.zfunc/_mnem     # or bash, fish, powershell, elvish
+```
+
 Licence: Apache-2.0.
