@@ -73,6 +73,23 @@ b = store.blame("customer-4821")       # which commit set this, and why
 print(b.commit[:8], b.provenance.source)
 ```
 
+## Coming from Git
+
+| Git | `mnem` |
+| --- | --- |
+| `git init` | `mnem init` |
+| `git add` | `mnem add` |
+| `git commit` | `mnem commit` |
+| `git log` | `mnem log` |
+| `git branch` | `mnem branch` |
+| `git checkout` | `mnem checkout` |
+| `git diff` | `mnem diff` |
+| `git merge` | `mnem merge` |
+| `git blame` | `mnem blame`, same idea |
+| `git bisect` | `mnem bisect`, same idea |
+
+What is missing on purpose, for now: `push` / `pull` / `clone` (the sync protocol between stores is Era 2), a staged hunk (`add -p`, staging is a whole node), and a text-merge conflict marker (a conflict is an object you resolve with `--resolve <id>=ours|theirs|base|delete` or `--strategy`, not an inline marker).
+
 ## The GitHub for AI agents
 
 Git made source code collaborative; GitHub made it social. As software becomes agents working in teams, they need the same stack underneath. Mnemosyne is building it in three eras:
