@@ -33,6 +33,19 @@ jobs:
       - run: cargo test --workspace --exclude mnem-py
       - run: cargo build --workspace --exclude mnem-py --release
 
+  windows:
+    name: rust (windows test, build)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.93.0
+      - uses: Swatinem/rust-cache@v2
+      # No fmt/clippy here, those are platform-independent; this job exists
+      # to catch a real Windows incompatibility (path handling, redb's file
+      # locking) before #173 ships a Windows binary.
+      - run: cargo test --workspace --exclude mnem-py
+      - run: cargo build --workspace --exclude mnem-py --release
+
   python:
     name: python (ruff, pytest)
     runs-on: ubuntu-latest
