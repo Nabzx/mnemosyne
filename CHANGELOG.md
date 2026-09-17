@@ -10,6 +10,12 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Added
 
+- CI: a `windows-latest` job runs `cargo test` and `cargo build --release`
+  on every push and pull request. The core and the CLI are now actually
+  tested on Windows, not just assumed to work there.
+
+### Added
+
 - `mnem completions <shell>`: prints a shell completion script (bash, zsh,
   fish, powershell, elvish) via a new `clap_complete` dependency.
 
