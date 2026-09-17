@@ -131,7 +131,7 @@ jobs:
           uv pip install --python /tmp/wheelenv pytest dist/*.whl
           cp -r python/tests /tmp/sdk-tests
           cd /tmp && /tmp/wheelenv/bin/python -m pytest sdk-tests -q
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: wheel
           path: dist/*.whl
