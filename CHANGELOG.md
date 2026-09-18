@@ -10,6 +10,15 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Added
 
+- CI: `.github/workflows/release.yml`. A published GitHub Release now builds
+  `mnem-agents` wheels for linux (x86_64, aarch64), macOS (universal2) and
+  Windows (x64), plus the sdist and the two adapter wheels, and publishes
+  all of it to PyPI via trusted publishing. `workflow_dispatch` reruns it
+  for an existing tag, to backfill a release that shipped without this
+  (v0.0.7 currently has only a macOS wheel).
+
+### Added
+
 - CI: a `windows-latest` job runs `cargo test` and `cargo build --release`
   on every push and pull request. The core and the CLI are now actually
   tested on Windows, not just assumed to work there.
