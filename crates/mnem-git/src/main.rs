@@ -20,7 +20,7 @@ use anyhow::{Context, Result};
 use clap::{CommandFactory, Parser, Subcommand};
 use clap_complete::Shell;
 use mnem_store::{
-    bisect, ChangeKind, Checkout, Conflict, ConflictKind, ContentKind, DiffTarget, Head,
+    bisect, ChangeKind, Checkout, Conflict, ConflictKind, ContentKind, DiffTarget, Export, Head,
     MemoryNode, MergeOutcome, MergeStrategy, NodeChange, ObjectId, Provenance, Resolution, Store,
 };
 
@@ -179,6 +179,19 @@ enum Command {
         /// Which shell to generate for.
         shell: Shell,
     },
+    /// Dump the whole store (every commit, ref and HEAD) as one JSON value.
+    Export {
+        /// Write here instead of stdout.
+        #[arg(short, long, value_name = "FILE")]
+        output: Option<PathBuf>,
+    },
+    /// Create a new store from an export (the reverse of `export`).
+    Import {
+        /// The exported JSON file.
+        file: PathBuf,
+        /// Where to create the store. Refuses if one already exists there.
+        path: Option<PathBuf>,
+    },
 }
 
 fn main() -> Result<()> {
@@ -240,6 +253,8 @@ fn main() -> Result<()> {
             name_only,
         }) => cmd_diff(from, to, stat, name_only),
         Some(Command::Completions { shell }) => cmd_completions(shell),
+        Some(Command::Export { output }) => cmd_export(output),
+        Some(Command::Import { file, path }) => cmd_import(file, path),
     }
 }
 
@@ -779,6 +794,38 @@ fn cmd_completions(shell: Shell) -> Result<()> {
     let mut cmd = Cli::command();
     let name = cmd.get_name().to_string();
     clap_complete::generate(shell, &mut cmd, name, &mut std::io::stdout());
+    Ok(())
+}
+
+fn cmd_export(output: Option<PathBuf>) -> Result<()> {
+    let store = open_store()?;
+    let export = store.export()?;
+    let json = serde_json::to_string_pretty(&export).context("encoding the export as JSON")?;
+    match output {
+        Some(path) => {
+            fs::write(&path, json).with_context(|| format!("writing {}", path.display()))?;
+            eprintln!(
+                "Exported {} object(s) to {}",
+                export.objects.len(),
+                path.display()
+            );
+        }
+        None => println!("{json}"),
+    }
+    Ok(())
+}
+
+fn cmd_import(file: PathBuf, path: Option<PathBuf>) -> Result<()> {
+    let text = fs::read_to_string(&file).with_context(|| format!("reading {}", file.display()))?;
+    let export: Export = serde_json::from_str(&text)
+        .with_context(|| format!("{} is not a valid mnem export", file.display()))?;
+    let path = path.unwrap_or_else(|| PathBuf::from("."));
+    let object_count = export.objects.len();
+    let store = Store::import(&path, &export)?;
+    println!(
+        "Imported {object_count} object(s) into {}",
+        store.mnem_dir().display()
+    );
     Ok(())
 }
 
