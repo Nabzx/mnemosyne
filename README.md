@@ -33,6 +33,7 @@ Your agent runs for an hour, makes forty tool calls, and updates its memory the 
 | `merge` | combine two lines of memory, surfacing conflicts as objects you inspect and resolve |
 | `blame` | resolve any belief to the commit (through merges) and the observation that introduced it |
 | `bisect` | binary-search a run for the first commit where a wrong belief appears |
+| `export` · `import` | dump the whole history as one portable JSON file, and rebuild a store from it |
 
 <p align="center"><img src="https://raw.githubusercontent.com/Nabzx/mnemosyne/main/assets/panel-agent.svg" alt="A Python agent loop: a Claude call, store.add with provenance, store.commit, and store.blame tracing a belief to its origin" width="820" /></p>
 
