@@ -1,0 +1,138 @@
+name: release
+
+# Builds cross-platform wheels for mnem-agents (the pyo3 SDK) and the two pure-
+# Python adapters, then publishes to PyPI. Runs automatically when a GitHub
+# Release is published; `workflow_dispatch` reruns it for an existing tag (set
+# `ref`), building only unless `publish` is also set (used to backfill a
+# release, per #165 and #177's note that PyPI descriptions/wheels are frozen
+# per version).
+#
+# Publishing uses PyPI trusted publishing (OIDC, no stored token). Each
+# project (mnem-agents, mnem-mcp, mnem-langgraph) needs a one-time trusted
+# publisher added on its PyPI project page, naming this repo, this workflow
+# file, and the `pypi` environment below, before the publish job can succeed.
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Tag or ref to build (default: the ref this run is on)"
+        required: false
+      publish:
+        description: "Also publish to PyPI (for backfilling an existing release)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  linux:
+    name: wheel (linux ${{ matrix.target }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [x86_64, aarch64]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+      - uses: PyO3/maturin-action@v1
+        with:
+          target: ${{ matrix.target }}
+          manylinux: auto
+          args: --release --out dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheel-linux-${{ matrix.target }}
+          path: dist
+
+  macos:
+    name: wheel (macos universal2)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+      - uses: PyO3/maturin-action@v1
+        with:
+          args: --release --out dist --universal2
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheel-macos-universal2
+          path: dist
+
+  windows:
+    name: wheel (windows x64)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+      - uses: PyO3/maturin-action@v1
+        with:
+          target: x64
+          args: --release --out dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheel-windows-x64
+          path: dist
+
+  sdist:
+    name: sdist (mnem-agents)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+      - uses: PyO3/maturin-action@v1
+        with:
+          command: sdist
+          args: --out dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sdist-mnem-agents
+          path: dist
+
+  adapters:
+    name: wheels (mnem-mcp, mnem-langgraph)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+      - run: uv build packages/mnem-mcp
+      - run: uv build packages/mnem-langgraph
+      # Flatten both dist/ dirs into one, so the artifact matches the shape
+      # of every other job's (files directly inside, nothing nested).
+      - run: |
+          mkdir -p dist
+          cp packages/mnem-mcp/dist/* packages/mnem-langgraph/dist/* dist/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-adapters
+          path: dist
+
+  publish:
+    name: publish to PyPI
+    needs: [linux, macos, windows, sdist, adapters]
+    if: github.event_name == 'release' || inputs.publish == true
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist
+          skip-existing: true
