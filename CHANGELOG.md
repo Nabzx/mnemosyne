@@ -10,6 +10,16 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Added
 
+- `mnem export` / `mnem import`: the whole store (every object ever
+  written, every ref, HEAD) as one portable JSON file, and the reverse.
+  Object ids render as hex, so the file reads cleanly with `jq` or by
+  hand. A hand-edited or corrupted export is a clean error on import,
+  not a silent misread: every object's claimed id is re-hashed and
+  checked. Does not touch `format_version`; it is a view for backup and
+  portability, not a new on-disk format.
+
+### Added
+
 - CI: `.github/workflows/release.yml`. A published GitHub Release now builds
   `mnem-agents` wheels for linux (x86_64, aarch64), macOS (universal2) and
   Windows (x64), plus the sdist and the two adapter wheels, and publishes
