@@ -13,6 +13,8 @@ name: release
 # file, and the `pypi` environment below, before the publish job can succeed.
 
 on:
+  push:
+    branches: [ci/release-wheels] # TEMP: dropped before merge, see #165
   release:
     types: [published]
   workflow_dispatch:
