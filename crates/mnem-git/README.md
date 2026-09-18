@@ -21,6 +21,16 @@ The crate is named `mnem-git`; the installed binary is `mnem`. The library
 core is [`mnem-store`](https://crates.io/crates/mnem-store); the Python
 SDK is `mnem-agents` on PyPI.
 
+## Backup and portability
+
+```bash
+mnem export -o backup.json     # the whole history, every commit, ref and HEAD
+mnem import backup.json ./restored
+```
+
+The file is plain JSON: every object id renders as hex, so `jq` and a text
+editor both work on it.
+
 ## Shell completions
 
 ```bash
