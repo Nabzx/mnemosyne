@@ -61,7 +61,8 @@ jobs:
           ref: ${{ inputs.ref || github.ref }}
       - uses: PyO3/maturin-action@v1
         with:
-          args: --release --out dist --universal2
+          target: universal2-apple-darwin
+          args: --release --out dist
       - uses: actions/upload-artifact@v4
         with:
           name: wheel-macos-universal2
