@@ -10,6 +10,15 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Added
 
+- ADR-0019 (prebuilt `mnem` binaries): `cargo-dist` builds `mnem` for linux
+  (x86_64, aarch64), macOS (x86_64, aarch64) and Windows (x86_64), plus a
+  shell and a PowerShell installer, and attaches them to the GitHub
+  Release. Triggered by hand (`workflow_dispatch`), same as the PyPI
+  workflow; assumes the release already exists as a draft and undrafts it
+  once the binaries are attached. No Homebrew tap yet.
+
+### Added
+
 - `mnem export` / `mnem import`: the whole store (every object ever
   written, every ref, HEAD) as one portable JSON file, and the reverse.
   Object ids render as hex, so the file reads cleanly with `jq` or by
@@ -20,7 +29,9 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Added
 
-- CI: `.github/workflows/release.yml`. A published GitHub Release now builds
+- CI: `.github/workflows/release-pypi.yml` (named `release.yml` until #173
+  gave the Rust binaries their own workflow of that name). A published
+  GitHub Release now builds
   `mnem-agents` wheels for linux (x86_64, aarch64), macOS (universal2) and
   Windows (x64), plus the sdist and the two adapter wheels, and publishes
   all of it to PyPI via trusted publishing. `workflow_dispatch` reruns it
