@@ -35,3 +35,4 @@ change is a new ADR that supersedes the old one.
 | [0016](0016-mcp-tools-and-the-adapter-contract.md) | The MCP tools and the adapter contract | Accepted |
 | [0017](0017-the-benchmark-and-its-metrics.md) | The benchmark and its metrics | Accepted |
 | [0018](0018-the-era-2-seam.md) | The Era 2 seam: the semantic merge trait and the sync protocol | Accepted |
+| [0019](0019-prebuilt-mnem-binaries.md) | Prebuilt `mnem` binaries via cargo-dist | Accepted |
