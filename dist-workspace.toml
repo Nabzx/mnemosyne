@@ -24,7 +24,3 @@ dispatch-releases = true
 # undrafts it once everything is attached, so the release only goes visible
 # once the artifacts are actually there.
 create-release = false
-# TEMP: build and upload real artifacts on this PR to prove the matrix
-# actually works, instead of only the default "plan" dry run. Dropped
-# before merge, see #173.
-pr-run-mode = "upload"
