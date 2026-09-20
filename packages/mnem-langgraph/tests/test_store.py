@@ -34,6 +34,18 @@ def test_put_get_delete_round_trip(store: MnemosyneStore) -> None:
     assert len(store.history(limit=10)) == 3
 
 
+def test_delete_on_a_key_never_written_is_a_no_op(store: MnemosyneStore) -> None:
+    # BaseStore's delete() is idempotent: deleting an absent key is not an
+    # error, unlike the underlying mnem-store `rm` it is built on (#215).
+    store.delete(NS, "never-written")
+    assert store.get(NS, "never-written") is None
+
+    store.put(NS, "plan", {"tier": "enterprise"})
+    store.delete(NS, "plan")
+    store.delete(NS, "plan")  # deleting twice is also a no-op
+    assert store.get(NS, "plan") is None
+
+
 def test_provenance_via_meta_reaches_blame(store: MnemosyneStore) -> None:
     store.put(NS, "plan", {"tier": "enterprise", "_meta": {"source": "ticket-4821"}})
     store.put(NS, "plan", {"tier": "pro", "_meta": {"source": "billing-8842", "step": "s31"}})

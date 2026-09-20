@@ -114,7 +114,12 @@ class MnemosyneStore(BaseStore):
     ) -> None:
         node_id = _node_id(namespace, key)
         if value is None:
-            agents.forget(self._store, node_id, author=self._author)
+            try:
+                agents.forget(self._store, node_id, author=self._author)
+            except mnem.InvalidRefError:
+                # BaseStore.delete() is idempotent: deleting a key that was
+                # never written (or already deleted) is a no-op, not an error.
+                pass
             return
         agents.remember(
             self._store, node_id, value, author=self._author,

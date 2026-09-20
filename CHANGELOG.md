@@ -8,6 +8,12 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ## [Unreleased]
 
+### Fixed
+
+- `mnem-langgraph`: `MnemosyneStore.delete()` on a key that was never
+  written no longer raises `InvalidRefError` - `BaseStore`'s delete is
+  idempotent by convention, matching a dict's `.pop(key, None)`.
+
 ### Added
 
 - ADR-0019 (prebuilt `mnem` binaries): `cargo-dist` builds `mnem` for linux
