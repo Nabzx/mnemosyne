@@ -100,9 +100,10 @@ pub struct MemoryNode {
     pub event_time: Option<i64>,
 }
 
-/// The set of memory nodes visible at a commit (ADR-0003). v0.1 is `flat`: a
-/// sorted map from a node's `id` to that node's [`ObjectId`]. The prolly-tree
-/// form arrives in Phase 2 as a second kind.
+/// The set of memory nodes visible at a commit (ADR-0003). It is `flat`: a
+/// sorted map from a node's `id` to that node's [`ObjectId`]. A prolly-tree
+/// form is deferred to Era 2, reassessed only on a real storage/read-latency
+/// ceiling (see ADR-0002, ADR-0012).
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct State {
     /// Node id to node object id, kept sorted by key.

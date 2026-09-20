@@ -59,9 +59,10 @@ _Avoid_: repo, repository, database, vault
 
 **State**:
 The content-addressed set of memory nodes visible at a commit. A commit points
-at one state. It is `flat` (a sorted map) now and gains a `prolly` form in
-Phase 2. Distinct from working memory, which is the mutable form the agent
-reads and writes.
+at one state. It is `flat` (a sorted map); a `prolly` form is deferred to
+Era 2, reassessed only on a real storage/read-latency ceiling (see
+ADR-0002/ADR-0012). Distinct from working memory, which is the mutable form
+the agent reads and writes.
 _Avoid_: snapshot, tree, index, the memory
 
 **Working memory**:
