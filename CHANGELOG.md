@@ -101,6 +101,23 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   actually does (one handle opened at startup and reused; redb allows a single
   open handle per file per process).
 
+### Added
+
+- `homepage` on the published crate metadata (`mnem-store`, `mnem-git`);
+  crates.io showed "Not provided" despite a real docs site existing.
+- `deny.toml`: explicit `[advisories]` and `[sources]` tables, written down
+  rather than left to cargo-deny's implicit defaults.
+
+### Changed
+
+- README: links to shell completions (`mnem completions <shell>`, #171) and
+  to `examples/`, neither of which was surfaced there before.
+- `CONTRIBUTING.md`'s Checks section now names all 9 recipes `just ci` runs,
+  not 5.
+- `CONTEXT.md` and `mnem-store`'s `State` doc comment no longer claim a
+  prolly-tree form "arrives in Phase 2" - Era 1 is fully shipped and it was
+  never built; both now point at ADR-0002/0012's deferral instead.
+
 ## [0.0.7] - 2026-09-09
 
 Era 1 complete: the substrate, with a benchmark and a docs site. `format_version` 1.
