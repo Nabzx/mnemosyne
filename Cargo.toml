@@ -12,6 +12,7 @@ edition = "2021"
 rust-version = "1.85"
 license = "Apache-2.0"
 repository = "https://github.com/Nabzx/mnemosyne"
+homepage = "https://nabzx.github.io/mnemosyne/"
 authors = ["Nabil Shah <nabilshahx@gmail.com>"]
 
 [workspace.lints.rust]

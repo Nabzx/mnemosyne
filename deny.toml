@@ -25,6 +25,16 @@ allow = [
 ]
 confidence-threshold = 0.8
 
+[advisories]
+# No known-vulnerable dependency has ever needed acknowledging; this stays
+# empty until one does, rather than relying on cargo-deny's implicit default.
+ignore = []
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]
+
 [bans]
 multiple-versions = "allow"
 wildcards = "allow"

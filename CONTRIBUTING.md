@@ -60,14 +60,18 @@ If a change alters behaviour, update `CONTEXT.md` (if a term shifts),
 ### Checks
 
 `just ci` runs everything CI runs, in the same order: `cargo fmt --check`,
-`cargo clippy -D warnings`, `cargo test`, the release build, `cargo deny check
-bans`, the Python lint and tests, and the conventional-commit check. It must
-pass before a pull request.
+`cargo clippy -D warnings`, `cargo test`, the release build, `cargo deny check`
+(bans, licences, advisories and sources), the Python lint and tests, the
+adapter packages' lint/tests plus the worked `examples/`, the benchmark
+regression gate, the repo-consistency checks (ADR index, ADR references, the
+changelog), and the conventional-commit check. It must pass before a pull
+request.
 
 `just install-hooks` sets `.githooks` as the hooks path, so `git commit` runs a
 fast pre-commit check (formatting and the Python lint).
 
 Individual recipes: `just fmt`, `just test`, `just clippy`, `just msrv`, `just
-deny`, `just py`, `just wheel`, `just commits`. Run `just` to list them.
+deny`, `just py`, `just adapters`, `just benchmark`, `just checks`, `just
+wheel`, `just commits`. Run `just` to list them.
 
 From Phase 3, the merge property harness runs in CI.
