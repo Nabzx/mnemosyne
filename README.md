@@ -74,6 +74,15 @@ b = store.blame("customer-4821")       # which commit set this, and why
 print(b.commit[:8], b.provenance.source)
 ```
 
+Shell completions:
+
+```bash
+mnem completions zsh > ~/.zfunc/_mnem     # or bash, fish, powershell, elvish
+```
+
+More worked examples, one per surface (SDK, Claude, LangGraph, MCP), live in
+[`examples/`](examples/) - the README GIF above is `examples/claude_agent.py`.
+
 ## Coming from Git
 
 | Git | `mnem` |
