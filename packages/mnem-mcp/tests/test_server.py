@@ -67,6 +67,74 @@ def test_operations_raise_typed_errors(store_path: str) -> None:
         server.do_when_did(store, "a")  # no equals / absent / present
 
 
+def test_error_code_covers_every_mnem_error(store_path: str) -> None:
+    # Every _CODES entry, exercised directly against the exception type
+    # rather than by contriving a live scenario for each - a real scenario is
+    # covered separately below where one exists (NoStoreError, CorruptStoreError).
+    for name, code in [
+        ("NotFoundError", "not_found"),
+        ("InvalidRefError", "invalid_ref"),
+        ("ConflictError", "conflict"),
+        ("CorruptStoreError", "corrupt_store"),
+        ("NoStoreError", "no_store"),
+        ("StoreIoError", "store_io"),
+        ("FormatVersionError", "format_version"),
+    ]:
+        exc = getattr(mnem, name)("boom")
+        assert server.error_code(exc) == code
+
+
+def test_do_branch_and_do_switch(store_path: str) -> None:
+    store = mnem.open(store_path)
+    server.do_remember(store, "plan", "enterprise")
+    assert store.head() == "ref: main"
+
+    assert server.do_branch(store, "exp") == {"branch": "exp"}
+    assert store.head() == "ref: main"  # branching alone does not switch HEAD
+    assert server.do_switch(store, "exp") == {"head": "ref: exp"}
+    assert store.head() == "ref: exp"
+
+    server.do_remember(store, "plan", "trial")
+    assert server.do_recall(store, "plan")["content"] == "trial"
+
+    server.do_switch(store, "main")
+    assert server.do_recall(store, "plan")["content"] == "enterprise"  # main untouched
+
+
+def test_do_merge_round_trip_through_a_real_conflict(store_path: str) -> None:
+    store = mnem.open(store_path)
+    server.do_remember(store, "plan", "enterprise")
+    server.do_branch(store, "exp")
+    server.do_switch(store, "exp")
+    server.do_remember(store, "plan", "trial")
+    server.do_switch(store, "main")
+    server.do_remember(store, "plan", "pro")
+
+    conflicted = server.do_merge(store, "exp")
+    assert conflicted["status"] == "conflicts"
+    assert conflicted["conflicts"][0]["id"] == "plan"
+
+    resolved = server.do_merge(store, "exp", resolutions={"plan": "ours"})
+    assert resolved["status"] == "merged"
+    assert server.do_recall(store, "plan")["content"] == "pro"
+
+
+def test_no_store_error_on_an_uninitialised_path(tmp_path: object) -> None:
+    with pytest.raises(mnem.NoStoreError):
+        mnem.open(str(tmp_path))
+
+
+def test_corrupt_store_error_on_a_mangled_head(store_path: str) -> None:
+    import pathlib
+
+    head = pathlib.Path(store_path) / ".mnem" / "HEAD"
+    head.write_text("not a ref or a commit id")
+    # `open()` itself does not validate HEAD; the error surfaces lazily on
+    # the first operation that resolves it.
+    with pytest.raises(mnem.CorruptStoreError):
+        mnem.open(store_path).head()
+
+
 # --- through the protocol ---------------------------------------------
 
 
