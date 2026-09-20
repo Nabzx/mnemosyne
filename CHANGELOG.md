@@ -8,12 +8,6 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ## [Unreleased]
 
-### Fixed
-
-- `mnem-langgraph`: `MnemosyneStore.delete()` on a key that was never
-  written no longer raises `InvalidRefError` - `BaseStore`'s delete is
-  idempotent by convention, matching a dict's `.pop(key, None)`.
-
 ### Added
 
 - ADR-0019 (prebuilt `mnem` binaries): `cargo-dist` builds `mnem` for linux
@@ -22,9 +16,6 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   Release. Triggered by hand (`workflow_dispatch`), same as the PyPI
   workflow; assumes the release already exists as a draft and undrafts it
   once the binaries are attached. No Homebrew tap yet.
-
-### Added
-
 - `mnem export` / `mnem import`: the whole store (every object ever
   written, every ref, HEAD) as one portable JSON file, and the reverse.
   Object ids render as hex, so the file reads cleanly with `jq` or by
@@ -32,9 +23,6 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   not a silent misread: every object's claimed id is re-hashed and
   checked. Does not touch `format_version`; it is a view for backup and
   portability, not a new on-disk format.
-
-### Added
-
 - CI: `.github/workflows/release-pypi.yml` (named `release.yml` until #173
   gave the Rust binaries their own workflow of that name). A published
   GitHub Release now builds
@@ -43,59 +31,55 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   all of it to PyPI via trusted publishing. `workflow_dispatch` reruns it
   for an existing tag, to backfill a release that shipped without this
   (v0.0.7 currently has only a macOS wheel).
-
-### Added
-
 - CI: a `windows-latest` job runs `cargo test` and `cargo build --release`
   on every push and pull request. The core and the CLI are now actually
   tested on Windows, not just assumed to work there.
-
-### Added
-
 - `mnem completions <shell>`: prints a shell completion script (bash, zsh,
   fish, powershell, elvish) via a new `clap_complete` dependency.
-
-### Added
-
 - `deny.toml`: a `[licenses]` policy, allow-listing every permissive licence
   actually in the dependency tree. The `deny` CI job now runs `cargo deny
   check` (bans, licences, advisories, sources), not just `check bans`.
-
-### Added
-
 - README: a "Coming from Git" command cheat-sheet, and an FAQ answering the
   usual "how is this different from a vector store / mem0 / Zep / a
   checkpointer / a JSONL log" questions up front.
 - `packages/mnem-mcp/README.md`: a Claude Desktop `claude_desktop_config.json`
   snippet, linked from the main README.
 - `CITATION.cff`.
+- `homepage` on the published crate metadata (`mnem-store`, `mnem-git`);
+  crates.io showed "Not provided" despite a real docs site existing.
+- `deny.toml`: explicit `[advisories]` and `[sources]` tables, written down
+  rather than left to cargo-deny's implicit defaults.
 
 ### Changed
 
 - README: the CLI quickstart is now the full arc the demo GIF tells (record a
   fact, misread one an hour later, `bisect` and `blame` find it), not just
   `init`/`add`/`commit`/`blame`.
-
-### Changed
-
 - The crate-level doc comments for `mnem-store` and `mnem-git` (the public
   docs.rs landing page and the crates.io description) now describe what each
   crate does, rather than the phase history of how it was built.
 - The `Development Status` classifier on all three PyPI packages
   (`mnem-agents`, `mnem-mcp`, `mnem-langgraph`) moves from `2 - Pre-Alpha` to
   `3 - Alpha`.
-
-### Changed
-
 - README: the quickstart now installs the published packages (`cargo install
   mnem-git`, `pip install mnem-agents`) instead of the pre-publish build-from-
   source workaround, and gains a CLI-only walkthrough alongside the Python
   one. The status table catches up through `v0.0.7`. The badge row adds
   crates.io, PyPI and docs-site badges; the "Prior work" section links
   `docs/benchmark.md`, the evidence for the claim right above it.
+- README: links to shell completions (`mnem completions <shell>`, #171) and
+  to `examples/`, neither of which was surfaced there before.
+- `CONTRIBUTING.md`'s Checks section now names all 9 recipes `just ci` runs,
+  not 5.
+- `CONTEXT.md` and `mnem-store`'s `State` doc comment no longer claim a
+  prolly-tree form "arrives in Phase 2" - Era 1 is fully shipped and it was
+  never built; both now point at ADR-0002/0012's deferral instead.
 
 ### Fixed
 
+- `mnem-langgraph`: `MnemosyneStore.delete()` on a key that was never
+  written no longer raises `InvalidRefError` - `BaseStore`'s delete is
+  idempotent by convention, matching a dict's `.pop(key, None)`.
 - Every relative link and image path in a file that ships standalone to a
   registry (the root `README.md`, published as the `mnem-agents` PyPI
   description; `packages/mnem-mcp/README.md`; `packages/mnem-langgraph/README.md`)
@@ -106,23 +90,6 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   and corrected "it opens the store fresh each time" to describe what the code
   actually does (one handle opened at startup and reused; redb allows a single
   open handle per file per process).
-
-### Added
-
-- `homepage` on the published crate metadata (`mnem-store`, `mnem-git`);
-  crates.io showed "Not provided" despite a real docs site existing.
-- `deny.toml`: explicit `[advisories]` and `[sources]` tables, written down
-  rather than left to cargo-deny's implicit defaults.
-
-### Changed
-
-- README: links to shell completions (`mnem completions <shell>`, #171) and
-  to `examples/`, neither of which was surfaced there before.
-- `CONTRIBUTING.md`'s Checks section now names all 9 recipes `just ci` runs,
-  not 5.
-- `CONTEXT.md` and `mnem-store`'s `State` doc comment no longer claim a
-  prolly-tree form "arrives in Phase 2" - Era 1 is fully shipped and it was
-  never built; both now point at ADR-0002/0012's deferral instead.
 
 ## [0.0.7] - 2026-09-09
 
