@@ -75,3 +75,42 @@ deny`, `just py`, `just adapters`, `just benchmark`, `just checks`, `just
 wheel`, `just commits`. Run `just` to list them.
 
 From Phase 3, the merge property harness runs in CI.
+
+## Releasing
+
+ADR-0007 sketches a release process it hands to "a `release` workflow"; what
+actually shipped (ADR-0019, #173) is two independently-triggered workflows and
+a couple of steps that stay manual on purpose. This section is the real
+sequence, kept current here rather than by amending an Accepted ADR.
+
+1. On a `chore/release-vX.Y.Z` branch: bump `[workspace.package] version` in
+   the root `Cargo.toml`, move `CHANGELOG.md`'s `Unreleased` section to a
+   dated `[X.Y.Z]` heading (fresh empty `Unreleased` after it), bump the
+   hardcoded version asserts in `python/tests/test_binding.py`, and add a
+   top entry to `docs/progress/plain-notes.md`. PR it, wait for green CI,
+   merge.
+2. On `main`: `git tag -a vX.Y.Z -m vX.Y.Z && git push origin vX.Y.Z`.
+3. `cargo publish -p mnem-store` then `cargo publish -p mnem-git` (path
+   dependency, so that order). Not automated in CI - see the "no `cargo
+   publish` in any workflow" note below.
+4. Create the GitHub Release for the tag as a **draft** (`gh release create
+   vX.Y.Z --draft --notes-from-tag`, or the web UI) - do not publish it yet.
+   ADR-0019's `create-release = false` means cargo-dist expects this draft to
+   already exist; it does not create one.
+5. `gh workflow run release.yml -f tag=vX.Y.Z` - cargo-dist builds the `mnem`
+   binaries for all 5 targets, attaches them to the draft, and undrafts it
+   once everything is attached.
+6. Undrafting a GitHub Release fires the same `release: published` event a
+   manual publish would. `release-pypi.yml` listens for exactly that event,
+   so it should start on its own and publish `mnem-agents`/`mnem-mcp`/
+   `mnem-langgraph` wheels to PyPI via trusted publishing, no manual
+   `maturin`/`twine` step needed. **This chain (undraft -> auto-triggered
+   PyPI publish) has not yet been exercised end-to-end** - #173's own test
+   used `pr-run-mode = "upload"`, a different path. Check the Actions tab
+   after step 5; if `release-pypi.yml` did not start, fall back to
+   `gh workflow run release-pypi.yml -f ref=vX.Y.Z -f publish=true`.
+7. Close whatever issues/epics the release covers and move on.
+
+**No workflow touches crates.io** (`cargo publish`, `CARGO_REGISTRY_TOKEN`) -
+step 3 is manual by design, and stays that way until there's a reason to
+automate it.
