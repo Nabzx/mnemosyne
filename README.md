@@ -40,9 +40,12 @@ Your agent runs for an hour, makes forty tool calls, and updates its memory the 
 ## Quickstart
 
 ```bash
-cargo install mnem-git      # installs the `mnem` binary
+curl --proto '=https' --tlsv1.2 -LsSf https://github.com/Nabzx/mnemosyne/releases/latest/download/mnem-git-installer.sh | sh
+# no Rust toolchain needed; PowerShell equivalent: mnem-git-installer.ps1 on the same release page
 pip install mnem-agents     # the Python SDK; `import mnem`
 ```
+
+Already have Rust? `cargo install mnem-git` builds the CLI from source instead.
 
 The CLI, the whole arc in about a minute: record a fact, get it wrong, find out why.
 

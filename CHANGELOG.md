@@ -8,6 +8,12 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ## [Unreleased]
 
+### Changed
+
+- README quickstart leads with the cargo-dist shell installer (no Rust
+  toolchain needed); `cargo install mnem-git` is now the "already have
+  Rust" alternative.
+
 ## [0.0.8] - 2026-09-21
 
 Prebuilt `mnem` binaries, `export`/`import` (CLI and SDK), and a round of
