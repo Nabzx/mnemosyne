@@ -50,6 +50,10 @@ enum Command {
         /// Read the content from this file, parsed as JSON.
         #[arg(long, value_name = "FILE", conflicts_with = "content")]
         content_file: Option<PathBuf>,
+        /// The content, parsed as JSON (a number, bool, object, array, or
+        /// null) instead of stored as a plain string.
+        #[arg(long, value_name = "JSON", conflicts_with_all = ["content", "content_file"])]
+        content_json: Option<String>,
         /// Provenance: which step of the run produced this.
         #[arg(long)]
         step: Option<String>,
@@ -207,10 +211,19 @@ fn main() -> Result<()> {
             id,
             content,
             content_file,
+            content_json,
             step,
             source,
             event_time,
-        }) => cmd_add(id, content, content_file, step, source, event_time),
+        }) => cmd_add(
+            id,
+            content,
+            content_file,
+            content_json,
+            step,
+            source,
+            event_time,
+        ),
         Some(Command::Rm { id }) => cmd_rm(id),
         Some(Command::Commit { message, author }) => cmd_commit(message, author),
         Some(Command::Log {
@@ -272,19 +285,23 @@ fn cmd_add(
     id: String,
     content: Option<String>,
     content_file: Option<PathBuf>,
+    content_json: Option<String>,
     step: Option<String>,
     source: Option<String>,
     event_time: Option<i64>,
 ) -> Result<()> {
-    let content = match (content, content_file) {
-        (_, Some(file)) => {
+    let content = match (content, content_file, content_json) {
+        (_, Some(file), _) => {
             let text =
                 fs::read_to_string(&file).with_context(|| format!("reading {}", file.display()))?;
             serde_json::from_str(&text)
                 .with_context(|| format!("{} is not valid JSON", file.display()))?
         }
-        (Some(text), None) => serde_json::Value::String(text),
-        (None, None) => {
+        (_, None, Some(json)) => {
+            serde_json::from_str(&json).context("--content-json is not valid JSON")?
+        }
+        (Some(text), None, None) => serde_json::Value::String(text),
+        (None, None, None) => {
             let mut buf = String::new();
             std::io::stdin().read_to_string(&mut buf)?;
             serde_json::Value::String(buf.trim_end().to_string())

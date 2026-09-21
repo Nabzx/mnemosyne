@@ -8,6 +8,12 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ## [Unreleased]
 
+### Added
+
+- `mnem add --content-json <JSON>`: stage a number, bool, object, array, or
+  null inline, without writing it to a temp file first (`--content-file`
+  was the only prior way to store non-string content from the CLI).
+
 ### Fixed
 
 - `mnem-langgraph`: `MnemosyneStore.delete()` on a key that was never
