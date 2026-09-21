@@ -10,6 +10,9 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Added
 
+- `mnem add --content-json <JSON>`: stage a number, bool, object, array, or
+  null inline, without writing it to a temp file first (`--content-file`
+  was the only prior way to store non-string content from the CLI).
 - CI: a `windows-python` job builds the `mnem-py` extension and runs the SDK
   and adapter tests (`packages/mnem-mcp`, `packages/mnem-langgraph`) on
   Windows. #184's Windows job only ever covered the plain Rust build; a real
