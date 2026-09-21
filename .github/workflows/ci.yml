@@ -46,6 +46,24 @@ jobs:
       - run: cargo test --workspace --exclude mnem-py
       - run: cargo build --workspace --exclude mnem-py --release
 
+  windows-python:
+    name: windows (python bindings)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.93.0
+      - uses: Swatinem/rust-cache@v2
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+      # ruff is platform-independent and already runs in the `python` job;
+      # this exists to actually build and import the extension on Windows
+      # before a real Windows wheel ships to PyPI on release (#212).
+      - run: uv pip install -e ".[dev]"
+      - run: uv run pytest python/tests -q
+      - run: uv pip install -e "./packages/mnem-mcp[dev]" -e "./packages/mnem-langgraph[dev]"
+      - run: uv run pytest packages -q
+
   python:
     name: python (ruff, pytest)
     runs-on: ubuntu-latest

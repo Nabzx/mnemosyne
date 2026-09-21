@@ -8,6 +8,14 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ## [Unreleased]
 
+### Added
+
+- CI: a `windows-python` job builds the `mnem-py` extension and runs the SDK
+  and adapter tests (`packages/mnem-mcp`, `packages/mnem-langgraph`) on
+  Windows. #184's Windows job only ever covered the plain Rust build; a real
+  Windows wheel has shipped to PyPI on every release since #165 without
+  anything testing it first.
+
 ### Fixed
 
 - `mnem-langgraph`: `MnemosyneStore.delete()` on a key that was never
