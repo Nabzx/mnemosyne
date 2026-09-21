@@ -7,7 +7,7 @@ members = [
 ]
 
 [workspace.package]
-version = "0.0.7"
+version = "0.0.8"
 edition = "2021"
 rust-version = "1.85"
 license = "Apache-2.0"
@@ -27,7 +27,7 @@ unimplemented = "warn"
 mem_forget = "warn"
 
 [workspace.dependencies]
-mnem-store = { path = "crates/mnem-store", version = "0.0.7" }
+mnem-store = { path = "crates/mnem-store", version = "0.0.8" }
 anyhow = "1"
 clap = { version = "4", features = ["derive"] }
 clap_complete = "4"
