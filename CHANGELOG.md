@@ -10,6 +10,16 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Changed
 
+- The README demo GIF now shows a real merge conflict, not just
+  commit/bisect/blame: a second line of the same case ran in parallel on
+  a branch and independently got the right answer, and the agent resolves
+  a genuine conflict in its favour rather than silently overwriting
+  anything. Re-recorded with a tighter lead-in and a deliberate hold on
+  the final line so the payoff reads clearly whether a viewer catches the
+  loop from the start or mid-cycle.
+
+### Changed
+
 - README Quickstart: the 3 commands that get memory under version control
   are now their own block, ahead of the fuller bisect/blame walkthrough -
   previously the two were one undifferentiated 7-command sequence.

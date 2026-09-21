@@ -61,7 +61,9 @@ def result(text: str) -> None:
 
 
 def seed(store: mnem.Store) -> str:
-    """The first session: the case is opened, then a billing note is misread.
+    """The first session: the case is opened, a second line confirms the plan
+    by phone on its own branch, then - back on the main line - a billing note
+    is misread.
 
     Returns the id of the commit that recorded the wrong plan tier.
     """
@@ -73,6 +75,14 @@ def seed(store: mnem.Store) -> str:
         store, "primary-contact", "alice@acme",
         step="step-4", summary="note the primary contact", time_ms=2_000,
     )
+
+    fork_point = store.head_commit()
+    with store.branch("direct-callback", start=fork_point):
+        agents.remember(
+            store, "customer-4821", "on the Enterprise plan",
+            source="call-4821", summary="confirmed the plan by phone", time_ms=2_500,
+        )
+
     return agents.remember(
         store, "customer-4821", "downgraded to Pro last month",
         source="billing-note-8842", step="step-31",
@@ -89,7 +99,8 @@ def replay(store: mnem.Store, bad_commit: str) -> None:
     )
 
     claude('My current note for customer-4821 is "downgraded to Pro last month".')
-    cont("Let me find the commit where that belief entered.")
+    cont("A dozen updates have touched this case since - grep finds every")
+    cont("mention of Pro, not which one is real. Let me bisect for the exact commit.")
     tool('bisect  customer-4821 == "downgraded to Pro last month"')
     boundary = store.bisect(
         lambda memory: (
@@ -112,25 +123,36 @@ def replay(store: mnem.Store, bad_commit: str) -> None:
         f"source:  {blame.provenance.source}"
     )
 
-    claude(f"It came from {blame.provenance.source} at {blame.provenance.agent_step}.")
-    cont("But ticket-4821, the original source of this case, says Enterprise.")
-    cont("I misread the billing note. Correcting the record.")
-    fixed = agents.remember(
-        store, "customer-4821", "on the Enterprise plan",
-        source="ticket-4821", note="fix: misread billing-note-8842 as a downgrade",
-        summary="correct the plan tier", time_ms=6_000,
+    claude(f"It came from {blame.provenance.source} at {blame.provenance.agent_step} - a misread.")
+    cont("A second line on this case ran in parallel: direct-callback, confirmed by phone.")
+    tool("merge  direct-callback")
+    conflicted = store.merge("direct-callback", time_ms=5_000)
+    result(
+        f'conflict on customer-4821: ours "downgraded to Pro last month", '
+        f'theirs "{conflicted.conflicts[0].theirs.content}"'
     )
-    tool("remember  customer-4821 = \"on the Enterprise plan\"  (source: ticket-4821)")
-    tool(f"commit    {fixed[:12]}  correct the plan tier")
 
-    claude("Fixed. The history keeps both the mistake and the correction:")
+    claude("Ours traces to the misread billing note. Theirs traces to a direct call. Keeping theirs.")
+    tool("merge  direct-callback --resolve customer-4821=theirs")
+    merged = store.merge(
+        "direct-callback", resolutions={"customer-4821": "theirs"},
+        message="merge direct-callback: trust the phone confirmation over the misread billing note",
+        time_ms=6_000,
+    )
+    tool(f"commit    {merged.commit[:12]}  merge direct-callback")
+
+    claude("Fixed and reconciled. The history keeps every line of it:")
     tool("log --oneline")
     result("\n".join(f"{c.id[:12]}  {c.message}" for c in store.log()))
 
     assert boundary == bad_commit
     assert blame.provenance.source == "billing-note-8842"
+    assert conflicted.status == "conflicts"
+    assert merged.status == "merged"
     assert store.working_memory()["customer-4821"].content == "on the Enterprise plan"
-    line(f"\n{GREEN}OK{OFF}  the wrong belief was found, traced and corrected", pause=0)
+    if PACE:
+        time.sleep(PACE * 1.6)  # a beat before the payoff, not an instant afterthought
+    line(f"\n{GREEN}{BOLD}OK{OFF}  the wrong belief was found, traced and reconciled", pause=0)
 
 
 def live(store: mnem.Store) -> None:
