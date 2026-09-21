@@ -276,7 +276,7 @@ def main() -> None:
     parser.add_argument("--live", action="store_true", help="run a real Claude tool-use loop")
     args = parser.parse_args()
     if args.demo:
-        PACE = 1.0
+        PACE = 0.55
 
     print(f"{DIM}  mnemosyne · a support agent finds its own mistake{OFF}")
     with tempfile.TemporaryDirectory() as directory:

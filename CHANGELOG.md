@@ -10,6 +10,15 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Changed
 
+- README demo GIF: retimed from 24.3s down to 15.0s without cutting any
+  content (`--demo` mode's `PACE` multiplier lowered from 1.0 to 0.55,
+  scaling every line's pause proportionally; `Set TypingSpeed` tightened
+  in the tape). A real, well-regarded comparable (atuin's README GIF)
+  runs 12.3s; this keeps the same full merge-conflict scenario the demo
+  just gained while landing much closer to that pace.
+
+### Changed
+
 - README demo GIF: theme changed from Catppuccin Mocha to Aardvark Blue.
   Tested 5 candidates against the real recording first - most read as
   near-identical to Mocha; Aardvark Blue's saturated navy was the most

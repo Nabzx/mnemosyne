@@ -18,7 +18,7 @@ Set Height 720
 Set Padding 44
 Set WindowBar Colorful
 Set Theme "Aardvark Blue"
-Set TypingSpeed 22ms
+Set TypingSpeed 12ms
 Set Framerate 24
 
 Hide
@@ -35,4 +35,4 @@ Sleep 200ms
 Type `python examples/claude_agent.py --demo`
 Sleep 150ms
 Enter
-Sleep 24s
+Sleep 14.5s
