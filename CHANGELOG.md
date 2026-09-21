@@ -8,6 +8,11 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ## [Unreleased]
 
+## [0.0.8] - 2026-09-21
+
+Prebuilt `mnem` binaries, `export`/`import` (CLI and SDK), and a round of
+pre-launch polish across CI, docs, and package metadata.
+
 ### Added
 
 - Python SDK: `store.export()` / `mnem.Store.import_(path, data)` - the
@@ -350,7 +355,8 @@ Era 1, "it commits". `format_version` 1.
 - Initial bootstrap tag. Workspace, CI and process scaffolding only; no
   features.
 
-[Unreleased]: https://github.com/Nabzx/mnemosyne/compare/v0.0.7...HEAD
+[Unreleased]: https://github.com/Nabzx/mnemosyne/compare/v0.0.8...HEAD
+[0.0.8]: https://github.com/Nabzx/mnemosyne/compare/v0.0.7...v0.0.8
 [0.0.7]: https://github.com/Nabzx/mnemosyne/compare/v0.0.6...v0.0.7
 [0.0.6]: https://github.com/Nabzx/mnemosyne/compare/v0.0.5...v0.0.6
 [0.0.5]: https://github.com/Nabzx/mnemosyne/compare/v0.0.4...v0.0.5
