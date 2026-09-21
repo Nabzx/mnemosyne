@@ -2,10 +2,11 @@
 # (builds the Python SDK, then renders this tape with vhs).
 #
 # The terminal runs examples/claude_agent.py in replay mode: a support agent
-# diagnoses a wrong answer with bisect and blame, then corrects the record.
-# The store, the commit ids, the bisect and the blame are real; the agent's
-# lines are a fixed script. Run the example with --live and an API key for a
-# real Claude tool-use loop.
+# diagnoses a wrong answer with bisect and blame, finds a parallel branch
+# already has the right answer, and merges it in over a real conflict. The
+# store, the commit ids, the bisect, the blame and the merge are real; the
+# agent's lines are a fixed script. Run the example with --live and an API
+# key for a real Claude tool-use loop.
 
 Output assets/demo.gif
 
@@ -29,9 +30,9 @@ Type `PROMPT_COMMAND=''; export PS1=""; clear`
 Enter
 Sleep 300ms
 Show
-Sleep 500ms
+Sleep 200ms
 
 Type `python examples/claude_agent.py --demo`
-Sleep 400ms
+Sleep 150ms
 Enter
-Sleep 21s
+Sleep 24s
