@@ -17,7 +17,7 @@ Set Width 1400
 Set Height 720
 Set Padding 44
 Set WindowBar Colorful
-Set Theme "Catppuccin Mocha"
+Set Theme "Aardvark Blue"
 Set TypingSpeed 22ms
 Set Framerate 24
 
