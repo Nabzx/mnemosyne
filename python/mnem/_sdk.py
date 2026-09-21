@@ -290,6 +290,19 @@ class Store:
         """Open the nearest store at or above ``path``."""
         return cls(_mnem.Store.open(os.fspath(path)))
 
+    @classmethod
+    def import_(cls, path: str | os.PathLike[str], data: str) -> Store:
+        """Rebuild a store at ``path`` from a JSON string produced by
+        :meth:`export`. ``path`` must not already hold a store."""
+        return cls(_mnem.Store.import_(os.fspath(path), data))
+
+    def export(self) -> str:
+        """Every object ever written, every ref, and ``HEAD``, as one JSON
+        string - a view for backup and portability, round-trippable through
+        :meth:`import_`. Not a new on-disk format; does not touch
+        ``format_version``."""
+        return self._inner.export()
+
     @property
     def root(self) -> Path:
         """The directory that holds ``.mnem``."""

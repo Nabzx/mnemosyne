@@ -257,3 +257,36 @@ def test_changed_by_lists_a_commits_change_set(tmp_path: object) -> None:
         "region": "added",
         "owner": "removed",
     }
+
+
+def test_export_import_round_trips_through_the_sdk(tmp_path: object) -> None:
+    store = mnem.init(tmp_path / "orig")
+    store.add("plan", "enterprise", provenance=mnem.Provenance(source="t1"))
+    store.commit("open the case", author="agent")
+    store.new_branch("exp")
+    store.checkout("exp")
+    store.add("plan", "trial")
+    store.commit("exp change", author="agent")
+
+    data = store.export()
+    assert isinstance(data, str)
+
+    restored = mnem.Store.import_(tmp_path / "restored", data)
+    assert restored.head() == store.head()
+    assert restored.working_memory()["plan"].content == "trial"
+    assert [c.message for c in restored.log()] == [c.message for c in store.log()]
+
+    b = restored.blame("plan")
+    assert b.node.content == "trial"
+
+
+def test_import_refuses_an_existing_store(tmp_path: object) -> None:
+    store = mnem.init(tmp_path)
+    data = store.export()
+    with pytest.raises(mnem.StoreExistsError):
+        mnem.Store.import_(tmp_path, data)
+
+
+def test_import_a_corrupted_export_is_a_clean_error(tmp_path: object) -> None:
+    with pytest.raises(ValueError):
+        mnem.Store.import_(tmp_path / "restored", "not json at all")
