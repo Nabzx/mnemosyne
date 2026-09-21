@@ -10,6 +10,9 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Added
 
+- Python SDK: `store.export()` / `mnem.Store.import_(path, data)` - the
+  same whole-store JSON backup/restore `mnem export`/`import` gave the
+  CLI in #174, now callable without shelling out to the binary.
 - `mnem add --content-json <JSON>`: stage a number, bool, object, array, or
   null inline, without writing it to a temp file first (`--content-file`
   was the only prior way to store non-string content from the CLI).
