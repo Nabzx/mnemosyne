@@ -15,7 +15,7 @@ use pyo3::prelude::*;
 use pyo3::types::{PyAny, PyDict, PyList};
 
 use mnem_store::{
-    ChangeKind, Checkout, ConflictKind, ContentKind, DiffTarget, MemoryNode, MergeOutcome,
+    ChangeKind, Checkout, ConflictKind, ContentKind, DiffTarget, Export, MemoryNode, MergeOutcome,
     MergeStrategy, MnemError, NodeChange, ObjectId, Provenance, Resolution, Store,
 };
 
@@ -152,6 +152,26 @@ impl PyStore {
     fn open(path: &str) -> PyResult<Self> {
         let inner = Store::open(path).map_err(to_py_err)?;
         Ok(Self { inner })
+    }
+
+    /// Rebuild a store at `path/.mnem/`, fresh, from an `export()` JSON
+    /// string. `path` must not already hold a store (#174, #207).
+    #[staticmethod]
+    #[pyo3(name = "import_")]
+    fn import_store(path: &str, data: &str) -> PyResult<Self> {
+        let export: Export = serde_json::from_str(data)
+            .map_err(|e| PyValueError::new_err(format!("not a valid mnem export: {e}")))?;
+        let inner = Store::import(path, &export).map_err(to_py_err)?;
+        Ok(Self { inner })
+    }
+
+    /// Every object ever written, every ref, and `HEAD`, as one JSON string
+    /// (#174, #207). Not a new on-disk format - a view for backup and
+    /// portability; round-trip through [`import_`](#method.import_).
+    fn export(&self) -> PyResult<String> {
+        let export = self.inner.export().map_err(to_py_err)?;
+        serde_json::to_string(&export)
+            .map_err(|e| PyValueError::new_err(format!("encoding the export as JSON: {e}")))
     }
 
     /// The store root, the directory that holds `.mnem/`.
