@@ -16,6 +16,12 @@ change is a new ADR that supersedes the old one.
 > `mnem-langgraph`. `import mnem` and the `.mnem/` store directory are
 > unchanged. See the `CHANGELOG.md` entry under Unreleased.
 
+> Releasing note: [ADR-0007](0007-versioning-and-release-policy.md)'s step 5
+> sketches one workflow that publishes crates.io, PyPI, and cuts the GitHub
+> release. What shipped (ADR-0019) is two independently-triggered workflows
+> and a couple of steps that stay manual on purpose. `CONTRIBUTING.md`'s
+> "Releasing" section is the real, current sequence.
+
 | ADR | Title | Status |
 | --- | --- | --- |
 | [0001](0001-record-architecture-decisions.md) | Record architecture decisions | Accepted |
