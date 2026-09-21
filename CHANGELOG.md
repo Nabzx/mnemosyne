@@ -10,6 +10,12 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Changed
 
+- README Quickstart: the 3 commands that get memory under version control
+  are now their own block, ahead of the fuller bisect/blame walkthrough -
+  previously the two were one undifferentiated 7-command sequence.
+
+### Changed
+
 - README quickstart leads with the cargo-dist shell installer (no Rust
   toolchain needed); `cargo install mnem-git` is now the "already have
   Rust" alternative.
