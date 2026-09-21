@@ -6,6 +6,44 @@ for you.
 
 ---
 
+## v0.0.8 - install it without Rust, back it up in one file
+
+**The one-line version:** two things people asked for once v0.0.7 was out:
+`mnem` as a plain binary you download, not something you compile, and a way
+to back up a whole store without knowing anything about `.mnem/`'s internals.
+
+**New this release:**
+
+- **Prebuilt `mnem` binaries.** A shell or PowerShell one-liner installs
+  `mnem` on Linux, macOS or Windows with no Rust toolchain at all - the
+  binary is attached to the GitHub Release. `cargo install mnem-git` still
+  works for anyone who already has Rust.
+- **`export` / `import`.** `mnem export -o backup.json` writes the whole
+  store - every commit, every branch, everything - as one JSON file you can
+  read with `jq`, put under someone else's version control, or just keep
+  safe. `mnem import backup.json ./restored` rebuilds a working store from
+  it. The same two operations are now callable from the Python SDK too
+  (`store.export()`, `mnem.Store.import_(path, data)`), not just the CLI.
+- **A round of pre-launch polish**, found by re-reading the whole project
+  as a first-time visitor would: a stale README, missing on-ramps (shell
+  completions, worked examples, an FAQ), CI gaps (nothing tested the
+  Windows build of the Python bindings until now), and small metadata
+  fixes (crates.io was missing a homepage link).
+
+**What is guaranteed:** everything v0.0.7 guaranteed, unchanged. `export`/
+`import` do not touch `format_version` - they are a view for backup and
+portability, not a new on-disk format, and a tampered or hand-edited export
+is a clean error on import, not a silent misread.
+
+**What it still does not do** (Era 2 and later): the same as v0.0.7 - no
+shared memory between two agents, no semantic merge, no sync between
+stores.
+
+**Under the hood:** `cargo-dist` (ADR-0019), `crates/mnem-store/src/
+portable.rs`, `crates/mnem-py/src/lib.rs`'s `export`/`import_` bindings.
+
+---
+
 ## v0.0.7 - the substrate, measured
 
 **The one-line version:** Era 1 is done. `mnem` is a working, single-agent memory
