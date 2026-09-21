@@ -22,7 +22,11 @@ import time
 import mnem
 from mnem import agents
 
-# Catppuccin-ish palette, matched to assets/demo.tape.
+# Fixed 24-bit accent colours, independent of assets/demo.tape's `Set Theme`
+# (which only remaps the terminal's 16-colour palette and the default
+# background/foreground - truecolor escapes like these pass straight
+# through any theme). Tested against Aardvark Blue and Catppuccin Mocha;
+# re-check here first if the tape's theme ever changes again.
 LILAC = "\033[38;2;203;166;247m"
 BLUE = "\033[38;2;137;180;250m"
 GREEN = "\033[38;2;166;227;161m"

@@ -10,6 +10,15 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Changed
 
+- README demo GIF: theme changed from Catppuccin Mocha to Aardvark Blue.
+  Tested 5 candidates against the real recording first - most read as
+  near-identical to Mocha; Aardvark Blue's saturated navy was the most
+  distinct without clashing against the demo's fixed lilac/blue/green
+  accent colours (which are hardcoded truecolor, independent of the
+  tape's theme - a theme swap alone never touches them).
+
+### Changed
+
 - The README demo GIF now shows a real merge conflict, not just
   commit/bisect/blame: a second line of the same case ran in parallel on
   a branch and independently got the right answer, and the agent resolves
