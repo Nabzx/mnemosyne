@@ -10,6 +10,11 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Added
 
+- CI: a `windows-python` job builds the `mnem-py` extension and runs the SDK
+  and adapter tests (`packages/mnem-mcp`, `packages/mnem-langgraph`) on
+  Windows. #184's Windows job only ever covered the plain Rust build; a real
+  Windows wheel has shipped to PyPI on every release since #165 without
+  anything testing it first.
 - ADR-0019 (prebuilt `mnem` binaries): `cargo-dist` builds `mnem` for linux
   (x86_64, aarch64), macOS (x86_64, aarch64) and Windows (x86_64), plus a
   shell and a PowerShell installer, and attaches them to the GitHub
