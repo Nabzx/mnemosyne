@@ -47,13 +47,17 @@ pip install mnem-agents     # the Python SDK; `import mnem`
 
 Already have Rust? `cargo install mnem-git` builds the CLI from source instead.
 
-The CLI, the whole arc in about a minute: record a fact, get it wrong, find out why.
+Three commands, and an agent's memory is under version control:
 
 ```bash
 mnem init ./agent-memory && cd ./agent-memory
 mnem add customer-4821 "on the Enterprise plan" --source ticket-4821
 mnem commit -m "open the case" --author agent
+```
 
+Now watch it catch a real mistake:
+
+```bash
 # an hour later, the agent misreads a billing note:
 mnem add customer-4821 "downgraded to Pro last month" --source billing-note-8842 --step step-31
 mnem commit -m "reconcile the plan tier" --author agent
