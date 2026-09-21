@@ -50,6 +50,33 @@ expose `branch`, `switch` and `merge` to the model rather than just a harness:
 Any other MCP client wires up the same way: `command` is `mnem-mcp`, `args` is
 `--store <path>` plus, optionally, `--tools all`.
 
+## Claude Code
+
+Either add it directly (per-project, local to you):
+
+```bash
+claude mcp add mnem -- mnem-mcp --store /absolute/path/to/agent-memory
+```
+
+Or drop a `.mcp.json` in the project root, so it's checked in and shared with
+anyone who opens the repo in Claude Code:
+
+```json
+{
+  "mcpServers": {
+    "mnem": {
+      "command": "mnem-mcp",
+      "args": ["--store", "/absolute/path/to/agent-memory"]
+    }
+  }
+}
+```
+
+A project-scoped `.mcp.json` needs approving once (`claude mcp list` shows it
+pending until then); `claude mcp add` is trusted immediately since you typed
+it yourself. Both verified working end to end. Add `"--tools", "all"` to
+either form for `branch`/`switch`/`merge`, same as Claude Desktop above.
+
 ## How it binds
 
 One store per server process, from `--store` or `$MNEM_STORE`: a single handle

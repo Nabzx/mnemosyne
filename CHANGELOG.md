@@ -8,6 +8,12 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ## [Unreleased]
 
+### Added
+
+- `packages/mnem-mcp/README.md`: a Claude Code section (`claude mcp add`
+  and a project-scoped `.mcp.json`), alongside the existing Claude
+  Desktop config. Both verified working end to end.
+
 ### Changed
 
 - README demo GIF: retimed from 24.3s down to 15.0s without cutting any

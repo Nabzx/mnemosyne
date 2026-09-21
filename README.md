@@ -136,7 +136,7 @@ Era 1, the substrate, is complete. Era 2, the collaboration layer, is next. See 
 - **`mnem-store` (Rust)**: the object model, the content-addressed store, the commit graph. Never touches the network or a model; a `cargo deny` check enforces it.
 - **`mnem`**: the CLI (crate `mnem-git`, Rust) and the SDK (`mnem-agents`, Python) built on the core.
 - **The store** is a `.mnem/` directory, format specified in [`docs/format/`](https://github.com/Nabzx/mnemosyne/tree/main/docs/format) and frozen for `0.0.x` at `format_version` 1. Decisions live in [`docs/adr/`](https://github.com/Nabzx/mnemosyne/tree/main/docs/adr).
-- **Plug into an agent**: an MCP server ([`mnem-mcp`](https://github.com/Nabzx/mnemosyne/blob/main/packages/mnem-mcp/README.md#claude-desktop), works with Claude Desktop) or a LangGraph `BaseStore` ([`mnem-langgraph`](https://github.com/Nabzx/mnemosyne/blob/main/packages/mnem-langgraph/README.md)).
+- **Plug into an agent**: an MCP server ([`mnem-mcp`](https://github.com/Nabzx/mnemosyne/blob/main/packages/mnem-mcp/README.md#claude-desktop), works with Claude Desktop and [Claude Code](https://github.com/Nabzx/mnemosyne/blob/main/packages/mnem-mcp/README.md#claude-code)) or a LangGraph `BaseStore` ([`mnem-langgraph`](https://github.com/Nabzx/mnemosyne/blob/main/packages/mnem-langgraph/README.md)).
 
 ## Prior work
 
