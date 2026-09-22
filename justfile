@@ -38,6 +38,12 @@ msrv:
 deny:
     cargo deny check
 
+# Coverage report (needs cargo-llvm-cov: `cargo install cargo-llvm-cov`).
+# A report, not a gate - not part of `just ci`, since it's slower than a
+# plain test run and there's no failing threshold.
+coverage:
+    cargo llvm-cov --workspace --exclude mnem-py --html
+
 # Build the extension, then lint and test the Python side.
 py:
     maturin develop -m crates/mnem-py/Cargo.toml

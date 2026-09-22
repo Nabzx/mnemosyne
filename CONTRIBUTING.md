@@ -72,7 +72,12 @@ fast pre-commit check (formatting and the Python lint).
 
 Individual recipes: `just fmt`, `just test`, `just clippy`, `just msrv`, `just
 deny`, `just py`, `just adapters`, `just benchmark`, `just checks`, `just
-wheel`, `just commits`. Run `just` to list them.
+wheel`, `just commits`, `just coverage`. Run `just` to list them.
+
+A `coverage` CI job also runs on every push, uploading an HTML report as a
+build artefact - a report, not a gate. There is no coverage badge yet: a
+live one needs an external service (Codecov or similar), which needs the
+maintainer's own account and token, not something to add silently.
 
 From Phase 3, the merge property harness runs in CI.
 
