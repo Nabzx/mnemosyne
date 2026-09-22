@@ -10,6 +10,14 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Added
 
+- `docs/debugging-a-poisoned-agent.md`: a step-by-step walkthrough of
+  `examples/claude_agent.py`'s bisect/blame/merge scenario, using its real,
+  reproducible output (the ids are content hashes, deterministic from the
+  script's fixed inputs) rather than a compressed or fabricated example.
+  Linked from the README's "Prior work" section.
+
+### Added
+
 - `docs/why-version-control.md`: a technical piece making the general case
   for versioned agent memory, aimed at a reader who hasn't seen the
   project - leans on the benchmark's audit-query table and the

@@ -142,6 +142,8 @@ Era 1, the substrate, is complete. Era 2, the collaboration layer, is next. See 
 
 A wave of 2026 research points at this idea (Git4Data, GitOfThoughts, StateFuse, MemTX, LatticeMind), each a paper or a prototype. One finding is worth stating plainly: versioned memory does not make an agent give better answers. What it gives you is history, audit, and safe merging. That is the whole pitch, and it is enough. The [benchmark](https://github.com/Nabzx/mnemosyne/blob/main/docs/benchmark.md) has the numbers, [why I built this](https://github.com/Nabzx/mnemosyne/blob/main/docs/why.md) has the longer version, and [why agent memory needs version control](https://github.com/Nabzx/mnemosyne/blob/main/docs/why-version-control.md) makes the general case.
 
+Want the same story worked end to end, one command at a time, with real commit ids instead of a compressed summary? [Debugging a poisoned agent with bisect](https://github.com/Nabzx/mnemosyne/blob/main/docs/debugging-a-poisoned-agent.md) narrates exactly what the GIF above is doing.
+
 ## FAQ
 
 **Why not a vector store or RAG?** A different axis. Retrieval ranks by similarity; `mnem` versions and audits exact state. They compose rather than compete: searching inside a `mnem`-versioned memory is a reasonable future direction, not something this replaces.
