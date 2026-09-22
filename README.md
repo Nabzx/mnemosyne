@@ -38,6 +38,8 @@ Your agent runs for an hour, makes forty tool calls, and updates its memory the 
 
 <p align="center"><img src="https://raw.githubusercontent.com/Nabzx/mnemosyne/main/assets/panel-agent.svg" alt="A Python agent loop: a Claude call, store.add with provenance, store.commit, and store.blame tracing a belief to its origin" width="820" /></p>
 
+Every correctness property above - exact reconstruction, precise `bisect`, accurate `blame`, no lost writes on `merge` - holds at 100% across an 80-seed, 720-run sweep, plus a separate 50,000-case fuzz test on the merge algorithm, gated in CI on every change. Full detail: [the benchmark](https://github.com/Nabzx/mnemosyne/blob/main/docs/benchmark.md).
+
 ## Quickstart
 
 ```bash
