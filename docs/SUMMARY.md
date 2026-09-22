@@ -1,6 +1,7 @@
 # Summary
 
 [Introduction](index.md)
+[Why I built this](why.md)
 
 # Reference
 

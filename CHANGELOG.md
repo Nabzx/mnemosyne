@@ -10,6 +10,14 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Added
 
+- `docs/why.md`: the "why I built this" essay drafted back in #175 -
+  redrafted fresh against the current state of the project (v0.0.8, the
+  merge-conflict demo, `docs/comparisons.md`) rather than a stale copy,
+  since the original file was never committed and no longer exists.
+  Linked from the README's "Prior work" section.
+
+### Added
+
 - `docs/comparisons.md`: a written comparison against Mem0, Zep, Letta,
   Memoria and ByteRover CLI, checked against each project's actual source
   (not its README) - what's real about each one's history/versioning
