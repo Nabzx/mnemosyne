@@ -10,6 +10,14 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Added
 
+- CI: a `coverage` job runs `cargo llvm-cov` on every push, uploading an
+  HTML report as a build artefact (`just coverage` locally). Currently
+  81.65% line coverage workspace-wide. A report, not a gate - no failing
+  threshold. No badge yet; a live one needs a maintainer account on an
+  external service (Codecov or similar), which is a separate decision.
+
+### Added
+
 - A PyPI-downloads badge to the README's badge row (verified live before
   adding it - `pypistats.org`-backed, no auth needed).
 
