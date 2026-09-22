@@ -148,6 +148,8 @@ A wave of 2026 research points at this idea (Git4Data, GitOfThoughts, StateFuse,
 
 **Why not mem0, Zep, or a memory-layer product?** Those manage *what* an agent remembers: extraction, summarisation, retrieval. `mnem` manages the *history* of whatever memory representation you already have, closer to the substrate under those tools than a competitor to them.
 
+**Is `mnem` the only one doing git-shaped things for agent state?** No, and it isn't the first. [`docs/comparisons.md`](https://github.com/Nabzx/mnemosyne/blob/main/docs/comparisons.md) checks Letta, Memoria and ByteRover CLI against their actual source, not their marketing pages, and says plainly where each one is ahead and where `mnem`'s claim differs.
+
 **Why not LangGraph's own checkpointer?** A checkpoint resumes a run. There is no `blame`, `bisect`, `merge`, or a long-lived branch model. `mnem-langgraph`'s `MnemosyneStore` targets `BaseStore` (long-term memory), not `BaseCheckpointSaver`.
 
 **Why not just append to a JSONL file?** That is Baseline B in [the benchmark](https://github.com/Nabzx/mnemosyne/blob/main/docs/benchmark.md). It answers "what was the state at step *t*", but not "which observation set this" or "merge two agents' memories, surfacing the conflicts". The benchmark's audit-query table has the full comparison.
