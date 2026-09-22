@@ -3,6 +3,7 @@
 [Introduction](index.md)
 [Why I built this](why.md)
 [Why agent memory needs version control](why-version-control.md)
+[Debugging a poisoned agent with bisect](debugging-a-poisoned-agent.md)
 
 # Reference
 
