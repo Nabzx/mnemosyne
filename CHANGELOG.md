@@ -10,6 +10,12 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Added
 
+- The README now states the benchmark's actual correctness figures (100%
+  across an 80-seed, 720-run sweep, plus a separate 50,000-case merge fuzz
+  test) instead of only linking to `docs/benchmark.md`.
+
+### Added
+
 - CI: a `coverage` job runs `cargo llvm-cov` on every push, uploading an
   HTML report as a build artefact (`just coverage` locally). Currently
   81.65% line coverage workspace-wide. A report, not a gate - no failing
