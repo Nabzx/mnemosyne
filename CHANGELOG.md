@@ -10,6 +10,11 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Added
 
+- A PyPI-downloads badge to the README's badge row (verified live before
+  adding it - `pypistats.org`-backed, no auth needed).
+
+### Added
+
 - `docs/debugging-a-poisoned-agent.md`: a step-by-step walkthrough of
   `examples/claude_agent.py`'s bisect/blame/merge scenario, using its real,
   reproducible output (the ids are content hashes, deterministic from the
