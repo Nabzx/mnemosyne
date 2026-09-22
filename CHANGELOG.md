@@ -10,6 +10,14 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Added
 
+- `docs/comparisons.md`: a written comparison against Mem0, Zep, Letta,
+  Memoria and ByteRover CLI, checked against each project's actual source
+  (not its README) - what's real about each one's history/versioning
+  claims, and what's actually different about `mnem`'s. Linked from a new
+  README FAQ entry.
+
+### Added
+
 - `packages/mnem-mcp/README.md`: a Claude Code section (`claude mcp add`
   and a project-scoped `.mcp.json`), alongside the existing Claude
   Desktop config. Both verified working end to end.

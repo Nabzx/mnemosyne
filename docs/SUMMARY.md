@@ -8,6 +8,7 @@
   - [Golden vectors](format/golden-vectors.md)
 - [Benchmark report](benchmark.md)
 - [Merge chaos report](chaos-report.md)
+- [How mnem compares](comparisons.md)
 
 # Architecture decisions
 
