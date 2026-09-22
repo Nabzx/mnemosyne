@@ -10,6 +10,14 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Added
 
+- `docs/why-version-control.md`: a technical piece making the general case
+  for versioned agent memory, aimed at a reader who hasn't seen the
+  project - leans on the benchmark's audit-query table and the
+  bisect/blame billing-note example rather than abstract argument. Linked
+  from the README's "Prior work" section.
+
+### Added
+
 - `docs/why.md`: the "why I built this" essay drafted back in #175 -
   redrafted fresh against the current state of the project (v0.0.8, the
   merge-conflict demo, `docs/comparisons.md`) rather than a stale copy,
