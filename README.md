@@ -8,6 +8,7 @@
 &nbsp;[![CI](https://github.com/Nabzx/mnemosyne/actions/workflows/ci.yml/badge.svg)](https://github.com/Nabzx/mnemosyne/actions/workflows/ci.yml)
 &nbsp;[![crates.io](https://img.shields.io/crates/v/mnem-git.svg)](https://crates.io/crates/mnem-git)
 &nbsp;[![PyPI](https://img.shields.io/pypi/v/mnem-agents.svg)](https://pypi.org/project/mnem-agents/)
+&nbsp;[![PyPI downloads](https://img.shields.io/pypi/dm/mnem-agents.svg)](https://pypi.org/project/mnem-agents/)
 &nbsp;[![Docs](https://img.shields.io/badge/docs-nabzx.github.io-1f6feb.svg)](https://nabzx.github.io/mnemosyne/)
 &nbsp;![Status: early development](https://img.shields.io/badge/status-early_development-f59e0b.svg)
 
