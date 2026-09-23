@@ -26,6 +26,26 @@ quality. Neither has anything resembling `branch` or `merge`.
   resolve. Its "audit logs" are API access logs, not a versioned memory
   state.
 
+`docs/benchmark.md`'s audit-query table stays scoped to `dict`/JSONL/`mnem`
+(ADR-0017) - that page is CI-gated, and Mem0's and Zep's behaviour isn't
+`mnem`'s own build to verify. The same seven questions, answered here
+against each tool's real source instead
+([ADR-0022](adr/0022-mem0-and-zep-on-the-audit-query-table.md)):
+
+| Question | Mem0 | Zep (Graphiti) |
+| --- | --- | --- |
+| what does it believe now | yes | yes |
+| what did it believe at step t | no built-in call (`history` is scoped per memory, no global reconstruction) | yes, via `SearchFilters`' `valid_at`/`invalid_at` date filters - but `search()`'s own convenience wrapper always uses "now" |
+| when did belief X first go wrong (bisect) | no | no |
+| which observation set X | shallow: `actor_id`/`role` per history event | real: `EntityEdge.episodes` references the originating observation(s) |
+| what did step t change | qualified: a real diff per memory, no cross-memory "commit" | no explicit diff API; derivable from two point-in-time queries |
+| merge two agents' memories, surfacing conflicts | no | no (a later fact invalidates an earlier one, not a flagged conflict) |
+| storage after L steps | `O(keys)` live state + `O(events)` append-only history | `O(all facts ever asserted)`, monotonically growing |
+
+Bisect is the one row where `mnem`, Mem0, and Zep are all behind a plain
+JSONL log's linear scan - worth stating plainly rather than only ever
+naming where `mnem` wins.
+
 ## Letta - the closest of the memory-layer tools
 
 [Letta](https://github.com/letta-ai/letta) (formerly MemGPT) has real prior
