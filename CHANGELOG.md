@@ -10,6 +10,12 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Added
 
+- `docs/research/issue-282-mem0-zep-audit-table.md`: source-level research
+  verifying Mem0's and Zep's real behaviour against the audit-query table's
+  seven questions, feeding the ADR that will narrow ADR-0017's scope.
+
+### Added
+
 - [ADR-0021](docs/adr/0021-the-crewai-adapter.md): the `mnem-crewai`
   adapter's contract. `StorageBackend` implemented for real (one node per
   memory record, `/`-delimited scope-path node ids, unindexed but exact

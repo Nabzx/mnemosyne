@@ -51,6 +51,7 @@
 - [The v1 benchmark design](research/issue-61-benchmark-design.md)
 - [An OpenAI Agents SDK adapter](research/issue-249-openai-agents-survey.md)
 - [A CrewAI adapter](research/issue-250-crewai-survey.md)
+- [Mem0 and Zep against the audit-query table](research/issue-282-mem0-zep-audit-table.md)
 
 # Progress notes
 
