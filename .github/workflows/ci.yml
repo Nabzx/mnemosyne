@@ -149,7 +149,7 @@ jobs:
           uv pip install --python /tmp/wheelenv pytest dist/*.whl
           cp -r python/tests /tmp/sdk-tests
           cd /tmp && /tmp/wheelenv/bin/python -m pytest sdk-tests -q
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: wheel
           path: dist/*.whl
@@ -229,7 +229,7 @@ jobs:
       # needs libpython to link. A report, not a gate - no failing threshold
       # here; that's a separate policy decision, not bundled into this one.
       - run: cargo llvm-cov --workspace --exclude mnem-py --html
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: coverage-html
           path: target/llvm-cov/html
