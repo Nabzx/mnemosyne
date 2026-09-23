@@ -53,6 +53,7 @@
 - [An OpenAI Agents SDK adapter](research/issue-249-openai-agents-survey.md)
 - [A CrewAI adapter](research/issue-250-crewai-survey.md)
 - [Mem0 and Zep against the audit-query table](research/issue-282-mem0-zep-audit-table.md)
+- [An AutoGen adapter](research/issue-251-autogen-survey.md)
 
 # Progress notes
 
