@@ -36,6 +36,7 @@
 - [0019 Prebuilt mnem binaries via cargo-dist](adr/0019-prebuilt-mnem-binaries.md)
 - [0020 The OpenAI Agents SDK adapter](adr/0020-the-openai-agents-sdk-adapter.md)
 - [0021 The CrewAI adapter](adr/0021-the-crewai-adapter.md)
+- [0022 Mem0 and Zep on the audit-query table](adr/0022-mem0-and-zep-on-the-audit-query-table.md)
 
 # Research
 
