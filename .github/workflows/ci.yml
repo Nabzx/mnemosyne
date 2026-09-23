@@ -59,9 +59,10 @@ jobs:
       # ruff is platform-independent and already runs in the `python` job;
       # this exists to actually build and import the extension on Windows
       # before a real Windows wheel ships to PyPI on release (#212).
-      - run: uv pip install --system -e ".[dev]"
+      - run: uv venv
+      - run: uv pip install -e ".[dev]"
       - run: uv run pytest python/tests -q
-      - run: uv pip install --system -e "./packages/mnem-mcp[dev]" -e "./packages/mnem-langgraph[dev]"
+      - run: uv pip install -e "./packages/mnem-mcp[dev]" -e "./packages/mnem-langgraph[dev]"
       - run: uv run pytest packages -q
 
   python:
@@ -75,7 +76,8 @@ jobs:
         with:
           python-version: "3.12"
       # Builds the mnem-py extension through maturin and installs it editable.
-      - run: uv pip install --system -e ".[dev]"
+      - run: uv venv
+      - run: uv pip install -e ".[dev]"
       - run: uv run ruff check python scripts
       - run: uv run pytest python/tests scripts -q
 
@@ -92,7 +94,8 @@ jobs:
       # The correctness metrics run in the `rust` job (benchmark.rs is a test).
       # This is the overhead comparison against a dict and a JSONL baseline: it
       # asserts the audit-query table and the 2x regression gate (ADR-0017).
-      - run: uv pip install --system -e ".[dev]"
+      - run: uv venv
+      - run: uv pip install -e ".[dev]"
       - run: uv run ruff check benchmarks
       - run: uv run python benchmarks/overhead.py
 
@@ -109,9 +112,10 @@ jobs:
       # The SDK (built through maturin), then each adapter package under
       # packages/ with its own deps. Adapters live outside the workspace and
       # test against the SDK (ADR-0004, ADR-0016).
-      - run: uv pip install --system -e ".[dev]"
-      - run: uv pip install --system -e "./packages/mnem-mcp[dev]"
-      - run: uv pip install --system -e "./packages/mnem-langgraph[dev]"
+      - run: uv venv
+      - run: uv pip install -e ".[dev]"
+      - run: uv pip install -e "./packages/mnem-mcp[dev]"
+      - run: uv pip install -e "./packages/mnem-langgraph[dev]"
       - run: uv run ruff check packages examples
       - run: uv run pytest packages -q
       # The worked examples double as end-to-end checks: each asserts its
