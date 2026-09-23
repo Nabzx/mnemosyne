@@ -10,6 +10,13 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Added
 
+- [ADR-0022](docs/adr/0022-mem0-and-zep-on-the-audit-query-table.md): the
+  audit-query table's seven questions verified against real Mem0/Zep
+  behaviour, narrowing (not reversing) ADR-0017's scope. The table itself
+  lands in `docs/comparisons.md` in a follow-up build ticket (#283).
+
+### Added
+
 - `docs/research/issue-282-mem0-zep-audit-table.md`: source-level research
   verifying Mem0's and Zep's real behaviour against the audit-query table's
   seven questions, feeding the ADR that will narrow ADR-0017's scope.
