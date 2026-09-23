@@ -10,6 +10,12 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Added
 
+- `docs/research/issue-251-autogen-survey.md`: source-level research on
+  AutoGen's `Memory` protocol, feeding the ADR that will fix a
+  `mnem-autogen` adapter's contract.
+
+### Added
+
 - `docs/comparisons.md`: a sourced Mem0/Zep table answering the
   audit-query table's seven questions against each tool's real source
   ([ADR-0022](docs/adr/0022-mem0-and-zep-on-the-audit-query-table.md)),
