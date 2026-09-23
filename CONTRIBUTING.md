@@ -9,7 +9,10 @@ read.
 The one exception is Dependabot, which is the maintainer's own dependency-update
 tooling, configured in `.github/dependabot.yml`. The maintainer reviews each
 Dependabot pull request and re-lands the change under their own commit, so the
-history stays single-author.
+history stays single-author. An open Dependabot pull request is not a stalled
+external contribution - it is closed once triaged, whether that means
+re-landing it (the usual case) or closing it with a reason if the bump isn't
+wanted yet; it is not left open as a queue.
 
 This keeps the history clean and the design coherent while the project is
 young. It may change once the substrate has shipped.
