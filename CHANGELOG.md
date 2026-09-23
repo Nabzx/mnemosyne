@@ -10,6 +10,12 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Added
 
+- `docs/research/issue-249-openai-agents-survey.md`: source-level research
+  on the OpenAI Agents SDK's `Session` protocol, feeding the ADR that will
+  fix a `mnem-openai-agents` adapter's contract.
+
+### Added
+
 - The README now states the benchmark's actual correctness figures (100%
   across an 80-seed, 720-run sweep, plus a separate 50,000-case merge fuzz
   test) instead of only linking to `docs/benchmark.md`.
