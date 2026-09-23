@@ -34,6 +34,7 @@
 - [0017 The benchmark and its metrics](adr/0017-the-benchmark-and-its-metrics.md)
 - [0018 The Era 2 seam](adr/0018-the-era-2-seam.md)
 - [0019 Prebuilt mnem binaries via cargo-dist](adr/0019-prebuilt-mnem-binaries.md)
+- [0020 The OpenAI Agents SDK adapter](adr/0020-the-openai-agents-sdk-adapter.md)
 
 # Research
 

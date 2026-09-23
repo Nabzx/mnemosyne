@@ -10,6 +10,15 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Added
 
+- [ADR-0020](docs/adr/0020-the-openai-agents-sdk-adapter.md): the
+  `mnem-openai-agents` adapter's contract. `Session` implemented narrowly
+  (one node per transcript item, a shared store with a session-id prefix,
+  provenance auto-captured via `on_tool_end`); `branch`/`merge`/`blame`/
+  `bisect` live on the adapter class outside the protocol, mirroring the
+  LangGraph adapter's precedent. No code yet - the build ticket follows.
+
+### Added
+
 - `docs/research/issue-249-openai-agents-survey.md`: source-level research
   on the OpenAI Agents SDK's `Session` protocol, feeding the ADR that will
   fix a `mnem-openai-agents` adapter's contract.
