@@ -10,6 +10,10 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Added
 
+- `docs/research/issue-250-crewai-survey.md`: source-level research on
+  CrewAI's `StorageBackend` protocol, feeding the ADR that will fix a
+  `mnem-crewai` adapter's contract.
+
 - [ADR-0020](docs/adr/0020-the-openai-agents-sdk-adapter.md): the
   `mnem-openai-agents` adapter's contract. `Session` implemented narrowly
   (one node per transcript item, a shared store with a session-id prefix,
