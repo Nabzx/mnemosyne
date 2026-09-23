@@ -43,3 +43,4 @@ change is a new ADR that supersedes the old one.
 | [0018](0018-the-era-2-seam.md) | The Era 2 seam: the semantic merge trait and the sync protocol | Accepted |
 | [0019](0019-prebuilt-mnem-binaries.md) | Prebuilt `mnem` binaries via cargo-dist | Accepted |
 | [0020](0020-the-openai-agents-sdk-adapter.md) | The OpenAI Agents SDK adapter | Accepted |
+| [0021](0021-the-crewai-adapter.md) | The CrewAI adapter | Accepted |

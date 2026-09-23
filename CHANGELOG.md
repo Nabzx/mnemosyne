@@ -10,6 +10,14 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Added
 
+- [ADR-0021](docs/adr/0021-the-crewai-adapter.md): the `mnem-crewai`
+  adapter's contract. `StorageBackend` implemented for real (one node per
+  memory record, `/`-delimited scope-path node ids, unindexed but exact
+  cosine-similarity search with a stated scale ceiling, `source`/`private`
+  passed straight through). No code yet - the build ticket follows.
+
+### Added
+
 - `docs/research/issue-250-crewai-survey.md`: source-level research on
   CrewAI's `StorageBackend` protocol, feeding the ADR that will fix a
   `mnem-crewai` adapter's contract.
