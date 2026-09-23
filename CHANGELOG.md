@@ -10,6 +10,14 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Added
 
+- [ADR-0023](docs/adr/0023-the-autogen-adapter.md): the `mnem-autogen`
+  adapter's contract. `Memory` implemented to match `ListMemory`'s own
+  real behaviour exactly (query ignores its argument, returns everything
+  chronologically), one store per instance, metadata left fully opaque.
+  No code yet - the build ticket follows.
+
+### Added
+
 - `docs/research/issue-251-autogen-survey.md`: source-level research on
   AutoGen's `Memory` protocol, feeding the ADR that will fix a
   `mnem-autogen` adapter's contract.

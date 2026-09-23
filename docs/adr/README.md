@@ -45,3 +45,4 @@ change is a new ADR that supersedes the old one.
 | [0020](0020-the-openai-agents-sdk-adapter.md) | The OpenAI Agents SDK adapter | Accepted |
 | [0021](0021-the-crewai-adapter.md) | The CrewAI adapter | Accepted |
 | [0022](0022-mem0-and-zep-on-the-audit-query-table.md) | Mem0 and Zep on the audit-query table | Accepted |
+| [0023](0023-the-autogen-adapter.md) | The AutoGen adapter | Accepted |
