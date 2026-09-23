@@ -49,6 +49,7 @@
 - [The MCP tool surface](research/issue-55-mcp-tool-surface.md)
 - [The v1 benchmark design](research/issue-61-benchmark-design.md)
 - [An OpenAI Agents SDK adapter](research/issue-249-openai-agents-survey.md)
+- [A CrewAI adapter](research/issue-250-crewai-survey.md)
 
 # Progress notes
 
