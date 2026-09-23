@@ -8,6 +8,21 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ## [Unreleased]
 
+### Changed
+
+- CONTRIBUTING.md: the Dependabot paragraph now states plainly that an
+  open Dependabot pull request is triaged (re-landed or closed with a
+  reason), never left open as a queue.
+
+### Changed
+
+- CI: `astral-sh/setup-uv` 5 -> 10.1.0, `actions/checkout` 4.4.0 ->
+  7.0.1, `actions/labeler` 5.0.0 -> 7.0.0, `actions/upload-artifact`
+  4.6.2 -> 7.0.1, `actions/deploy-pages` 4.0.5 -> 5.0.1. Re-lands 5
+  previously-untriaged Dependabot pull requests (#78, #79, #188, #189,
+  #190) as maintainer commits, each SHA re-verified against its real
+  tag ref before applying.
+
 ### Added
 
 - [ADR-0023](docs/adr/0023-the-autogen-adapter.md): the `mnem-autogen`
