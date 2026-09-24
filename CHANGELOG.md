@@ -8,6 +8,14 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ## [Unreleased]
 
+### Fixed
+
+- `docs/comparisons.md`'s Letta section described a retired API
+  (block-history/checkpoint-rollback, now on an `archive` branch) as
+  current. Corrected to describe the active product (`letta-code`),
+  whose agent memory is a real git repository used as sync plumbing,
+  not a versioning feature - no `log`, `branch`, or `merge`.
+
 ### Added
 
 - `docs/research/issue-252-letta-survey.md`: source-level research
