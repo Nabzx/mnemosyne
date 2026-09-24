@@ -8,6 +8,15 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ## [Unreleased]
 
+### Added
+
+- `docs/research/issue-252-letta-survey.md`: source-level research
+  finding Letta's active product (`letta-code`) has pivoted away from
+  the block/checkpoint model `docs/comparisons.md` described - its
+  current memory model is a real git repository used as internal sync
+  plumbing, with no Python API surface for it. Feeds the ADR deciding
+  whether an adapter makes sense at all.
+
 ### Changed
 
 - CONTRIBUTING.md: the Dependabot paragraph now states plainly that an
