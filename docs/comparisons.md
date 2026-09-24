@@ -46,16 +46,24 @@ Bisect is the one row where `mnem`, Mem0, and Zep are all behind a plain
 JSONL log's linear scan - worth stating plainly rather than only ever
 naming where `mnem` wins.
 
-## Letta - the closest of the memory-layer tools
+## Letta - the closest of the memory-layer tools, and a real git repo
 
-[Letta](https://github.com/letta-ai/letta) (formerly MemGPT) has real prior
-art here: agent templates carry numbered versions with a documented
-rollback endpoint, and a `block_history` mechanism chains a hash over each
-change to a memory block - genuinely tamper-evident, not a marketing claim.
+[Letta](https://github.com/letta-ai/letta-code) (formerly MemGPT) has
+pivoted since this comparison first looked at it: the block-history/
+rollback API it used to ship is retired, sitting only on an `archive`
+branch. The active product, `letta-code`, is a CLI tool whose agent memory
+is stored as a literal git repository - cloned, pulled, committed, and
+pushed like any other, confirmed directly in its own source.
 
-What it doesn't have: named branches you diverge and later merge, or a
-conflict object. It's linear checkpoint-and-rollback, closer to `git reset`
-than `git merge`.
+That makes it the closest thing to `mnem`'s own idea of any tool compared
+here - and also the sharpest contrast. Letta's git usage is sync plumbing,
+not a versioning feature: no `log`, no checkout-at-revision, no `branch`,
+no `merge` - a push conflict just surfaces as a raw error. Its own
+first-party docs recommend driving raw git by hand (`git add`, `git
+commit`, `git push`) for basic operations like moving memory between
+agents. Letta hands you a real git repo and tells you to use real git
+yourself. `mnem` gives you `blame`, `bisect`, and a typed merge-conflict
+object on the same underlying idea.
 
 ## Memoria - real conflict detection, but merge doesn't block on it
 
