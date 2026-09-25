@@ -8,6 +8,13 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ## [Unreleased]
 
+### Added
+
+- `ROADMAP.md`: a dating policy for Era 2/3 - Era 1's already-shipped
+  phases stay dateless, Era 2/3 get soft, revisable estimates in
+  months (tightening to weeks as a phase nears), not quarters. Era 1
+  stays as-is; the actual dates land in Era 2/3 in a follow-up ticket.
+
 ### Changed
 
 - CONTRIBUTING.md: `docs/` and `examples/` are now open to real external
