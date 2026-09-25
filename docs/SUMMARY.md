@@ -38,6 +38,7 @@
 - [0021 The CrewAI adapter](adr/0021-the-crewai-adapter.md)
 - [0022 Mem0 and Zep on the audit-query table](adr/0022-mem0-and-zep-on-the-audit-query-table.md)
 - [0023 The AutoGen adapter](adr/0023-the-autogen-adapter.md)
+- [0024 The Mem0 migration path](adr/0024-the-mem0-migration-path.md)
 
 # Research
 
