@@ -8,6 +8,17 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ## [Unreleased]
 
+### Changed
+
+- `ROADMAP.md`: applied the dating policy decided in #247. The
+  now-inaccurate "there are no dates" line is fixed (Era 1 stays
+  dateless, Era 2/3 use the estimate policy). Era 2 and Era 3 each
+  explicitly state they have no estimate yet and why - neither's own
+  precondition (Era 1 shipped with users; real design work starting)
+  has happened, so there's nothing real to estimate against, checked
+  against Era 1's actual observed pace (six phases, four days) rather
+  than assumed.
+
 ### Added
 
 - `ROADMAP.md`: a dating policy for Era 2/3 - Era 1's already-shipped
