@@ -1,8 +1,10 @@
 # Roadmap
 
 One maintainer, working in linear phases. Every phase ends in a tagged build
-that runs, even if narrow. There are no dates. A phase is done when its
-definition of done is met, not before, and it does not grow past its goal.
+that runs, even if narrow. Era 1 carries no dates; Era 2 and Era 3 carry a
+soft, revisable estimate once one exists (the dating policy below, #247). A
+phase is done when its definition of done is met, not before, and it does not
+grow past its goal.
 
 Mnemosyne is built in three eras (ADR-0010). **Era 1, the substrate**, is
 single-agent versioned memory and is the six phases below. **Era 2, the
@@ -158,12 +160,26 @@ Make it usable from a real agent.
 
 Detailed once Era 1 has shipped and has users. Stays in the `0.0.x` line.
 
+**No estimate yet.** This era's own precondition - Era 1 shipped with real
+users - hasn't happened, and none of its actual design work (a Wayfinder map,
+the research and grilling tickets that resolve into ADRs) has started. An
+estimate lands once that precondition is met and the map exists, per the
+dating policy above - not invented ahead of it. Era 1's own six phases took
+four days end to end, but that was already-researched, mechanically-specified
+work with known reference designs (a three-way merge, `blame`, `bisect`);
+none of that pace evidence transfers to semantic merge, contradiction
+objects, or a sync protocol, none of which have been designed yet.
+
 - Semantic diff and merge over claims, with embeddings and an optional LLM adjudicator. Local model by default, an API optional and never used by CI.
 - Contradiction objects: incompatible claims kept and surfaced, not dropped.
 - The sync protocol: `remote`, `push`, `pull`, `fetch` between stores.
 - The review model: an agent proposes a memory update, a reviewer (a policy, a critic agent, or a person) approves it before it lands in shared memory, with full provenance.
 
 ## Era 3: the platform, and 1.0
+
+**No estimate yet**, for the same reason as Era 2, more so: there isn't even a
+phase-level sketch here yet, just the two bullets below. An estimate lands
+once real design work starts, not before.
 
 - The whole agent, its identity, prompt, tools, memory schema, policy and evaluations, as one versioned, signed, forkable artefact.
 - A registry to publish, discover, fork, and submit improvements to agents.
