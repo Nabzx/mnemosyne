@@ -8,6 +8,13 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ## [Unreleased]
 
+### Fixed
+
+- `ROADMAP.md`'s Backlog listed "CrewAI and AutoGen adapters" as
+  unplaced. Both now have real, Accepted ADRs (ADR-0021, ADR-0023) and
+  are tracked in epic #232 - removed from the backlog, noted where
+  they actually live.
+
 ### Changed
 
 - `ROADMAP.md`: applied the dating policy decided in #247. The

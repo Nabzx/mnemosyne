@@ -189,7 +189,10 @@ once real design work starts, not before.
 
 Not yet placed in an era.
 
-- CrewAI and AutoGen adapters
 - A weight-level view: LoRA deltas as commits, model merging as merge
 - A daemon for long-running stores
 - Encryption at rest for the object database
+
+CrewAI and AutoGen adapters were here; both now have real, Accepted ADRs
+(ADR-0021, ADR-0023) and a build ticket ahead of them - tracked in epic #232,
+not an unplaced backlog item anymore.
