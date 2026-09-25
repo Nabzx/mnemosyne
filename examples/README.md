@@ -4,6 +4,9 @@ Runnable scripts, one per surface. Each is deterministic by default (the "agent"
 is a fixed script, not a model) and ends by asserting the outcome, so CI keeps
 them working.
 
+A new worked example is a good first contribution - this directory is open to
+external PRs (see `CONTRIBUTING.md`).
+
 | Script | Surface | Shows |
 | --- | --- | --- |
 | `support_agent.py` | the Python SDK | record beliefs with provenance, then `bisect` + `blame` find where a wrong one entered |

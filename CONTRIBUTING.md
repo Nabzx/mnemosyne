@@ -3,8 +3,14 @@
 ## External contributions
 
 Mnemosyne is developed by a single maintainer. External pull requests from other
-people are not merged. Issues, bug reports, and design feedback are welcome and
-read.
+people are not merged, with one carve-out: `docs/` and `examples/` are open to
+real external PRs (typo fixes, clarity improvements, a new worked example) -
+lower review risk, no correctness or security surface. Everywhere else
+(`crates/`, `packages/`, the CLI) stays solo-maintained until the substrate has
+shipped, the same bar this section already names below. A PR outside the
+`docs/`/`examples/` carve-out is closed with a pointer to opening an issue
+instead, not silently left open. Issues, bug reports, and design feedback are
+always welcome and read.
 
 The one exception is Dependabot, which is the maintainer's own dependency-update
 tooling, configured in `.github/dependabot.yml`. The maintainer reviews each
