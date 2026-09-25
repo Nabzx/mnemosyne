@@ -8,6 +8,16 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ## [Unreleased]
 
+### Changed
+
+- CONTRIBUTING.md: `docs/` and `examples/` are now open to real external
+  PRs (typo fixes, clarity, a new worked example) - lower review risk,
+  no correctness/security surface. Everywhere else stays solo-maintained
+  until the substrate-shipped bar this section already stated. A PR
+  outside that carve-out is closed with a pointer to opening an issue,
+  not left open. `examples/README.md` gains a one-line pointer to the
+  on-ramp.
+
 ### Added
 
 - [ADR-0024](docs/adr/0024-the-mem0-migration-path.md): the Mem0
