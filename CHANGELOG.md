@@ -8,6 +8,14 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ## [Unreleased]
 
+### Added
+
+- `docs/research/issue-253-mem0-migration-survey.md`: source-level
+  research on Mem0's real read API (`get_all`'s scope/pagination
+  constraints, the exact per-item shape) feeding the ADR that will fix
+  a Mem0 migration/import tool's scope - not a peer adapter, since
+  Mem0 is a memory store, not an agent framework.
+
 ### Fixed
 
 - `docs/comparisons.md`'s Letta section described a retired API
