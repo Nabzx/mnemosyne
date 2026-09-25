@@ -16,6 +16,16 @@ The label taxonomy carries `track-a` (core and format) and `track-b` (SDK,
 adapters, developer experience) so a second maintainer can slot in later without
 reshaping the work. Until then the phases run in order.
 
+**Dating policy (decided, #247):** Era 1's phases above stay dateless - they're
+already shipped, tagged, and self-evidently ordered by their own history; a
+retrofitted date would be trivia, not information. Era 2 and Era 3, once
+detailed, carry a soft, explicitly revisable estimate each - a real sense of
+pace, not a deadline. Nothing about "done when its definition of done is met,
+not before" changes because of them: an estimate that slips is revised, not
+defended. Granularity is months while a phase is still some way off, tightening
+to weeks once it's imminent - not quarters, which round away real information
+without buying any real precision back.
+
 ## Ground rules
 
 - Every change lands through a pull request with green CI, even though there is
