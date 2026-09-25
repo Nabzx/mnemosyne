@@ -56,6 +56,7 @@
 - [Mem0 and Zep against the audit-query table](research/issue-282-mem0-zep-audit-table.md)
 - [An AutoGen adapter](research/issue-251-autogen-survey.md)
 - [A Letta adapter](research/issue-252-letta-survey.md)
+- [A Mem0 migration path](research/issue-253-mem0-migration-survey.md)
 
 # Progress notes
 
