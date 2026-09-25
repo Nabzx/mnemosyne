@@ -10,6 +10,14 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Added
 
+- [ADR-0024](docs/adr/0024-the-mem0-migration-path.md): the Mem0
+  migration path's contract. `mnem.agents.import_mem0(...)` in the SDK
+  (not a script or a new package), `mem0:`-namespaced node ids,
+  skip-and-log for empty content, a real pagination loop over
+  `get_all`. No code yet - the build ticket follows.
+
+### Added
+
 - `docs/research/issue-253-mem0-migration-survey.md`: source-level
   research on Mem0's real read API (`get_all`'s scope/pagination
   constraints, the exact per-item shape) feeding the ADR that will fix

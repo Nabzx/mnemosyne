@@ -46,3 +46,4 @@ change is a new ADR that supersedes the old one.
 | [0021](0021-the-crewai-adapter.md) | The CrewAI adapter | Accepted |
 | [0022](0022-mem0-and-zep-on-the-audit-query-table.md) | Mem0 and Zep on the audit-query table | Accepted |
 | [0023](0023-the-autogen-adapter.md) | The AutoGen adapter | Accepted |
+| [0024](0024-the-mem0-migration-path.md) | The Mem0 migration path | Accepted |
