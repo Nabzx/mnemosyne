@@ -100,7 +100,7 @@ jobs:
       - run: uv run python benchmarks/overhead.py
 
   adapters:
-    name: adapters (mcp, langgraph)
+    name: adapters (mcp, langgraph, openai-agents)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -116,6 +116,7 @@ jobs:
       - run: uv pip install -e ".[dev]"
       - run: uv pip install -e "./packages/mnem-mcp[dev]"
       - run: uv pip install -e "./packages/mnem-langgraph[dev]"
+      - run: uv pip install -e "./packages/mnem-openai-agents[dev]"
       - run: uv run ruff check packages examples
       - run: uv run pytest packages -q
       # The worked examples double as end-to-end checks: each asserts its
