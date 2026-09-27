@@ -26,6 +26,11 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   session's prefix, `limit` (or `session_settings.limit` if unset)
   taking the tail, in chronological order. Item content is stored as
   the raw `TResponseInputItem` dict, unchanged (#305).
+- `mnem-openai-agents`: `MnemosyneSession.pop_item`/`clear_session` now
+  do real work (ADR-0020) - both are tombstone commits via
+  `mnem.agents.forget`/a batched equivalent, never a hard delete, so a
+  popped item or a cleared session stays recoverable through the
+  store's ordinary history (#306).
 
 ### Fixed
 

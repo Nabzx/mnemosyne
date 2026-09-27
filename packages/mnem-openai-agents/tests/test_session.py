@@ -1,7 +1,6 @@
-"""Tests for the MnemosyneSession scaffolding (#303). get_items/add_items'
-real behaviour is tested in test_items.py (#305)."""
-
-import asyncio
+"""Tests for the MnemosyneSession scaffolding (#303). Real behaviour for the
+four Session protocol methods is tested in test_items.py (#305, get_items/
+add_items) and test_pop_clear.py (#306, pop_item/clear_session)."""
 
 import mnem
 import pytest
@@ -27,15 +26,3 @@ def test_satisfies_session_protocol(session: MnemosyneSession) -> None:
 def test_session_id_and_settings(session: MnemosyneSession) -> None:
     assert session.session_id == "u1"
     assert session.session_settings is None
-
-
-@pytest.mark.parametrize(
-    "call",
-    [
-        lambda s: s.pop_item(),
-        lambda s: s.clear_session(),
-    ],
-)
-def test_methods_not_yet_implemented(session: MnemosyneSession, call) -> None:
-    with pytest.raises(NotImplementedError):
-        asyncio.run(call(session))
