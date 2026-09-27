@@ -1,10 +1,9 @@
 """``MnemosyneSession``: an OpenAI Agents SDK ``Session`` over a Mnemosyne
 store (#249, ADR-0020).
 
-``pop_item`` / ``clear_session`` still raise ``NotImplementedError`` - the
-real behaviour lands one ticket at a time:
+Extra methods outside the ``Session`` protocol still land one ticket at a
+time:
 
-- ``pop_item`` / ``clear_session``: #306.
 - Provenance auto-capture via ``on_tool_end``: #307.
 - ``branch`` / ``switch`` / ``merge`` / ``why`` / ``bisect`` / ``history``,
   outside the ``Session`` protocol entirely: #308.
@@ -103,6 +102,31 @@ def _read_items(store: mnem.Store, session_id: str) -> list[mnem.MemoryNode]:
     ]
 
 
+def _forget_many(store: mnem.Store, node_ids: list[str], *, author: str = "agent") -> None:
+    """Tombstone every id in ``node_ids`` as one commit - ``remember_many``'s
+    batch shape, for deletions (ADR-0020). Unlike ``_write_items``, a retry
+    restages the same fixed id list rather than re-reading anything: the ids
+    to forget don't depend on timing the way a fresh ``seq`` does, exactly
+    matching ``remember_many``'s own simpler retry.
+    """
+    if not node_ids:
+        return
+
+    last: mnem.ConflictError | None = None
+    for attempt in range(_RETRIES):
+        try:
+            for node_id in node_ids:
+                store.rm(node_id)
+            n = len(node_ids)
+            store.commit(f"forget {n} node{'s' if n != 1 else ''}", author=author)
+            return
+        except mnem.ConflictError as exc:
+            last = exc
+            time.sleep(_BACKOFF_MS * (attempt + 1) / 1000)
+    assert last is not None
+    raise last
+
+
 def _resolve_limit(limit: int | None, settings: SessionSettings | None) -> int | None:
     """``limit``, falling back to ``settings.limit`` when unset - the same
     precedence :class:`agents.memory.sqlite_session.SQLiteSession` uses, not
@@ -151,7 +175,16 @@ class MnemosyneSession:
         _write_items(self._store, self.session_id, list(items))
 
     async def pop_item(self) -> TResponseInputItem | None:
-        raise NotImplementedError("lands in #306")
+        items = _read_items(self._store, self.session_id)
+        if not items:
+            return None
+        last = items[-1]
+        mnem.agents.forget(self._store, last.id)
+        return last.content
 
     async def clear_session(self) -> None:
-        raise NotImplementedError("lands in #306")
+        node_ids = [node.id for node in _read_items(self._store, self.session_id)]
+        seq_id = _seq_node_id(self.session_id)
+        if self._store.working_node(seq_id) is not None:
+            node_ids.append(seq_id)
+        _forget_many(self._store, node_ids)
