@@ -62,7 +62,7 @@ jobs:
       - run: uv venv
       - run: uv pip install -e ".[dev]"
       - run: uv run pytest python/tests -q
-      - run: uv pip install -e "./packages/mnem-mcp[dev]" -e "./packages/mnem-langgraph[dev]"
+      - run: uv pip install -e "./packages/mnem-mcp[dev]" -e "./packages/mnem-langgraph[dev]" -e "./packages/mnem-openai-agents[dev]"
       - run: uv run pytest packages -q
 
   python:
