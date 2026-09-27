@@ -8,6 +8,14 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ## [Unreleased]
 
+### Added
+
+- `packages/mnem-openai-agents`: scaffolding for an OpenAI Agents SDK
+  `Session` backed by Mnemosyne (ADR-0020). `MnemosyneSession` imports
+  cleanly and satisfies the `Session` protocol structurally, but every
+  method still raises `NotImplementedError` - real behaviour lands one
+  ticket at a time under epic #232 (#303).
+
 ### Fixed
 
 - `.github/workflows/release.yml` had drifted from what `cargo-dist`
