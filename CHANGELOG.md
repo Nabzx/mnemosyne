@@ -31,6 +31,12 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   `mnem.agents.forget`/a batched equivalent, never a hard delete, so a
   popped item or a cleared session stays recoverable through the
   store's ordinary history (#306).
+- `mnem-openai-agents`: provenance auto-capture (ADR-0020) - passing
+  `hooks=session.hooks` to `Runner.run` populates a real
+  `Provenance.source`/`observation` on every node written as a result
+  of a tool call, no per-call payload to shape by hand. README updated
+  to state the behaviour and the one line of caller wiring it needs
+  (#307).
 
 ### Fixed
 

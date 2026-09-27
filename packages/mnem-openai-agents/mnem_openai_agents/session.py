@@ -4,7 +4,6 @@ store (#249, ADR-0020).
 Extra methods outside the ``Session`` protocol still land one ticket at a
 time:
 
-- Provenance auto-capture via ``on_tool_end``: #307.
 - ``branch`` / ``switch`` / ``merge`` / ``why`` / ``bisect`` / ``history``,
   outside the ``Session`` protocol entirely: #308.
 
@@ -12,6 +11,15 @@ Once complete, this class implements the SDK's ``Session`` protocol
 structurally (it is a ``Protocol``, not an ABC - no explicit subclassing
 needed), so ``Runner.run(agent, prompt, session=MnemosyneSession(store,
 session_id))`` works as a drop-in replacement for ``SQLiteSession``.
+
+Passing ``hooks=session.hooks`` to that same ``Runner.run`` call turns on
+provenance auto-capture (ADR-0020, #307): every node written as a result of
+a tool call gets a real ``Provenance.source``/``observation`` for free, no
+per-call payload to shape by hand the way LangGraph's ``_meta`` needs. This
+is the one piece of caller wiring the mechanism needs - the SDK has no way
+for a ``Session`` to register a hook on a run just by being passed as
+``session=``; ``RunHooksBase`` and ``Session`` are independent parameters
+on ``Runner.run``.
 """
 
 from __future__ import annotations
@@ -20,10 +28,12 @@ import time
 from typing import TYPE_CHECKING
 
 import mnem
+from agents import RunHooks
 
 if TYPE_CHECKING:
     from agents.items import TResponseInputItem
     from agents.memory import SessionSettings
+    from agents.tool import Tool
 
 _SEQ_SUFFIX = ":_seq"
 _RETRIES = 4
@@ -55,12 +65,15 @@ def _write_items(
     session_id: str,
     contents: list,
     *,
-    provenance: mnem.Provenance | None = None,
+    provenances: list[mnem.Provenance | None] | None = None,
     author: str = "agent",
 ) -> list[str]:
     """Stage ``contents`` as new items under ``session_id``, bump the
     counter, and commit once - one write, however many nodes it touches
     (ADR-0020, mirroring ``mnem.agents.remember_many``'s batch form).
+    ``provenances`` (default: none) pairs one-to-one with ``contents``, since
+    a single batched ``add_items`` call can carry several tool calls' worth
+    of items, each wanting its own provenance, not one shared value (#307).
     Returns the new items' ids, in write order.
 
     Retries on a lost write race with the same bounded backoff
@@ -71,13 +84,15 @@ def _write_items(
     """
     if not contents:
         return []
+    if provenances is None:
+        provenances = [None] * len(contents)
 
     last: mnem.ConflictError | None = None
     for attempt in range(_RETRIES):
         try:
             start = _read_seq(store, session_id)
             ids = [_item_id(session_id, start + i) for i in range(len(contents))]
-            for node_id, content in zip(ids, contents, strict=True):
+            for node_id, content, provenance in zip(ids, contents, provenances, strict=True):
                 store.add(node_id, content, provenance=provenance)
             store.add(_seq_node_id(session_id), start + len(contents))
             n = len(contents)
@@ -137,6 +152,29 @@ def _resolve_limit(limit: int | None, settings: SessionSettings | None) -> int |
     return settings.limit if settings is not None else None
 
 
+class _ToolEndProvenanceHooks(RunHooks):
+    """Populates a session's pending per-tool-call provenance from
+    ``RunHooksBase.on_tool_end`` (ADR-0020, #307) - the carrier LangGraph's
+    ``_meta`` and MCP's ``remember`` argument each had to invent by hand.
+
+    ``add_items`` consumes the pending entries by matching each item's own
+    ``call_id`` when it writes, since a single batched call can hold several
+    tool calls' worth of items.
+    """
+
+    def __init__(self, session: MnemosyneSession) -> None:
+        self._session = session
+
+    async def on_tool_end(self, context: object, agent: object, tool: Tool, result: object) -> None:
+        call_id = getattr(context, "tool_call_id", None)
+        if call_id is None:
+            return
+        self._session._pending_provenance[call_id] = mnem.Provenance(
+            source=getattr(tool, "name", None),
+            observation=str(result),
+        )
+
+
 class MnemosyneSession:
     """A ``Session`` backed by a Mnemosyne store, scoped to one ``session_id``.
 
@@ -149,6 +187,14 @@ class MnemosyneSession:
         session_id: This session's own identifier.
         session_settings: Optional default settings (currently just
             ``limit``), matching the SDK's own ``Session`` protocol field.
+
+    Attributes:
+        hooks: Pass as ``Runner.run(..., hooks=session.hooks)`` to turn on
+            provenance auto-capture (#307) - every node ``add_items`` writes
+            as a result of a tool call gets a real ``Provenance.source``/
+            ``observation`` for free. Not required for the rest of the
+            adapter to work; a run with no ``hooks=`` still reads and writes
+            normally, just without that provenance.
     """
 
     def __init__(
@@ -161,6 +207,8 @@ class MnemosyneSession:
         self.session_id = session_id
         self.session_settings = session_settings
         self._store = store
+        self._pending_provenance: dict[str, mnem.Provenance] = {}
+        self.hooks = _ToolEndProvenanceHooks(self)
 
     async def get_items(self, limit: int | None = None) -> list[TResponseInputItem]:
         contents = [node.content for node in _read_items(self._store, self.session_id)]
@@ -172,7 +220,14 @@ class MnemosyneSession:
         return contents[-effective_limit:]
 
     async def add_items(self, items: list[TResponseInputItem]) -> None:
-        _write_items(self._store, self.session_id, list(items))
+        items = list(items)
+        call_ids = [item.get("call_id") for item in items]
+        # get(), not pop(), per item: one tool call's function_call and
+        # function_call_output items share a call_id, both in this batch.
+        provenances = [self._pending_provenance.get(cid) for cid in call_ids]
+        for cid in set(call_ids):
+            self._pending_provenance.pop(cid, None)
+        _write_items(self._store, self.session_id, items, provenances=provenances)
 
     async def pop_item(self) -> TResponseInputItem | None:
         items = _read_items(self._store, self.session_id)
