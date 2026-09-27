@@ -15,8 +15,19 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   cleanly and satisfies the `Session` protocol structurally, but every
   method still raises `NotImplementedError` - real behaviour lands one
   ticket at a time under epic #232 (#303).
+- `mnem-openai-agents`: the node id scheme and reserved sequence-counter
+  node the rest of the adapter is built on (ADR-0020) - a sortable
+  `{session_id}:{seq:010d}` id per item, a `{session_id}:_seq` counter
+  bumped in the same commit as every write, excluded from any content
+  read. No `Session` protocol methods wired up to it yet (#304).
 
 ### Fixed
+
+- `mnem-openai-agents`: `MnemosyneSession` took a path and opened its own
+  store handle (#303), contradicting ADR-0020's own decision that it
+  takes an already-open `Store` shared across every session a host
+  application constructs. Fixed while building #304, before any adapter
+  behaviour depended on the wrong shape.
 
 - `.github/workflows/release.yml` had drifted from what `cargo-dist`
   (pinned at 0.32.0) actually generates - caused by hand-editing action

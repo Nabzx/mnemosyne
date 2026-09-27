@@ -11,8 +11,8 @@ from mnem_openai_agents import MnemosyneSession
 
 @pytest.fixture
 def session(tmp_path: object) -> MnemosyneSession:
-    mnem.init(tmp_path)
-    return MnemosyneSession("u1", str(tmp_path))
+    store = mnem.init(tmp_path)
+    return MnemosyneSession(store, "u1")
 
 
 def test_import() -> None:
