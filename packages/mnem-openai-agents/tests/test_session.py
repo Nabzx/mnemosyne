@@ -1,4 +1,5 @@
-"""Tests for the MnemosyneSession scaffolding (#303)."""
+"""Tests for the MnemosyneSession scaffolding (#303). get_items/add_items'
+real behaviour is tested in test_items.py (#305)."""
 
 import asyncio
 
@@ -31,8 +32,6 @@ def test_session_id_and_settings(session: MnemosyneSession) -> None:
 @pytest.mark.parametrize(
     "call",
     [
-        lambda s: s.get_items(),
-        lambda s: s.add_items([]),
         lambda s: s.pop_item(),
         lambda s: s.clear_session(),
     ],

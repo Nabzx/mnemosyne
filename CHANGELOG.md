@@ -20,6 +20,12 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   `{session_id}:{seq:010d}` id per item, a `{session_id}:_seq` counter
   bumped in the same commit as every write, excluded from any content
   read. No `Session` protocol methods wired up to it yet (#304).
+- `mnem-openai-agents`: `MnemosyneSession.get_items`/`add_items` now do
+  real work (ADR-0020) - `add_items` is one Mnemosyne commit per call,
+  one node per item; `get_items` is a keyed range read under the
+  session's prefix, `limit` (or `session_settings.limit` if unset)
+  taking the tail, in chronological order. Item content is stored as
+  the raw `TResponseInputItem` dict, unchanged (#305).
 
 ### Fixed
 
