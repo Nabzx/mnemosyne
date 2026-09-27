@@ -1,10 +1,9 @@
 """``MnemosyneSession``: an OpenAI Agents SDK ``Session`` over a Mnemosyne
 store (#249, ADR-0020).
 
-The ``Session`` methods still raise ``NotImplementedError`` - the real
-behaviour lands one ticket at a time:
+``pop_item`` / ``clear_session`` still raise ``NotImplementedError`` - the
+real behaviour lands one ticket at a time:
 
-- ``get_items`` / ``add_items``: #305 (the id scheme below, #304, first).
 - ``pop_item`` / ``clear_session``: #306.
 - Provenance auto-capture via ``on_tool_end``: #307.
 - ``branch`` / ``switch`` / ``merge`` / ``why`` / ``bisect`` / ``history``,
@@ -104,6 +103,16 @@ def _read_items(store: mnem.Store, session_id: str) -> list[mnem.MemoryNode]:
     ]
 
 
+def _resolve_limit(limit: int | None, settings: SessionSettings | None) -> int | None:
+    """``limit``, falling back to ``settings.limit`` when unset - the same
+    precedence :class:`agents.memory.sqlite_session.SQLiteSession` uses, not
+    imported from there since it is not part of that module's public
+    surface."""
+    if limit is not None:
+        return limit
+    return settings.limit if settings is not None else None
+
+
 class MnemosyneSession:
     """A ``Session`` backed by a Mnemosyne store, scoped to one ``session_id``.
 
@@ -130,10 +139,16 @@ class MnemosyneSession:
         self._store = store
 
     async def get_items(self, limit: int | None = None) -> list[TResponseInputItem]:
-        raise NotImplementedError("lands in #305")
+        contents = [node.content for node in _read_items(self._store, self.session_id)]
+        effective_limit = _resolve_limit(limit, self.session_settings)
+        if effective_limit is None:
+            return contents
+        if effective_limit <= 0:
+            return []
+        return contents[-effective_limit:]
 
     async def add_items(self, items: list[TResponseInputItem]) -> None:
-        raise NotImplementedError("lands in #305")
+        _write_items(self._store, self.session_id, list(items))
 
     async def pop_item(self) -> TResponseInputItem | None:
         raise NotImplementedError("lands in #306")
