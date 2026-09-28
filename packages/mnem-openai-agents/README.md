@@ -52,7 +52,29 @@ not passing it.
   the item or session is gone from a live read but still recoverable through
   the store's ordinary history.
 
+## Extra methods
+
+Not on the `Session` protocol, for code that wants Mnemosyne's own
+differentiators: `branch(name)`, `switch(target)`, `merge(theirs, ...)`,
+`why(item_id)`, `bisect(predicate)`, `history(limit=...)`. All but `why`
+are **store-wide**, not scoped to one session's own items - branching or
+merging moves the whole store, since ADR-0020's shared-store design means
+other sessions may share it.
+
+```python
+session.branch("hypothesis")
+session.switch("hypothesis")
+await session.add_items([...])          # a divergent line of items
+session.switch("main")
+
+result = session.merge("hypothesis")     # status "conflicts" if any collide
+if not result.ok:
+    session.merge("hypothesis", resolutions={c.id: "theirs" for c in result.conflicts})
+
+session.why(item_id)                     # -> Blame: which commit, what provenance
+session.bisect(lambda memory: item_id in memory)
+```
+
 See [ADR-0020](https://github.com/Nabzx/mnemosyne/blob/main/docs/adr/0020-the-openai-agents-sdk-adapter.md)
-and epic [#232](https://github.com/Nabzx/mnemosyne/issues/232). `branch` /
-`switch` / `merge` / `why` / `bisect` / `history`, outside the `Session`
-protocol entirely, and a worked example, are not built yet.
+and epic [#232](https://github.com/Nabzx/mnemosyne/issues/232). A worked
+example is not built yet.

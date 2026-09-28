@@ -1,13 +1,7 @@
 """``MnemosyneSession``: an OpenAI Agents SDK ``Session`` over a Mnemosyne
 store (#249, ADR-0020).
 
-Extra methods outside the ``Session`` protocol still land one ticket at a
-time:
-
-- ``branch`` / ``switch`` / ``merge`` / ``why`` / ``bisect`` / ``history``,
-  outside the ``Session`` protocol entirely: #308.
-
-Once complete, this class implements the SDK's ``Session`` protocol
+This class implements the SDK's ``Session`` protocol
 structurally (it is a ``Protocol``, not an ABC - no explicit subclassing
 needed), so ``Runner.run(agent, prompt, session=MnemosyneSession(store,
 session_id))`` works as a drop-in replacement for ``SQLiteSession``.
@@ -20,6 +14,16 @@ is the one piece of caller wiring the mechanism needs - the SDK has no way
 for a ``Session`` to register a hook on a run just by being passed as
 ``session=``; ``RunHooksBase`` and ``Session`` are independent parameters
 on ``Runner.run``.
+
+``branch`` / ``switch`` / ``merge`` / ``why`` / ``bisect`` / ``history``
+live on the class directly, outside the ``Session`` protocol entirely
+(ADR-0020, #308) - thin wrappers over the underlying ``Store``, for code
+that wants Mnemosyne's own differentiators, not just drop-in
+compatibility. ``branch``/``switch``/``merge``/``bisect``/``history`` are
+**store-wide**, not scoped to one session's own items: ADR-0020's shared-
+store design means other sessions may share the same store, and a branch
+or merge moves the whole thing, the same real caveat the LangGraph
+adapter's own extra methods already carry (ADR-0016).
 """
 
 from __future__ import annotations
@@ -31,6 +35,8 @@ import mnem
 from agents import RunHooks
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from agents.items import TResponseInputItem
     from agents.memory import SessionSettings
     from agents.tool import Tool
@@ -243,3 +249,59 @@ class MnemosyneSession:
         if self._store.working_node(seq_id) is not None:
             node_ids.append(seq_id)
         _forget_many(self._store, node_ids)
+
+    # --- extra methods, outside Session -----------------------------------
+
+    def branch(self, name: str, *, start: str | None = None) -> str:
+        """Create a branch (at ``start`` or ``HEAD``) without switching to
+        it - store-wide, matching the LangGraph adapter's own precedent."""
+        self._store.new_branch(name, start=start)
+        return name
+
+    def switch(self, target: str) -> None:
+        """Move the store to a branch or commit."""
+        self._store.checkout(target)
+
+    def merge(
+        self,
+        theirs: str,
+        *,
+        resolutions: dict[str, str | mnem.MemoryNode] | None = None,
+        strategy: str | None = None,
+        message: str | None = None,
+        author: str | None = None,
+        time_ms: int | None = None,
+    ) -> mnem.MergeResult:
+        """Merge ``theirs`` into the current branch - a thin wrapper over
+        :meth:`mnem.Store.merge`, store-wide like every merge."""
+        return self._store.merge(
+            theirs,
+            resolutions=resolutions,
+            strategy=strategy,
+            message=message,
+            author=author,
+            time_ms=time_ms,
+        )
+
+    def why(self, item_id: str) -> mnem.Blame:
+        """The commit and provenance that gave ``item_id`` its current
+        value - ``item_id`` is one of this session's own item ids, as
+        returned by :meth:`get_items`'s underlying nodes."""
+        return self._store.blame(item_id)
+
+    def bisect(
+        self,
+        predicate: Callable[[dict[str, mnem.MemoryNode]], bool],
+        *,
+        bad: str | None = None,
+        good: str | None = None,
+    ) -> str:
+        """The first commit where ``predicate`` holds, over the full store
+        state - a thin wrapper, not filtered to this session's own items."""
+        return self._store.bisect(predicate, bad=bad, good=good)
+
+    def history(self, *, limit: int = 20) -> list[mnem.Commit]:
+        """The recent commits, newest first - the whole store's history,
+        matching the LangGraph adapter's own precedent (not filtered to
+        this session's own items)."""
+        return self._store.log(limit=limit)
