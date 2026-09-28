@@ -43,6 +43,14 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   differentiators, not just `Session`-protocol drop-in compatibility.
   Store-wide except `why`, matching the LangGraph adapter's own extra
   methods (#308).
+- `examples/openai_agents_memory.py`: a worked example for
+  `mnem-openai-agents` - a real `Runner.run` tool-calling turn (a
+  scripted model, so it stays deterministic and needs no API key, but
+  the real tool and the real hooks still execute), then `why`/`bisect`
+  trace the answer to the exact call that produced it. Wired into CI;
+  `mnem-openai-agents` now listed in the main README's adapter list
+  alongside `mnem-mcp`/`mnem-langgraph`. This closes out the
+  `mnem-openai-agents` build (#309).
 
 ### Fixed
 

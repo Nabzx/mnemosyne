@@ -125,6 +125,7 @@ jobs:
       - run: uv run python examples/claude_agent.py
       - run: uv run python examples/langgraph_memory.py
       - run: uv run python examples/mcp_client.py
+      - run: uv run python examples/openai_agents_memory.py
 
   wheel:
     name: python (wheel)
