@@ -37,6 +37,12 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   of a tool call, no per-call payload to shape by hand. README updated
   to state the behaviour and the one line of caller wiring it needs
   (#307).
+- `mnem-openai-agents`: `MnemosyneSession.branch`/`switch`/`merge`/
+  `why`/`bisect`/`history` (ADR-0020), thin wrappers over the
+  underlying `Store` for code that wants Mnemosyne's own
+  differentiators, not just `Session`-protocol drop-in compatibility.
+  Store-wide except `why`, matching the LangGraph adapter's own extra
+  methods (#308).
 
 ### Fixed
 
