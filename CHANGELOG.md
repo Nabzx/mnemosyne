@@ -63,6 +63,12 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   scope path honored literally) and a real scope tree-walk
   (`list_scopes`/`get_scope_info`) over it (ADR-0021). `save`/`search`
   and the rest of the protocol still raise `NotImplementedError` (#311).
+- `mnem-crewai`: `save`/`get_record`/`list_records` now do real work
+  (ADR-0021) - `save` is one Mnemosyne commit per call, one node per
+  record, `MemoryRecord.source` mapped straight to `Provenance.source`;
+  `get_record` and `list_records` (newest-first, optionally scoped to
+  a subtree) round-trip the full record, embedding included. `delete`/
+  `update`/`count` are next (#312).
 
 ### Fixed
 
