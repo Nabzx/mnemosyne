@@ -1,5 +1,6 @@
 """Tests for the MnemosyneStorageBackend scaffolding (#310). get_scope_info/
-list_scopes' real behaviour is tested in test_scopes.py (#311)."""
+list_scopes' real behaviour is tested in test_scopes.py (#311); save/
+get_record/list_records' in test_records.py (#312)."""
 
 import asyncio
 
@@ -27,11 +28,8 @@ def test_satisfies_storage_backend_protocol(backend: MnemosyneStorageBackend) ->
 @pytest.mark.parametrize(
     "call",
     [
-        lambda b: b.save([]),
         lambda b: b.search([0.1]),
         lambda b: b.delete(),
-        lambda b: b.get_record("x"),
-        lambda b: b.list_records(),
         lambda b: b.list_categories(),
         lambda b: b.count(),
         lambda b: b.reset(),

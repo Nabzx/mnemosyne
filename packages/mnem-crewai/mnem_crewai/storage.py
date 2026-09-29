@@ -1,12 +1,10 @@
 """``MnemosyneStorageBackend``: a CrewAI ``StorageBackend`` over a Mnemosyne
 store (#250, ADR-0021).
 
-``save`` / ``search`` / ``delete`` / ``update`` / ``get_record`` /
-``list_records`` / ``count`` / ``list_categories`` / ``reset`` and the
-async wrappers still raise ``NotImplementedError`` - real behaviour lands
-one ticket at a time:
+``search`` / ``delete`` / ``update`` / ``count`` / ``list_categories`` /
+``reset`` and the async wrappers still raise ``NotImplementedError`` - real
+behaviour lands one ticket at a time:
 
-- ``save`` / ``get_record`` / ``list_records``: #312
 - ``delete`` / ``update`` / ``count`` / ``list_categories`` / ``reset``: #313
 - ``search`` via real cosine similarity: #314
 - ``asave`` / ``asearch`` / ``adelete``: #315
@@ -22,6 +20,7 @@ factory contract, not something this adapter can make more granular).
 
 from __future__ import annotations
 
+import time
 from typing import TYPE_CHECKING, Any
 
 import mnem
@@ -29,6 +28,9 @@ from crewai.memory.types import MemoryRecord, ScopeInfo
 
 if TYPE_CHECKING:
     from datetime import datetime
+
+_RETRIES = 4
+_BACKOFF_MS = 25
 
 
 def _node_id(scope: str, record_id: str) -> str:
@@ -111,7 +113,25 @@ class MnemosyneStorageBackend:
         self._store = mnem.open(path)
 
     def save(self, records: list[MemoryRecord]) -> None:
-        raise NotImplementedError("lands in #312")
+        if not records:
+            return
+        last: mnem.ConflictError | None = None
+        for attempt in range(_RETRIES):
+            try:
+                for record in records:
+                    self._store.add(
+                        _node_id(record.scope, record.id),
+                        _record_to_content(record),
+                        provenance=mnem.Provenance(source=record.source),
+                    )
+                n = len(records)
+                self._store.commit(f"save {n} record{'s' if n != 1 else ''}")
+                return
+            except mnem.ConflictError as exc:
+                last = exc
+                time.sleep(_BACKOFF_MS * (attempt + 1) / 1000)
+        assert last is not None
+        raise last
 
     def search(
         self,
@@ -138,7 +158,14 @@ class MnemosyneStorageBackend:
         raise NotImplementedError("lands in #313")
 
     def get_record(self, record_id: str) -> MemoryRecord | None:
-        raise NotImplementedError("lands in #312")
+        # Node ids are {scope}/{record_id}, and the scope isn't known here -
+        # a scan, not an indexed lookup, since record_id (a uuid4) carries
+        # no scope information to key on directly.
+        suffix = f"/{record_id}"
+        for node_id, node in self._store.working_memory().items():
+            if node_id.endswith(suffix):
+                return _content_to_record(node.content)
+        return None
 
     def list_records(
         self,
@@ -146,7 +173,14 @@ class MnemosyneStorageBackend:
         limit: int = 200,
         offset: int = 0,
     ) -> list[MemoryRecord]:
-        raise NotImplementedError("lands in #312")
+        normalized = None if scope_prefix is None else (scope_prefix.rstrip("/") or "/")
+        records = [
+            _content_to_record(node.content)
+            for node_id, node in self._store.working_memory().items()
+            if normalized is None or _is_in_scope_subtree(node_id, normalized)
+        ]
+        records.sort(key=lambda r: r.created_at, reverse=True)
+        return records[offset : offset + limit]
 
     def get_scope_info(self, scope: str) -> ScopeInfo:
         normalized = scope.rstrip("/") or "/"
