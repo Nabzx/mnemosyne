@@ -63,7 +63,11 @@ jobs:
       - run: uv pip install -e ".[dev]"
       - run: uv run pytest python/tests -q
       - run: uv pip install -e "./packages/mnem-mcp[dev]" -e "./packages/mnem-langgraph[dev]" -e "./packages/mnem-openai-agents[dev]"
-      - run: uv run pytest packages -q
+      # mnem-crewai isn't installed here (crewai's mcp~=1.2x pin conflicts
+      # with mnem-mcp's own mcp>=2.2 floor in one venv, #310) and Windows
+      # coverage for it is deferred until it has real logic worth testing
+      # cross-platform - it's scaffolding-only right now.
+      - run: uv run pytest packages/mnem-mcp packages/mnem-langgraph packages/mnem-openai-agents -q
 
   python:
     name: python (ruff, pytest)
@@ -117,8 +121,12 @@ jobs:
       - run: uv pip install -e "./packages/mnem-mcp[dev]"
       - run: uv pip install -e "./packages/mnem-langgraph[dev]"
       - run: uv pip install -e "./packages/mnem-openai-agents[dev]"
+      # ruff needs no installed deps to lint source on disk, so it covers
+      # every package including mnem-crewai here; pytest does need real
+      # imports, so mnem-crewai's own tests run in the adapters-crewai job
+      # below instead - see that job for why it can't share this venv.
       - run: uv run ruff check packages examples
-      - run: uv run pytest packages -q
+      - run: uv run pytest packages/mnem-mcp packages/mnem-langgraph packages/mnem-openai-agents -q
       # The worked examples double as end-to-end checks: each asserts its
       # outcome and exits non-zero on failure (#60).
       - run: uv run python examples/support_agent.py
@@ -126,6 +134,26 @@ jobs:
       - run: uv run python examples/langgraph_memory.py
       - run: uv run python examples/mcp_client.py
       - run: uv run python examples/openai_agents_memory.py
+
+  adapters-crewai:
+    name: adapters (crewai)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: dtolnay/rust-toolchain@1.93.0
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+      - uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+        with:
+          python-version: "3.12"
+      # A separate job, not one more install line in `adapters` above:
+      # every crewai release with the StorageBackend protocol (1.10.1
+      # through at least 1.15.23, checked directly) pins mcp~=1.2x, which
+      # is incompatible with mnem-mcp's own mcp>=2.2 floor - the two
+      # cannot share one venv (found the hard way, #310).
+      - run: uv venv
+      - run: uv pip install -e ".[dev]"
+      - run: uv pip install -e "./packages/mnem-crewai[dev]"
+      - run: uv run pytest packages/mnem-crewai -q
 
   wheel:
     name: python (wheel)
