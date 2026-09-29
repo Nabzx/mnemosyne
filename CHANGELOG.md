@@ -51,6 +51,14 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   `mnem-openai-agents` now listed in the main README's adapter list
   alongside `mnem-mcp`/`mnem-langgraph`. This closes out the
   `mnem-openai-agents` build (#309).
+- `packages/mnem-crewai`: scaffolding for a CrewAI `StorageBackend` backed
+  by Mnemosyne (ADR-0021). `MnemosyneStorageBackend` imports cleanly and
+  satisfies the `StorageBackend` protocol structurally, but every method
+  still raises `NotImplementedError` - real behaviour lands one ticket at
+  a time under epic #232 (#310). CI runs it in a separate job from
+  `mnem-mcp`/`mnem-langgraph`/`mnem-openai-agents`: every crewai release
+  with this protocol pins `mcp` to the 1.x line, incompatible with
+  `mnem-mcp`'s own `mcp >= 2.2` floor in one venv.
 
 ### Fixed
 
