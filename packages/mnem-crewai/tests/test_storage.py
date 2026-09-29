@@ -1,4 +1,5 @@
-"""Tests for the MnemosyneStorageBackend scaffolding (#310)."""
+"""Tests for the MnemosyneStorageBackend scaffolding (#310). get_scope_info/
+list_scopes' real behaviour is tested in test_scopes.py (#311)."""
 
 import asyncio
 
@@ -31,8 +32,6 @@ def test_satisfies_storage_backend_protocol(backend: MnemosyneStorageBackend) ->
         lambda b: b.delete(),
         lambda b: b.get_record("x"),
         lambda b: b.list_records(),
-        lambda b: b.get_scope_info("/"),
-        lambda b: b.list_scopes(),
         lambda b: b.list_categories(),
         lambda b: b.count(),
         lambda b: b.reset(),

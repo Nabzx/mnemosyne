@@ -59,6 +59,10 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   `mnem-mcp`/`mnem-langgraph`/`mnem-openai-agents`: every crewai release
   with this protocol pins `mcp` to the 1.x line, incompatible with
   `mnem-mcp`'s own `mcp >= 2.2` floor in one venv.
+- `mnem-crewai`: the node id scheme (`{scope}/{record_id}`, CrewAI's own
+  scope path honored literally) and a real scope tree-walk
+  (`list_scopes`/`get_scope_info`) over it (ADR-0021). `save`/`search`
+  and the rest of the protocol still raise `NotImplementedError` (#311).
 
 ### Fixed
 
