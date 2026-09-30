@@ -29,9 +29,9 @@ test:
 build:
     cargo build --workspace --exclude mnem-py --release
 
-# The MSRV check, at Rust 1.85.
+# The MSRV check, at Rust 1.90.
 msrv:
-    RUSTUP_TOOLCHAIN=1.85.0 cargo check --all --all-features
+    RUSTUP_TOOLCHAIN=1.90.0 cargo check --all --all-features
 
 # `mnem-store` must stay offline (no network, TLS or async-runtime crate),
 # plus licences, advisories and sources.

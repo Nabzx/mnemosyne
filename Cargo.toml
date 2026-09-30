@@ -9,7 +9,7 @@ members = [
 [workspace.package]
 version = "0.0.8"
 edition = "2021"
-rust-version = "1.85"
+rust-version = "1.90"
 license = "Apache-2.0"
 repository = "https://github.com/Nabzx/mnemosyne"
 homepage = "https://nabzx.github.io/mnemosyne/"
