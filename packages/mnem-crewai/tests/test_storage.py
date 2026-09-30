@@ -1,6 +1,7 @@
 """Tests for the MnemosyneStorageBackend scaffolding (#310). get_scope_info/
 list_scopes' real behaviour is tested in test_scopes.py (#311); save/
-get_record/list_records' in test_records.py (#312)."""
+get_record/list_records' in test_records.py (#312); delete/update/count/
+list_categories/reset' in test_delete_update.py (#313)."""
 
 import asyncio
 
@@ -29,22 +30,11 @@ def test_satisfies_storage_backend_protocol(backend: MnemosyneStorageBackend) ->
     "call",
     [
         lambda b: b.search([0.1]),
-        lambda b: b.delete(),
-        lambda b: b.list_categories(),
-        lambda b: b.count(),
-        lambda b: b.reset(),
     ],
 )
 def test_sync_methods_not_yet_implemented(backend: MnemosyneStorageBackend, call) -> None:
     with pytest.raises(NotImplementedError):
         call(backend)
-
-
-def test_update_not_yet_implemented(backend: MnemosyneStorageBackend) -> None:
-    from crewai.memory.types import MemoryRecord
-
-    with pytest.raises(NotImplementedError):
-        backend.update(MemoryRecord(content="x"))
 
 
 @pytest.mark.parametrize(
