@@ -16,6 +16,8 @@ use std::fs;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 
+use redb::ReadableDatabase;
+
 use crate::config::Config;
 use crate::error::{MnemError, Result};
 use crate::head::Head;

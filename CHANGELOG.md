@@ -70,6 +70,23 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   a subtree) round-trip the full record, embedding included. `delete`/
   `update`/`count` are next (#312).
 
+### Changed
+
+- `redb` 2 -> 4. A real breaking change, not routine: `Database::
+  begin_read`/`begin_write` moved from inherent methods to the new
+  `ReadableDatabase` trait, needing one import in `store.rs` (used in
+  production code) and one each in `objects.rs`/`refs.rs`'s own test
+  modules (only their tests construct a raw `redb::Database` directly).
+  Verified thoroughly before landing, given this crate underpins the
+  frozen on-disk format: the full Rust suite passes unchanged,
+  including the golden-vector byte-for-byte check, the round-trip and
+  time-travel tests, and the 50,000-case merge fuzz sweep: none of
+  4.x's real behavioural changes (all gated behind opt-in experimental
+  feature flags this project does not enable) touch what this project
+  actually stores. `cargo clippy`, `cargo deny`, and the full Python
+  SDK test suite against a rebuilt extension also pass unchanged.
+  Re-lands #330 as a maintainer commit, not a blind Dependabot merge.
+
 ### Fixed
 
 - `mnem-openai-agents`: `MnemosyneSession` took a path and opened its own
