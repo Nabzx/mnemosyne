@@ -70,6 +70,34 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   a subtree) round-trip the full record, embedding included. `delete`/
   `update`/`count` are next (#312).
 
+### Changed
+
+- `redb` 2 -> 4. A real breaking change, not routine: `Database::
+  begin_read`/`begin_write` moved from inherent methods to the new
+  `ReadableDatabase` trait, needing one import in `store.rs` (used in
+  production code) and one each in `objects.rs`/`refs.rs`'s own test
+  modules (only their tests construct a raw `redb::Database` directly).
+  Verified thoroughly before landing, given this crate underpins the
+  frozen on-disk format: the full Rust suite passes unchanged,
+  including the golden-vector byte-for-byte check, the round-trip and
+  time-travel tests, and the 50,000-case merge fuzz sweep: none of
+  4.x's real behavioural changes (all gated behind opt-in experimental
+  feature flags this project does not enable) touch what this project
+  actually stores. `cargo clippy`, `cargo deny`, and the full Python
+  SDK test suite against a rebuilt extension also pass unchanged.
+  Re-lands #330 as a maintainer commit, not a blind Dependabot merge.
+- **MSRV raised from 1.85 to 1.90**, a real compatibility commitment,
+  not incidental to the `redb` bump above: checked every `redb`
+  release directly (not assumed) and found the entire 3.x/4.x line
+  requires at least Rust 1.89, with the specific 4.3.0 this project
+  now pins needing 1.90 - there is no partial upgrade that stays on
+  1.85. Updated everywhere the old MSRV was pinned: `Cargo.toml`'s
+  `rust-version`, `clippy.toml`'s `msrv` (so `incompatible_msrv` still
+  catches a real break locally), `rust-toolchain.toml`'s comment, and
+  the `msrv` CI job's toolchain pin. Verified `cargo check --all
+  --all-features` passes clean against a real, locally-installed
+  1.90.0 toolchain, not just a newer one that happens to also work.
+
 ### Fixed
 
 - `mnem-openai-agents`: `MnemosyneSession` took a path and opened its own

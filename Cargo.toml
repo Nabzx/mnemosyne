@@ -9,7 +9,7 @@ members = [
 [workspace.package]
 version = "0.0.8"
 edition = "2021"
-rust-version = "1.85"
+rust-version = "1.90"
 license = "Apache-2.0"
 repository = "https://github.com/Nabzx/mnemosyne"
 homepage = "https://nabzx.github.io/mnemosyne/"
@@ -33,7 +33,7 @@ clap = { version = "4", features = ["derive"] }
 clap_complete = "4"
 # storage and encoding, per ADR-0002, ADR-0005, ADR-0008. Not wired into a
 # crate until the Phase 1 build tickets (#22 onward).
-redb = "2"
+redb = "4"
 ciborium = "0.2"
 blake3 = "1"
 serde = { version = "1", features = ["derive"] }

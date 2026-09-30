@@ -110,6 +110,8 @@ pub fn delete(txn: &redb::WriteTransaction, name: &str) -> Result<bool> {
 
 #[cfg(test)]
 mod tests {
+    use redb::ReadableDatabase;
+
     use super::*;
 
     fn db() -> redb::Database {

@@ -106,6 +106,7 @@ pub fn ids_with_prefix(txn: &redb::ReadTransaction, hex_prefix: &str) -> Result<
 
 #[cfg(test)]
 mod tests {
+    use redb::ReadableDatabase;
     use serde_json::json;
 
     use super::*;
