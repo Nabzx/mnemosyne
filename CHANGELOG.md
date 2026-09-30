@@ -85,6 +85,11 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   README documents the scale ceiling (a few thousand records per scope)
   and points to CrewAI's own LanceDB/Qdrant backends beyond it. Every sync
   method is now real; only the async wrappers remain (#314).
+- `mnem-crewai`: `asave`/`asearch`/`adelete` now do real work (ADR-0021) -
+  each wraps its sync counterpart in `asyncio.to_thread`, matching the
+  LangGraph adapter's existing precedent, rather than a native async
+  re-implementation. Every `StorageBackend` protocol method is now real;
+  only a worked example is left (#315).
 
 ### Fixed
 

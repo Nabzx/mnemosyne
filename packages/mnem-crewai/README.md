@@ -33,7 +33,9 @@ matching happens there, after calling `storage.search()`), and the
 itself to filter by. See
 [ADR-0025](https://github.com/Nabzx/mnemosyne/blob/main/docs/adr/0025-crewai-private-filtering-is-not-the-adapters-job.md).
 
-## Not yet implemented
+## Async
 
-- `asave`/`asearch`/`adelete` (#315) - every sync method is real; the async
-  wrappers still raise `NotImplementedError`.
+`asave`/`asearch`/`adelete` wrap their sync counterpart in
+`asyncio.to_thread` (matching the LangGraph adapter's existing precedent)
+rather than a native async re-implementation - every `StorageBackend`
+protocol method is real. Only a worked example (#316) is left.

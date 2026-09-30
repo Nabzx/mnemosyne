@@ -1,20 +1,19 @@
 """``MnemosyneStorageBackend``: a CrewAI ``StorageBackend`` over a Mnemosyne
 store (#250, ADR-0021).
 
-The async wrappers still raise ``NotImplementedError`` - real behaviour lands
-one ticket at a time:
-
-- ``asave`` / ``asearch`` / ``adelete``: #315
-- a worked example: #316
+Every ``StorageBackend`` protocol method is real. ``asave``/``asearch``/
+``adelete`` wrap their sync counterpart in ``asyncio.to_thread`` (matching
+the LangGraph adapter's existing precedent, ADR-0021) rather than a native
+async re-implementation - a worked example is the only thing left (#316).
 
 ``search``/``list_records`` never filter on ``MemoryRecord.private`` - that
 enforcement is CrewAI's own ``RecallFlow``'s job, not the storage layer's;
 the real ``StorageBackend.search`` protocol never passes a requester
 identity to filter by (ADR-0025, correcting ADR-0021's original claim).
 
-Once complete, this class implements CrewAI's ``StorageBackend`` protocol
-structurally (it is a ``Protocol``, not an ABC - no explicit subclassing
-needed), so ``set_memory_storage_factory(lambda spec: MnemosyneStorageBackend(
+This class implements CrewAI's ``StorageBackend`` protocol structurally (it
+is a ``Protocol``, not an ABC - no explicit subclassing needed), so
+``set_memory_storage_factory(lambda spec: MnemosyneStorageBackend(
 "./agent-memory"))`` registers it as the process-wide default (a one-time,
 process-wide setter, not a per-``Memory``-instance argument - CrewAI's own
 factory contract, not something this adapter can make more granular).
@@ -22,6 +21,7 @@ factory contract, not something this adapter can make more granular).
 
 from __future__ import annotations
 
+import asyncio
 import math
 import time
 from typing import TYPE_CHECKING, Any
@@ -349,7 +349,7 @@ class MnemosyneStorageBackend:
         _forget_many(self._store, node_ids)
 
     async def asave(self, records: list[MemoryRecord]) -> None:
-        raise NotImplementedError("lands in #315")
+        await asyncio.to_thread(self.save, records)
 
     async def asearch(
         self,
@@ -360,7 +360,15 @@ class MnemosyneStorageBackend:
         limit: int = 10,
         min_score: float = 0.0,
     ) -> list[tuple[MemoryRecord, float]]:
-        raise NotImplementedError("lands in #315")
+        return await asyncio.to_thread(
+            self.search,
+            query_embedding,
+            scope_prefix=scope_prefix,
+            categories=categories,
+            metadata_filter=metadata_filter,
+            limit=limit,
+            min_score=min_score,
+        )
 
     async def adelete(
         self,
@@ -370,4 +378,11 @@ class MnemosyneStorageBackend:
         older_than: datetime | None = None,
         metadata_filter: dict[str, Any] | None = None,
     ) -> int:
-        raise NotImplementedError("lands in #315")
+        return await asyncio.to_thread(
+            self.delete,
+            scope_prefix=scope_prefix,
+            categories=categories,
+            record_ids=record_ids,
+            older_than=older_than,
+            metadata_filter=metadata_filter,
+        )
