@@ -69,6 +69,15 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   `get_record` and `list_records` (newest-first, optionally scoped to
   a subtree) round-trip the full record, embedding included. `delete`/
   `update`/`count` are next (#312).
+- `mnem-crewai`: `delete`/`update`/`count`/`list_categories`/`reset`
+  now do real work (ADR-0021) - `delete` matches on any combination of
+  `scope_prefix`/`categories`/`record_ids`/`older_than`/
+  `metadata_filter` (all given criteria AND together) and tombstones,
+  never a hard delete; `update` replaces a record by id as a new
+  commit, moving it to a new node if its own `scope` changed rather
+  than leaving a stale duplicate behind; `importance`/`last_accessed`
+  round-trip through all of the above, never independently
+  recomputed. `search` is next, the last protocol method (#313).
 
 ### Changed
 

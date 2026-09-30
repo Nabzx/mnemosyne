@@ -96,6 +96,30 @@ def _content_to_record(content: dict[str, Any]) -> MemoryRecord:
     return MemoryRecord.model_validate(content)
 
 
+def _forget_many(store: mnem.Store, node_ids: list[str], *, author: str = "agent") -> None:
+    """Tombstone every id in ``node_ids`` as one commit - ``remember_many``'s
+    batch shape, for deletions (mirrors the OpenAI Agents adapter's own
+    helper, ADR-0020). A retry restages the same fixed id list rather than
+    re-reading anything: which ids to forget doesn't depend on timing the
+    way a fresh sequence counter would.
+    """
+    if not node_ids:
+        return
+    last: mnem.ConflictError | None = None
+    for attempt in range(_RETRIES):
+        try:
+            for node_id in node_ids:
+                store.rm(node_id)
+            n = len(node_ids)
+            store.commit(f"forget {n} node{'s' if n != 1 else ''}", author=author)
+            return
+        except mnem.ConflictError as exc:
+            last = exc
+            time.sleep(_BACKOFF_MS * (attempt + 1) / 1000)
+    assert last is not None
+    raise last
+
+
 class MnemosyneStorageBackend:
     """A ``StorageBackend`` backed by a Mnemosyne store.
 
@@ -152,10 +176,58 @@ class MnemosyneStorageBackend:
         older_than: datetime | None = None,
         metadata_filter: dict[str, Any] | None = None,
     ) -> int:
-        raise NotImplementedError("lands in #313")
+        normalized = None if scope_prefix is None else (scope_prefix.rstrip("/") or "/")
+        to_delete = []
+        for node_id, node in self._store.working_memory().items():
+            if normalized is not None and not _is_in_scope_subtree(node_id, normalized):
+                continue
+            record = _content_to_record(node.content)
+            if record_ids is not None and record.id not in record_ids:
+                continue
+            if categories is not None and not any(c in record.categories for c in categories):
+                continue
+            if older_than is not None and record.created_at >= older_than:
+                continue
+            if metadata_filter is not None and not all(
+                record.metadata.get(k) == v for k, v in metadata_filter.items()
+            ):
+                continue
+            to_delete.append(node_id)
+        _forget_many(self._store, to_delete)
+        return len(to_delete)
 
     def update(self, record: MemoryRecord) -> None:
-        raise NotImplementedError("lands in #313")
+        new_node_id = _node_id(record.scope, record.id)
+        suffix = f"/{record.id}"
+        last: mnem.ConflictError | None = None
+        for attempt in range(_RETRIES):
+            try:
+                old_node_id = next(
+                    (
+                        node_id
+                        for node_id in self._store.working_memory()
+                        if node_id.endswith(suffix)
+                    ),
+                    None,
+                )
+                # The record's own scope may have changed since it was
+                # saved - if so this is really a move, not an in-place
+                # replace, so the old node under the old scope is
+                # tombstoned in the same commit as the new one is written.
+                if old_node_id is not None and old_node_id != new_node_id:
+                    self._store.rm(old_node_id)
+                self._store.add(
+                    new_node_id,
+                    _record_to_content(record),
+                    provenance=mnem.Provenance(source=record.source),
+                )
+                self._store.commit(f"update {record.id}")
+                return
+            except mnem.ConflictError as exc:
+                last = exc
+                time.sleep(_BACKOFF_MS * (attempt + 1) / 1000)
+        assert last is not None
+        raise last
 
     def get_record(self, record_id: str) -> MemoryRecord | None:
         # Node ids are {scope}/{record_id}, and the scope isn't known here -
@@ -213,13 +285,31 @@ class MnemosyneStorageBackend:
         return sorted(children)
 
     def list_categories(self, scope_prefix: str | None = None) -> dict[str, int]:
-        raise NotImplementedError("lands in #313")
+        normalized = None if scope_prefix is None else (scope_prefix.rstrip("/") or "/")
+        counts: dict[str, int] = {}
+        for node_id, node in self._store.working_memory().items():
+            if normalized is not None and not _is_in_scope_subtree(node_id, normalized):
+                continue
+            for category in _content_to_record(node.content).categories:
+                counts[category] = counts.get(category, 0) + 1
+        return counts
 
     def count(self, scope_prefix: str | None = None) -> int:
-        raise NotImplementedError("lands in #313")
+        normalized = None if scope_prefix is None else (scope_prefix.rstrip("/") or "/")
+        return sum(
+            1
+            for node_id in self._store.working_memory()
+            if normalized is None or _is_in_scope_subtree(node_id, normalized)
+        )
 
     def reset(self, scope_prefix: str | None = None) -> None:
-        raise NotImplementedError("lands in #313")
+        normalized = None if scope_prefix is None else (scope_prefix.rstrip("/") or "/")
+        node_ids = [
+            node_id
+            for node_id in self._store.working_memory()
+            if normalized is None or _is_in_scope_subtree(node_id, normalized)
+        ]
+        _forget_many(self._store, node_ids)
 
     async def asave(self, records: list[MemoryRecord]) -> None:
         raise NotImplementedError("lands in #315")
