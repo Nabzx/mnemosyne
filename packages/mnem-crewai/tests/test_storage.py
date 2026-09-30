@@ -2,10 +2,9 @@
 list_scopes' real behaviour is tested in test_scopes.py (#311); save/
 get_record/list_records' in test_records.py (#312); delete/update/count/
 list_categories/reset' in test_delete_update.py (#313); search's in
-test_search.py (#314). Every sync method is real now - only the async
-wrappers remain unimplemented (#315)."""
-
-import asyncio
+test_search.py (#314); the async wrappers' in test_async.py (#315). Every
+``StorageBackend`` protocol method is real now - only the worked example
+(#316) is left."""
 
 import mnem
 import pytest
@@ -26,16 +25,3 @@ def test_import() -> None:
 
 def test_satisfies_storage_backend_protocol(backend: MnemosyneStorageBackend) -> None:
     assert isinstance(backend, StorageBackend)
-
-
-@pytest.mark.parametrize(
-    "call",
-    [
-        lambda b: b.asave([]),
-        lambda b: b.asearch([0.1]),
-        lambda b: b.adelete(),
-    ],
-)
-def test_async_methods_not_yet_implemented(backend: MnemosyneStorageBackend, call) -> None:
-    with pytest.raises(NotImplementedError):
-        asyncio.run(call(backend))
