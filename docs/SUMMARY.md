@@ -39,6 +39,7 @@
 - [0022 Mem0 and Zep on the audit-query table](adr/0022-mem0-and-zep-on-the-audit-query-table.md)
 - [0023 The AutoGen adapter](adr/0023-the-autogen-adapter.md)
 - [0024 The Mem0 migration path](adr/0024-the-mem0-migration-path.md)
+- [0025 CrewAI private-filtering is not the adapter's job](adr/0025-crewai-private-filtering-is-not-the-adapters-job.md)
 
 # Research
 

@@ -1,7 +1,9 @@
 """Tests for the MnemosyneStorageBackend scaffolding (#310). get_scope_info/
 list_scopes' real behaviour is tested in test_scopes.py (#311); save/
 get_record/list_records' in test_records.py (#312); delete/update/count/
-list_categories/reset' in test_delete_update.py (#313)."""
+list_categories/reset' in test_delete_update.py (#313); search's in
+test_search.py (#314). Every sync method is real now - only the async
+wrappers remain unimplemented (#315)."""
 
 import asyncio
 
@@ -24,17 +26,6 @@ def test_import() -> None:
 
 def test_satisfies_storage_backend_protocol(backend: MnemosyneStorageBackend) -> None:
     assert isinstance(backend, StorageBackend)
-
-
-@pytest.mark.parametrize(
-    "call",
-    [
-        lambda b: b.search([0.1]),
-    ],
-)
-def test_sync_methods_not_yet_implemented(backend: MnemosyneStorageBackend, call) -> None:
-    with pytest.raises(NotImplementedError):
-        call(backend)
 
 
 @pytest.mark.parametrize(
