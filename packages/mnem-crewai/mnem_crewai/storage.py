@@ -1,14 +1,16 @@
 """``MnemosyneStorageBackend``: a CrewAI ``StorageBackend`` over a Mnemosyne
 store (#250, ADR-0021).
 
-``search`` / ``delete`` / ``update`` / ``count`` / ``list_categories`` /
-``reset`` and the async wrappers still raise ``NotImplementedError`` - real
-behaviour lands one ticket at a time:
+The async wrappers still raise ``NotImplementedError`` - real behaviour lands
+one ticket at a time:
 
-- ``delete`` / ``update`` / ``count`` / ``list_categories`` / ``reset``: #313
-- ``search`` via real cosine similarity: #314
 - ``asave`` / ``asearch`` / ``adelete``: #315
 - a worked example: #316
+
+``search``/``list_records`` never filter on ``MemoryRecord.private`` - that
+enforcement is CrewAI's own ``RecallFlow``'s job, not the storage layer's;
+the real ``StorageBackend.search`` protocol never passes a requester
+identity to filter by (ADR-0025, correcting ADR-0021's original claim).
 
 Once complete, this class implements CrewAI's ``StorageBackend`` protocol
 structurally (it is a ``Protocol``, not an ABC - no explicit subclassing
@@ -20,6 +22,7 @@ factory contract, not something this adapter can make more granular).
 
 from __future__ import annotations
 
+import math
 import time
 from typing import TYPE_CHECKING, Any
 
@@ -96,6 +99,22 @@ def _content_to_record(content: dict[str, Any]) -> MemoryRecord:
     return MemoryRecord.model_validate(content)
 
 
+def _cosine_similarity(a: list[float], b: list[float]) -> float:
+    """Exact cosine similarity - the same math LanceDB/Qdrant would run
+    against the same vectors (ADR-0021), just unindexed. Assumes equal-length
+    vectors, which CrewAI's own single configured embedder guarantees for
+    every record and query within one crew's data; a length mismatch raises
+    (via ``zip(strict=True)``) rather than silently truncating to a
+    technically-computable but wrong score.
+    """
+    dot = sum(x * y for x, y in zip(a, b, strict=True))
+    norm_a = math.sqrt(sum(x * x for x in a))
+    norm_b = math.sqrt(sum(y * y for y in b))
+    if norm_a == 0.0 or norm_b == 0.0:
+        return 0.0
+    return dot / (norm_a * norm_b)
+
+
 def _forget_many(store: mnem.Store, node_ids: list[str], *, author: str = "agent") -> None:
     """Tombstone every id in ``node_ids`` as one commit - ``remember_many``'s
     batch shape, for deletions (mirrors the OpenAI Agents adapter's own
@@ -166,7 +185,25 @@ class MnemosyneStorageBackend:
         limit: int = 10,
         min_score: float = 0.0,
     ) -> list[tuple[MemoryRecord, float]]:
-        raise NotImplementedError("lands in #314")
+        normalized = None if scope_prefix is None else (scope_prefix.rstrip("/") or "/")
+        scored: list[tuple[MemoryRecord, float]] = []
+        for node_id, node in self._store.working_memory().items():
+            if normalized is not None and not _is_in_scope_subtree(node_id, normalized):
+                continue
+            record = _content_to_record(node.content)
+            if record.embedding is None:
+                continue
+            if categories is not None and not any(c in record.categories for c in categories):
+                continue
+            if metadata_filter is not None and not all(
+                record.metadata.get(k) == v for k, v in metadata_filter.items()
+            ):
+                continue
+            score = _cosine_similarity(query_embedding, record.embedding)
+            if score >= min_score:
+                scored.append((record, score))
+        scored.sort(key=lambda pair: pair[1], reverse=True)
+        return scored[:limit]
 
     def delete(
         self,

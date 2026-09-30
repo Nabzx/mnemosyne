@@ -78,6 +78,24 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   than leaving a stale duplicate behind; `importance`/`last_accessed`
   round-trip through all of the above, never independently
   recomputed. `search` is next, the last protocol method (#313).
+- `mnem-crewai`: `search` now does real work (ADR-0021) - exact, unindexed
+  cosine similarity over every embedding in the scanned scope, respecting
+  `scope_prefix`/`categories`/`metadata_filter`/`min_score`/`limit`, ranked
+  identically to a hand-computed cosine similarity over the same vectors.
+  README documents the scale ceiling (a few thousand records per scope)
+  and points to CrewAI's own LanceDB/Qdrant backends beyond it. Every sync
+  method is now real; only the async wrappers remain (#314).
+
+### Fixed
+
+- `mnem-crewai`: corrected ADR-0021's claim that private-record filtering
+  "happens in the adapter's `search`/`list_records` implementations" -
+  the real `StorageBackend.search` protocol never passes a requester
+  identity to filter by, and neither of CrewAI's own reference backends
+  (LanceDB, Qdrant) filter on `private` themselves; that enforcement is
+  CrewAI's own `RecallFlow`'s job, after calling `storage.search()`.
+  `private` is round-tripped only, exactly like `importance`/
+  `last_accessed` (ADR-0025, narrowing ADR-0021).
 
 ### Changed
 
