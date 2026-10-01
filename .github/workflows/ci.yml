@@ -62,12 +62,13 @@ jobs:
       - run: uv venv
       - run: uv pip install -e ".[dev]"
       - run: uv run pytest python/tests -q
-      - run: uv pip install -e "./packages/mnem-mcp[dev]" -e "./packages/mnem-langgraph[dev]" -e "./packages/mnem-openai-agents[dev]"
+      - run: uv pip install -e "./packages/mnem-mcp[dev]" -e "./packages/mnem-langgraph[dev]" -e "./packages/mnem-openai-agents[dev]" -e "./packages/mnem-autogen[dev]"
       # mnem-crewai isn't installed here (crewai's mcp~=1.2x pin conflicts
       # with mnem-mcp's own mcp>=2.2 floor in one venv, #310) and Windows
       # coverage for it is deferred until it has real logic worth testing
-      # cross-platform - it's scaffolding-only right now.
-      - run: uv run pytest packages/mnem-mcp packages/mnem-langgraph packages/mnem-openai-agents -q
+      # cross-platform - it's scaffolding-only right now. mnem-autogen has
+      # no such conflict (#317), so it's covered here from day one.
+      - run: uv run pytest packages/mnem-mcp packages/mnem-langgraph packages/mnem-openai-agents packages/mnem-autogen -q
 
   python:
     name: python (ruff, pytest)
@@ -104,7 +105,7 @@ jobs:
       - run: uv run python benchmarks/overhead.py
 
   adapters:
-    name: adapters (mcp, langgraph, openai-agents)
+    name: adapters (mcp, langgraph, openai-agents, autogen)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -121,12 +122,16 @@ jobs:
       - run: uv pip install -e "./packages/mnem-mcp[dev]"
       - run: uv pip install -e "./packages/mnem-langgraph[dev]"
       - run: uv pip install -e "./packages/mnem-openai-agents[dev]"
+      - run: uv pip install -e "./packages/mnem-autogen[dev]"
       # ruff needs no installed deps to lint source on disk, so it covers
       # every package including mnem-crewai here; pytest does need real
       # imports, so mnem-crewai's own tests run in the adapters-crewai job
       # below instead - see that job for why it can't share this venv.
+      # mnem-autogen's own deps (jsonref/opentelemetry-api/pillow/protobuf/
+      # pydantic) don't conflict with anything already in this venv, so it
+      # shares this job rather than needing its own isolated one (#317).
       - run: uv run ruff check packages examples
-      - run: uv run pytest packages/mnem-mcp packages/mnem-langgraph packages/mnem-openai-agents -q
+      - run: uv run pytest packages/mnem-mcp packages/mnem-langgraph packages/mnem-openai-agents packages/mnem-autogen -q
       # The worked examples double as end-to-end checks: each asserts its
       # outcome and exits non-zero on failure (#60).
       - run: uv run python examples/support_agent.py
