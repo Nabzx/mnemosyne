@@ -10,6 +10,15 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Added
 
+- `packages/mnem-autogen`: scaffolding for an AutoGen `Memory` backed by
+  Mnemosyne (ADR-0023). `MnemosyneMemory` subclasses `autogen_core.memory.
+  Memory` directly (a real ABC, unlike CrewAI's structural `StorageBackend`
+  Protocol) and imports cleanly, but every method still raises
+  `NotImplementedError` - real behaviour lands one ticket at a time under
+  epic #232 (#317). Shares the plain `adapters` CI job (no dependency
+  conflict with mnem-mcp/mnem-langgraph/mnem-openai-agents, unlike
+  mnem-crewai's genuine `mcp` pin conflict, #310) and is covered on
+  Windows from day one for the same reason.
 - `packages/mnem-openai-agents`: scaffolding for an OpenAI Agents SDK
   `Session` backed by Mnemosyne (ADR-0020). `MnemosyneSession` imports
   cleanly and satisfies the `Session` protocol structurally, but every

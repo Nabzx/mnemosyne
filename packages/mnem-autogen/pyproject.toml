@@ -1,0 +1,44 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mnem-autogen"
+version = "0.0.1"
+description = "An AutoGen Memory backed by Mnemosyne: versioned agent memory with blame and bisect."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Nabil Shah", email = "nabilshahx@gmail.com" }]
+keywords = ["ai", "agents", "memory", "autogen", "version-control"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+]
+dependencies = [
+    "mnem-agents ~= 0.0",
+    # autogen_core.memory (Memory/ListMemory/MemoryContent) was added in
+    # 0.5.0; 0.4.2 and earlier have no autogen_core.memory module at all,
+    # checked directly against real releases, not assumed from the changelog.
+    "autogen-core >= 0.5.0, < 1",
+]
+
+[project.urls]
+Homepage = "https://github.com/Nabzx/mnemosyne"
+Repository = "https://github.com/Nabzx/mnemosyne"
+Documentation = "https://nabzx.github.io/mnemosyne/"
+
+[project.optional-dependencies]
+dev = ["pytest >= 8", "ruff >= 0.6"]
+
+# The SDK is not on PyPI yet; take it from the repo root.
+[tool.uv.sources]
+mnem-agents = { path = "../..", editable = true }
+
+[tool.hatch.build.targets.wheel]
+packages = ["mnem_autogen"]
+
+[tool.ruff]
+line-length = 100
