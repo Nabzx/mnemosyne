@@ -4,7 +4,12 @@ store (#250, ADR-0021).
 Every ``StorageBackend`` protocol method is real. ``asave``/``asearch``/
 ``adelete`` wrap their sync counterpart in ``asyncio.to_thread`` (matching
 the LangGraph adapter's existing precedent, ADR-0021) rather than a native
-async re-implementation - a worked example is the only thing left (#316).
+async re-implementation.
+
+``why``/``bisect`` are extra methods outside the ``StorageBackend``
+protocol, the same shape as the LangGraph and OpenAI Agents SDK adapters'
+own (ADR-0016, ADR-0020) - not part of CrewAI's own contract, but needed to
+do anything with the history every write already leaves behind.
 
 ``search``/``list_records`` never filter on ``MemoryRecord.private`` - that
 enforcement is CrewAI's own ``RecallFlow``'s job, not the storage layer's;
@@ -30,6 +35,7 @@ import mnem
 from crewai.memory.types import MemoryRecord, ScopeInfo
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
     from datetime import datetime
 
 _RETRIES = 4
@@ -386,3 +392,31 @@ class MnemosyneStorageBackend:
             older_than=older_than,
             metadata_filter=metadata_filter,
         )
+
+    def why(self, record_id: str) -> mnem.Blame:
+        """The commit and provenance that gave ``record_id``'s node its
+        current value - not part of ``StorageBackend``, same shape as the
+        LangGraph and OpenAI Agents SDK adapters' own (ADR-0016, ADR-0020).
+        A scan, not an indexed lookup, for the same reason ``get_record`` is
+        one - ``record_id`` carries no scope to key on directly."""
+        suffix = f"/{record_id}"
+        node_id = next(
+            (nid for nid in self._store.working_memory() if nid.endswith(suffix)),
+            None,
+        )
+        if node_id is None:
+            msg = f"no record with id {record_id!r}"
+            raise mnem.InvalidRefError(msg)
+        return self._store.blame(node_id)
+
+    def bisect(
+        self,
+        predicate: Callable[[dict[str, mnem.MemoryNode]], bool],
+        *,
+        bad: str | None = None,
+        good: str | None = None,
+    ) -> str:
+        """The first commit where ``predicate`` holds, over the full store
+        state - a thin wrapper, matching the OpenAI Agents SDK adapter's own
+        (ADR-0020)."""
+        return self._store.bisect(predicate, bad=bad, good=good)
