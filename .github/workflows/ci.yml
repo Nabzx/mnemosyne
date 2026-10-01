@@ -154,6 +154,9 @@ jobs:
       - run: uv pip install -e ".[dev]"
       - run: uv pip install -e "./packages/mnem-crewai[dev]"
       - run: uv run pytest packages/mnem-crewai -q
+      # The worked example doubles as an end-to-end check (#60), same as
+      # every other adapter's own example in the `adapters` job above.
+      - run: uv run python examples/crewai_memory.py
 
   wheel:
     name: python (wheel)

@@ -90,6 +90,14 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   LangGraph adapter's existing precedent, rather than a native async
   re-implementation. Every `StorageBackend` protocol method is now real;
   only a worked example is left (#315).
+- `mnem-crewai`: `why(record_id)`/`bisect(predicate)` (ADR-0021) - extra
+  methods outside the `StorageBackend` protocol, the same shape as the
+  LangGraph and OpenAI Agents SDK adapters' own, needed to do anything
+  with the history every write already leaves behind. A new worked
+  example, `examples/crewai_memory.py` - a real `Memory` instance,
+  `remember`/`recall` round-tripping through `MnemosyneStorageBackend`,
+  then `why`/`bisect` tracing a record to the commit that wrote it -
+  wired into CI. This closes out the `mnem-crewai` build (#316).
 
 ### Fixed
 

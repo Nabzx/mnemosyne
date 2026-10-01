@@ -38,4 +38,17 @@ itself to filter by. See
 `asave`/`asearch`/`adelete` wrap their sync counterpart in
 `asyncio.to_thread` (matching the LangGraph adapter's existing precedent)
 rather than a native async re-implementation - every `StorageBackend`
-protocol method is real. Only a worked example (#316) is left.
+protocol method is real.
+
+## Extra methods
+
+Not on the `StorageBackend` interface, for an application to call directly
+on the backend instance: `why(record_id)` (the commit and provenance that
+gave a record its current value) and `bisect(predicate)` (the first commit
+where `predicate` holds) - the same shape as the LangGraph and OpenAI
+Agents SDK adapters' own.
+
+See [`examples/crewai_memory.py`](https://github.com/Nabzx/mnemosyne/blob/main/examples/crewai_memory.py)
+for a worked example: a real `Memory` instance, `remember`/`recall`
+round-tripping through this backend, then `why`/`bisect` tracing a record
+back to the commit that wrote it.
