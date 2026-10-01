@@ -19,6 +19,12 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   conflict with mnem-mcp/mnem-langgraph/mnem-openai-agents, unlike
   mnem-crewai's genuine `mcp` pin conflict, #310) and is covered on
   Windows from day one for the same reason.
+- `mnem-autogen`: the node id scheme and write/read primitives (ADR-0023) -
+  a sortable `{name}:{seq:010d}` id per item, reusing the OpenAI Agents SDK
+  adapter's own scheme directly (ADR-0020), and a `{name}:_seq` counter
+  node bumped in the same commit as every write, excluded from any content
+  read. `add()`/`query()`/`update_context()` still raise
+  `NotImplementedError` - nothing calls these primitives yet (#318).
 - `packages/mnem-openai-agents`: scaffolding for an OpenAI Agents SDK
   `Session` backed by Mnemosyne (ADR-0020). `MnemosyneSession` imports
   cleanly and satisfies the `Session` protocol structurally, but every
