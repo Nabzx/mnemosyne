@@ -1,15 +1,12 @@
 """``MnemosyneMemory``: an AutoGen ``Memory`` over a Mnemosyne store (#251,
 ADR-0023).
 
-The node id scheme and write/read primitives (``_item_id``/``_seq_node_id``/
-``_read_seq``/``_write_item``/``_read_items``) are real (#318), reusing
-ADR-0020's ``{name}:{seq:010d}`` sequence-counter scheme directly - but every
-``Memory`` method below still raises ``NotImplementedError``, since nothing
-calls them yet. Real behaviour lands one ticket at a time:
-
-- ``add`` / ``query`` / ``update_context``: #319
-- ``clear`` / ``close``: #320
-- a worked example: #321
+``add``/``query``/``update_context`` are real (#319) - ``query`` ignores its
+own argument and returns everything chronologically, and ``update_context``
+formats byte-identically to ``ListMemory``'s own output, matching the SDK's
+real reference behaviour rather than a degraded one. ``clear``/``close``
+still raise ``NotImplementedError`` - lands in #320. A worked example is
+#321.
 
 ``MnemosyneMemory`` subclasses ``autogen_core.memory.Memory`` directly (an
 ABC, unlike CrewAI's structural ``StorageBackend`` Protocol) - one store per
@@ -21,11 +18,14 @@ namespaces the way LangGraph's ``BaseStore`` or CrewAI's globally-registered
 
 from __future__ import annotations
 
+import base64
 import time
 from typing import TYPE_CHECKING, Any
 
 import mnem
+from autogen_core import Image
 from autogen_core.memory import Memory, MemoryContent, MemoryQueryResult, UpdateContextResult
+from autogen_core.models import SystemMessage
 
 if TYPE_CHECKING:
     from autogen_core import CancellationToken
@@ -96,6 +96,39 @@ def _read_items(store: mnem.Store, name: str) -> list[mnem.MemoryNode]:
     ]
 
 
+def _content_to_node_content(content: MemoryContent) -> dict[str, Any]:
+    """``MemoryContent`` as JSON-safe node content (ADR-0003: "a string or
+    any JSON value"). ``content.content``'s own union type - ``str``,
+    ``bytes``, a dict, or an ``Image`` - needs explicit handling:
+    ``model_dump(mode="json")`` silently mis-serializes ``bytes`` (decodes
+    valid UTF-8 as a plain ``str``, losing the bytes/str distinction
+    entirely, and raises outright on invalid UTF-8 - verified directly, not
+    assumed) and has no real handling for ``Image`` at all. Reserved marker
+    keys (``__bytes_b64__``/``__image_b64__``) are an accepted, documented
+    risk against a real ``dict`` payload that happens to use the same key.
+    """
+    data = content.model_dump(mode="json", exclude={"content"})
+    raw = content.content
+    if isinstance(raw, bytes):
+        data["content"] = {"__bytes_b64__": base64.b64encode(raw).decode("ascii")}
+    elif isinstance(raw, Image):
+        data["content"] = {"__image_b64__": raw.to_base64()}
+    else:
+        data["content"] = raw  # str, or an already JSON-compatible dict
+    return data
+
+
+def _node_content_to_content(data: dict[str, Any]) -> MemoryContent:
+    raw = data["content"]
+    if isinstance(raw, dict) and "__bytes_b64__" in raw:
+        restored: Any = base64.b64decode(raw["__bytes_b64__"])
+    elif isinstance(raw, dict) and "__image_b64__" in raw:
+        restored = Image.from_base64(raw["__image_b64__"])
+    else:
+        restored = raw
+    return MemoryContent.model_validate({**data, "content": restored})
+
+
 class MnemosyneMemory(Memory):
     """A ``Memory`` backed by a Mnemosyne store - one store per instance.
 
@@ -118,7 +151,22 @@ class MnemosyneMemory(Memory):
         self,
         model_context: ChatCompletionContext,
     ) -> UpdateContextResult:
-        raise NotImplementedError("lands in #319")
+        """Formats byte-identically to ``ListMemory``'s own output - a
+        numbered ``SystemMessage`` listing every memory in chronological
+        order, appended via ``model_context.add_message`` - matching the
+        SDK's real reference behaviour, not an adapter-specific format."""
+        contents = [_node_content_to_content(node.content) for node in _read_items(self._store, self._name)]
+        if not contents:
+            return UpdateContextResult(memories=MemoryQueryResult(results=[]))
+
+        memory_strings = [f"{i}. {c.content!s}" for i, c in enumerate(contents, 1)]
+        memory_context = (
+            "\nRelevant memory content (in chronological order):\n"
+            + "\n".join(memory_strings)
+            + "\n"
+        )
+        await model_context.add_message(SystemMessage(content=memory_context))
+        return UpdateContextResult(memories=MemoryQueryResult(results=contents))
 
     async def query(
         self,
@@ -126,14 +174,20 @@ class MnemosyneMemory(Memory):
         cancellation_token: CancellationToken | None = None,
         **kwargs: Any,
     ) -> MemoryQueryResult:
-        raise NotImplementedError("lands in #319")
+        """Ignores ``query`` entirely and returns every item chronologically
+        - matches ``ListMemory``'s own real behaviour, not a degraded
+        implementation (ADR-0023)."""
+        _ = query, cancellation_token, kwargs
+        contents = [_node_content_to_content(node.content) for node in _read_items(self._store, self._name)]
+        return MemoryQueryResult(results=contents)
 
     async def add(
         self,
         content: MemoryContent,
         cancellation_token: CancellationToken | None = None,
     ) -> None:
-        raise NotImplementedError("lands in #319")
+        _ = cancellation_token
+        _write_item(self._store, self._name, _content_to_node_content(content))
 
     async def clear(self) -> None:
         raise NotImplementedError("lands in #320")

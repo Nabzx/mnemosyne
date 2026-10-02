@@ -25,6 +25,17 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   node bumped in the same commit as every write, excluded from any content
   read. `add()`/`query()`/`update_context()` still raise
   `NotImplementedError` - nothing calls these primitives yet (#318).
+- `mnem-autogen`: `add`/`query`/`update_context` now do real work
+  (ADR-0023) - `add` is one commit per call, one node per `MemoryContent`;
+  `query` ignores its own argument and returns everything chronologically,
+  matching `ListMemory`'s real behaviour exactly rather than a degraded
+  implementation; `update_context` formats byte-identically to
+  `ListMemory`'s own output, verified directly against it for the same
+  content. `MemoryContent.content`'s own `bytes`/`Image` cases get real,
+  lossless handling (pydantic's own `model_dump(mode="json")` silently
+  mis-serializes `bytes` and has no handling for `Image` at all - found and
+  worked around, not assumed safe). `metadata` round-trips fully opaque,
+  no reserved-key interpretation. `clear`/`close` are next (#320).
 - `packages/mnem-openai-agents`: scaffolding for an OpenAI Agents SDK
   `Session` backed by Mnemosyne (ADR-0020). `MnemosyneSession` imports
   cleanly and satisfies the `Session` protocol structurally, but every
