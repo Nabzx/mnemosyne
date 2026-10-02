@@ -1,10 +1,11 @@
-"""Tests for the MnemosyneMemory scaffolding (#317)."""
+"""Tests for the MnemosyneMemory scaffolding (#317). add/query/update_context's
+real behaviour is tested in test_memory_ops.py (#319)."""
 
 import asyncio
 
 import mnem
 import pytest
-from autogen_core.memory import Memory, MemoryContent, MemoryMimeType
+from autogen_core.memory import Memory
 
 from mnem_autogen import MnemosyneMemory
 
@@ -36,9 +37,6 @@ def test_name_round_trips() -> None:
 @pytest.mark.parametrize(
     "call",
     [
-        lambda m: m.update_context(None),
-        lambda m: m.query(""),
-        lambda m: m.add(MemoryContent(content="x", mime_type=MemoryMimeType.TEXT)),
         lambda m: m.clear(),
         lambda m: m.close(),
     ],
