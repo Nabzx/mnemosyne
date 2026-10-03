@@ -1,12 +1,11 @@
 """``MnemosyneMemory``: an AutoGen ``Memory`` over a Mnemosyne store (#251,
 ADR-0023).
 
-``add``/``query``/``update_context`` are real (#319) - ``query`` ignores its
-own argument and returns everything chronologically, and ``update_context``
-formats byte-identically to ``ListMemory``'s own output, matching the SDK's
-real reference behaviour rather than a degraded one. ``clear``/``close``
-still raise ``NotImplementedError`` - lands in #320. A worked example is
-#321.
+Every ``Memory`` method is real. ``clear()`` is a batched tombstone commit,
+never a hard delete (#320); ``close()`` actually releases the store handle,
+unlike ``ListMemory``'s own true no-op - redb allows only one open handle
+per store per process, so this is what lets another instance open the same
+path afterward. A worked example is the only thing left (#321).
 
 ``MnemosyneMemory`` subclasses ``autogen_core.memory.Memory`` directly (an
 ABC, unlike CrewAI's structural ``StorageBackend`` Protocol) - one store per
@@ -129,6 +128,35 @@ def _node_content_to_content(data: dict[str, Any]) -> MemoryContent:
     return MemoryContent.model_validate({**data, "content": restored})
 
 
+def _forget_many(store: mnem.Store, node_ids: list[str], *, author: str = "agent") -> None:
+    """Tombstone every id in ``node_ids`` as one commit - mirrors the other
+    adapters' own batch-tombstone helper (ADR-0020/0021). ``mnem.agents.
+    forget`` tombstones exactly one node per commit (confirmed directly
+    against its real signature), so looping it would produce one commit per
+    item rather than the single batched commit ``clear()`` needs - this
+    reuses the store's own ``rm``/``commit`` directly instead, the same
+    reasoning every other adapter's batch-tombstone helper already follows.
+    A retry restages the same fixed id list rather than re-reading
+    anything: which ids to forget doesn't depend on timing the way a fresh
+    ``seq`` does.
+    """
+    if not node_ids:
+        return
+    last: mnem.ConflictError | None = None
+    for attempt in range(_RETRIES):
+        try:
+            for node_id in node_ids:
+                store.rm(node_id)
+            n = len(node_ids)
+            store.commit(f"forget {n} node{'s' if n != 1 else ''}", author=author)
+            return
+        except mnem.ConflictError as exc:
+            last = exc
+            time.sleep(_BACKOFF_MS * (attempt + 1) / 1000)
+    assert last is not None
+    raise last
+
+
 class MnemosyneMemory(Memory):
     """A ``Memory`` backed by a Mnemosyne store - one store per instance.
 
@@ -190,7 +218,25 @@ class MnemosyneMemory(Memory):
         _write_item(self._store, self._name, _content_to_node_content(content))
 
     async def clear(self) -> None:
-        raise NotImplementedError("lands in #320")
+        """One batched tombstone commit forgetting every node under this
+        instance's namespace, including the ``_seq`` counter - never a
+        hard delete, so history before the clear stays recoverable through
+        ``mnem log``/``blame``, same as every other adapter's own
+        ``clear``/``reset``/``clear_session``. Resetting ``_seq`` too means
+        the next ``add()`` starts again at 0, not wherever it left off."""
+        node_ids = [node.id for node in _read_items(self._store, self._name)]
+        seq_id = _seq_node_id(self._name)
+        if self._store.working_node(seq_id) is not None:
+            node_ids.append(seq_id)
+        _forget_many(self._store, node_ids)
 
     async def close(self) -> None:
-        raise NotImplementedError("lands in #320")
+        """Releases the store handle - a real cleanup, not a true no-op
+        the way ``ListMemory``'s own ``close`` is. ``mnem.Store`` has no
+        explicit close method; redb's handle is released when the last
+        Python reference drops (PyO3's ``Drop``, verified directly), and
+        redb allows only one open handle per store per process - so this
+        is what actually lets another instance open the same path
+        afterward, unlike ``ListMemory``, which holds nothing OS-level to
+        release in the first place."""
+        self._store = None  # type: ignore[assignment]

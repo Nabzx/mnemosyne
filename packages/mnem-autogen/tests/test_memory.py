@@ -1,17 +1,12 @@
 """Tests for the MnemosyneMemory scaffolding (#317). add/query/update_context's
-real behaviour is tested in test_memory_ops.py (#319)."""
-
-import asyncio
+real behaviour is tested in test_memory_ops.py (#319); clear/close's in
+test_clear_close.py (#320). Every Memory method is now real."""
 
 import mnem
 import pytest
 from autogen_core.memory import Memory
 
 from mnem_autogen import MnemosyneMemory
-
-
-def _run(coro):
-    return asyncio.run(coro)
 
 
 @pytest.fixture
@@ -32,15 +27,3 @@ def test_name_round_trips() -> None:
     mem = MnemosyneMemory.__new__(MnemosyneMemory)
     mem._name = "my-agent"
     assert mem.name == "my-agent"
-
-
-@pytest.mark.parametrize(
-    "call",
-    [
-        lambda m: m.clear(),
-        lambda m: m.close(),
-    ],
-)
-def test_methods_not_yet_implemented(memory: MnemosyneMemory, call) -> None:
-    with pytest.raises(NotImplementedError):
-        _run(call(memory))
