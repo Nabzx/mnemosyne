@@ -36,6 +36,16 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   mis-serializes `bytes` and has no handling for `Image` at all - found and
   worked around, not assumed safe). `metadata` round-trips fully opaque,
   no reserved-key interpretation. `clear`/`close` are next (#320).
+- `mnem-autogen`: `clear`/`close` now do real work (ADR-0023) - `clear` is
+  one batched tombstone commit forgetting every node under the instance's
+  namespace (including the `_seq` counter, so the next `add()` starts
+  fresh), never a hard delete - history from before stays recoverable
+  through `mnem log`/`blame`. `close` actually releases the store handle
+  (`mnem.Store` has no close method of its own; redb's handle is released
+  when the last Python reference drops), unlike `ListMemory`'s true no-op
+  - redb allows only one open handle per store per process, so this is
+  what lets another instance open the same path afterward. Every `Memory`
+  method is now real; a worked example is the only thing left (#321).
 - `packages/mnem-openai-agents`: scaffolding for an OpenAI Agents SDK
   `Session` backed by Mnemosyne (ADR-0020). `MnemosyneSession` imports
   cleanly and satisfies the `Session` protocol structurally, but every

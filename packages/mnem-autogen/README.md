@@ -3,8 +3,7 @@
 An [AutoGen](https://github.com/microsoft/autogen) `Memory` backed by
 [Mnemosyne](https://github.com/Nabzx/mnemosyne).
 
-`add`/`query`/`update_context` are real. `clear`/`close` still raise
-`NotImplementedError` - real behaviour lands one ticket at a time, see
+Every `Memory` method is real - see
 [ADR-0023](https://github.com/Nabzx/mnemosyne/blob/main/docs/adr/0023-the-autogen-adapter.md)
 and epic [#232](https://github.com/Nabzx/mnemosyne/issues/232).
 
@@ -21,3 +20,9 @@ chronologically, and `update_context(model_context)` formats byte-
 identically to `ListMemory`'s own output - both match the SDK's real
 reference behaviour (`ListMemory` itself ignores `query()`'s argument too),
 not a degraded implementation.
+
+`clear()` is one batched tombstone commit, never a hard delete - history
+from before the clear stays recoverable through `mnem log`/`blame`.
+`close()` actually releases the store handle, unlike `ListMemory`'s own
+true no-op: redb allows only one open handle per store per process, so
+this is what lets another instance open the same path afterward.
