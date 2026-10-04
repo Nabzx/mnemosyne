@@ -46,6 +46,17 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   - redb allows only one open handle per store per process, so this is
   what lets another instance open the same path afterward. Every `Memory`
   method is now real; a worked example is the only thing left (#321).
+- `mnem-autogen`: `why(item_id)`/`bisect(predicate)` (ADR-0023) - extra
+  methods outside the `Memory` protocol, the same shape as the LangGraph,
+  OpenAI Agents SDK, and CrewAI adapters' own. A new worked example,
+  `examples/autogen_memory.py` - a real `AssistantAgent`, `update_context`
+  demonstrably injecting stored memories before inference (verified
+  directly against the model client's own call history, not just trusted
+  to have happened), then `why`/`bisect` tracing a memory to the commit
+  that wrote it - wired into CI via a new `examples` extra
+  (`autogen-agentchat`/`autogen-ext`, needed only by the example, kept out
+  of the package's own dependencies). This closes out the `mnem-autogen`
+  build (#321).
 - `packages/mnem-openai-agents`: scaffolding for an OpenAI Agents SDK
   `Session` backed by Mnemosyne (ADR-0020). `MnemosyneSession` imports
   cleanly and satisfies the `Session` protocol structurally, but every

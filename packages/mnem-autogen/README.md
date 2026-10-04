@@ -26,3 +26,17 @@ from before the clear stays recoverable through `mnem log`/`blame`.
 `close()` actually releases the store handle, unlike `ListMemory`'s own
 true no-op: redb allows only one open handle per store per process, so
 this is what lets another instance open the same path afterward.
+
+## Extra methods
+
+Not on the `Memory` interface, for an application to call directly on the
+memory instance: `why(item_id)` (the commit and provenance that gave an
+item its current value) and `bisect(predicate)` (the first commit where
+`predicate` holds) - the same shape as the LangGraph, OpenAI Agents SDK,
+and CrewAI adapters' own.
+
+See [`examples/autogen_memory.py`](https://github.com/Nabzx/mnemosyne/blob/main/examples/autogen_memory.py)
+for a worked example: a real `AssistantAgent`, `update_context`
+demonstrably injecting stored memories before inference, then `why`/
+`bisect` tracing a memory back to the commit that wrote it. Needs the
+`examples` extra: `pip install "mnem-autogen[examples]"`.
