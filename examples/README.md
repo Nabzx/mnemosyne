@@ -17,6 +17,7 @@ external PRs (see `CONTRIBUTING.md`).
 | `crewai_memory.py` | `mnem-crewai` | a real `Memory` instance, `remember`/`recall` round-tripping through `MnemosyneStorageBackend`, then `why` + `bisect` trace a record to the commit that wrote it |
 | `autogen_memory.py` | `mnem-autogen` | a real `AssistantAgent`, `update_context` demonstrably injecting stored memories before inference, then `why` + `bisect` trace a memory to the commit that wrote it |
 | `cross_framework_merge.py` | `mnem-crewai` + `mnem-langgraph` | two different framework adapters writing their own branches of one shared store; a real conflict between two CrewAI branches is surfaced and resolved, while an independent LangGraph branch merges in cleanly alongside it |
+| `fork_via_export_import.py` | the Python SDK | fork a store with `export`/`import`, edit the fork on a branch, `merge` the edit back - the merged node still `blame`s to the exact original commit id, proving the round trip carries real history, not flattened content |
 
 ```bash
 python examples/support_agent.py
@@ -28,4 +29,5 @@ python examples/openai_agents_memory.py                # needs mnem-openai-agent
 python examples/crewai_memory.py                       # needs mnem-crewai
 python examples/autogen_memory.py                      # needs mnem-autogen[examples]
 python examples/cross_framework_merge.py                # needs mnem-crewai, mnem-langgraph
+python examples/fork_via_export_import.py
 ```

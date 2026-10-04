@@ -140,6 +140,9 @@ jobs:
       - run: uv run python examples/mcp_client.py
       - run: uv run python examples/openai_agents_memory.py
       - run: uv run python examples/autogen_memory.py
+      # export/import/merge are core CLI, not adapter-specific - runs here
+      # rather than in adapters-crewai (#356).
+      - run: uv run python examples/fork_via_export_import.py
 
   adapters-crewai:
     name: adapters (crewai, cross-adapter ids)

@@ -10,6 +10,15 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Added
 
+- `examples/fork_via_export_import.py`: fork a store with `export`/
+  `import`, edit the fork on a branch, `merge` the edit back into the
+  fork's own main - no new convention, `export`/`import`/`merge` are
+  already real, general-purpose primitives. The merged-in node still
+  `blame`s to the *exact* original commit id, proving the round trip
+  carries the real object graph, not a flattened copy (content-addressed
+  objects hash identically regardless of which store file holds them).
+  Wired into the `adapters` job - core CLI, not adapter-specific (#356).
+
 - `examples/cross_framework_merge.py`: two different framework adapters -
   CrewAI and LangGraph - writing their own branches of one shared store.
   A real conflict surfaces and resolves between two of CrewAI's own
