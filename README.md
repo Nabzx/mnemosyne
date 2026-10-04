@@ -134,6 +134,8 @@ The later two are the point. Everything today is `0.0.x` groundwork ([ADR-0010](
 
 Era 1, the substrate, is complete. Era 2, the collaboration layer, is next. See [`ROADMAP.md`](https://github.com/Nabzx/mnemosyne/blob/main/ROADMAP.md) and [`CHANGELOG.md`](https://github.com/Nabzx/mnemosyne/blob/main/CHANGELOG.md).
 
+**Where this is going**, roughly: version control for agent memory (here today) → one agent defined once, published and forked across frameworks instead of rebuilt per framework (Era 3, [`ROADMAP.md`](https://github.com/Nabzx/mnemosyne/blob/main/ROADMAP.md)) → the same versioning idea applied to physical robot skills, a genuinely different and harder problem, noted as a long-term direction rather than a scoped one.
+
 ## How it works
 
 - **`mnem-store` (Rust)**: the object model, the content-addressed store, the commit graph. Never touches the network or a model; a `cargo deny` check enforces it.

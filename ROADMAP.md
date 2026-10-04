@@ -183,6 +183,14 @@ once real design work starts, not before.
 
 - The whole agent, its identity, prompt, tools, memory schema, policy and evaluations, as one versioned, signed, forkable artefact.
 - A registry to publish, discover, fork, and submit improvements to agents.
+- Framework portability: an agent defined once, runnable on any supported
+  framework (CrewAI, LangGraph, AutoGen, the OpenAI Agents SDK) rather than
+  rebuilt per framework. A prompt and a tool's name/description/schema are
+  already plain data; every framework studied derives a tool's schema from
+  a real Python callable the same way (type hints and a docstring), so the
+  translation is reformatting, not retraining. What crosses a framework
+  boundary as stored data vs. as a locally-supplied callable is a real
+  open security/trust question, not yet decided (map #352).
 - This is `1.0.0` (ADR-0010). When `0.1.0` is cut on the way there, or whether the line goes straight from `0.0.x` to `1.0.0`, is decided when Era 3 is in view.
 
 ## Backlog
@@ -192,6 +200,11 @@ Not yet placed in an era.
 - A weight-level view: LoRA deltas as commits, model merging as merge
 - A daemon for long-running stores
 - Encryption at rest for the object database
+- Beyond software agents: the same versioning/portability idea applied to
+  physical robot skills - a genuinely different, harder problem (moving a
+  skill across robot bodies is a robotics/ML research question, not a
+  data-format translation one, unlike the framework-portability bullet
+  above). Noted as a real long-term direction, not scoped or estimated.
 
 CrewAI and AutoGen adapters were here; both now have real, Accepted ADRs
 (ADR-0021, ADR-0023) and a build ticket ahead of them - tracked in epic #232,

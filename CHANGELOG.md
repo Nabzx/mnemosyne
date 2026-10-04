@@ -184,6 +184,18 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   the `msrv` CI job's toolchain pin. Verified `cargo check --all
   --all-features` passes clean against a real, locally-installed
   1.90.0 toolchain, not just a newer one that happens to also work.
+- `README.md`/`ROADMAP.md`: added a real, checked finding to Era 3's own
+  scope - every framework this project has an adapter for (CrewAI,
+  AutoGen, LangGraph, the OpenAI Agents SDK) derives a tool's JSON schema
+  from a real Python callable's type hints and docstring the same way,
+  confirmed directly against each one's own source - so an agent
+  definition's tool *shape* translates between frameworks by
+  reformatting, not retraining. Noted as part of Era 3's own registry
+  idea (map #352), not yet scoped or estimated. Also noted, honestly
+  separated as a harder, different kind of problem: the same versioning
+  idea applied to physical robot skills is a robotics/ML research
+  question, not a data-format one - added to the Backlog as a long-term
+  direction, explicitly not scoped.
 
 ### Fixed
 
