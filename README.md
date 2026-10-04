@@ -110,60 +110,23 @@ More worked examples, one per surface (SDK, Claude, LangGraph, MCP), live in
 
 What is missing on purpose, for now: `push` / `pull` / `clone` (the sync protocol between stores is Era 2), a staged hunk (`add -p`, staging is a whole node), and a text-merge conflict marker (a conflict is an object you resolve with `--resolve <id>=ours|theirs|base|delete` or `--strategy`, not an inline marker).
 
-## The GitHub for AI agents
+## The vision
 
-Git made source code collaborative; GitHub made it social. As software becomes agents working in teams, they need the same stack underneath. Mnemosyne is building it in three eras:
+Code needed version control, then a way to share and build on it together. AI agents need exactly the same thing, and it does not stop at memory: it reaches the whole agent, how agents work together, and eventually the physical machines they run on. Mnemosyne is building that, end to end:
 
-1. **The substrate** *(now)*: single-agent versioned memory, local and deterministic.
-2. **The collaboration layer**: semantic merge that reasons about contradiction, a sync protocol, and a review step before a memory update lands in shared memory. Pull requests, for agent memory.
-3. **The platform** *(`1.0`)*: the whole agent (prompt, tools, memory, policy, evals) as one versioned, signed, forkable artefact, with a registry.
+1. **Version control** *(now)*: single-agent versioned memory, local and deterministic.
+2. **The collaboration layer**: agents working together on shared memory, with a review step before a change lands, the same way a pull request works for code.
+3. **The platform**: the whole agent, not just its memory, saved, shared and forked the way code is on GitHub today.
+4. **The translation layer**: one agent definition, written once, running on any framework instead of rebuilt for each one.
+5. **Physical AI**: robots are the future. The same version control and translation layer, applied to physical skills instead of software memory, so what one system learns can move to another.
 
-The later two are the point. Everything today is `0.0.x` groundwork ([ADR-0010](https://github.com/Nabzx/mnemosyne/blob/main/docs/adr/0010-what-1-0-means.md)).
-
-## Status
-
-| Tag | What landed |
-| --- | --- |
-| `v0.0.2` | the object store, `commit` · `add` · `log`, the Python binding |
-| `v0.0.3` | `branch` · `checkout` · `diff`, time travel |
-| `v0.0.4` | deterministic three-way `merge` with conflict objects |
-| `v0.0.5` | `blame` · `bisect`, the provenance index |
-| `v0.0.6` | an MCP server and a LangGraph adapter, so an agent uses `mnem` as its memory |
-| `v0.0.7` | a benchmark, a docs site, the on-disk format frozen; published to crates.io and PyPI |
-| `v0.0.8` | prebuilt `mnem` binaries (no Rust toolchain needed), `export`/`import` in the CLI and the Python SDK |
-
-Era 1, the substrate, is complete. Era 2, the collaboration layer, is next. See [`ROADMAP.md`](https://github.com/Nabzx/mnemosyne/blob/main/ROADMAP.md) and [`CHANGELOG.md`](https://github.com/Nabzx/mnemosyne/blob/main/CHANGELOG.md).
-
-**Where this is going**, roughly: version control for agent memory (here today) → one agent defined once, published and forked across frameworks instead of rebuilt per framework (Era 3, [`ROADMAP.md`](https://github.com/Nabzx/mnemosyne/blob/main/ROADMAP.md)) → the same versioning idea applied to physical robot skills, a genuinely different and harder problem, noted as a long-term direction rather than a scoped one.
-
-## How it works
-
-- **`mnem-store` (Rust)**: the object model, the content-addressed store, the commit graph. Never touches the network or a model; a `cargo deny` check enforces it.
-- **`mnem`**: the CLI (crate `mnem-git`, Rust) and the SDK (`mnem-agents`, Python) built on the core.
-- **The store** is a `.mnem/` directory, format specified in [`docs/format/`](https://github.com/Nabzx/mnemosyne/tree/main/docs/format) and frozen for `0.0.x` at `format_version` 1. Decisions live in [`docs/adr/`](https://github.com/Nabzx/mnemosyne/tree/main/docs/adr).
-- **Plug into an agent**: an MCP server ([`mnem-mcp`](https://github.com/Nabzx/mnemosyne/blob/main/packages/mnem-mcp/README.md#claude-desktop), works with Claude Desktop and [Claude Code](https://github.com/Nabzx/mnemosyne/blob/main/packages/mnem-mcp/README.md#claude-code)), a LangGraph `BaseStore` ([`mnem-langgraph`](https://github.com/Nabzx/mnemosyne/blob/main/packages/mnem-langgraph/README.md)), an OpenAI Agents SDK `Session` ([`mnem-openai-agents`](https://github.com/Nabzx/mnemosyne/blob/main/packages/mnem-openai-agents/README.md)), a CrewAI `StorageBackend` ([`mnem-crewai`](https://github.com/Nabzx/mnemosyne/blob/main/packages/mnem-crewai/README.md)), or an AutoGen `Memory` ([`mnem-autogen`](https://github.com/Nabzx/mnemosyne/blob/main/packages/mnem-autogen/README.md)).
+We start with software agents. That is the easiest place to prove it works. But physical AI is the new phenomenon, and it is what this is ultimately built for.
 
 ## Prior work
 
 A wave of 2026 research points at this idea (Git4Data, GitOfThoughts, StateFuse, MemTX, LatticeMind), each a paper or a prototype. One finding is worth stating plainly: versioned memory does not make an agent give better answers. What it gives you is history, audit, and safe merging. That is the whole pitch, and it is enough. The [benchmark](https://github.com/Nabzx/mnemosyne/blob/main/docs/benchmark.md) has the numbers, [why I built this](https://github.com/Nabzx/mnemosyne/blob/main/docs/why.md) has the longer version, and [why agent memory needs version control](https://github.com/Nabzx/mnemosyne/blob/main/docs/why-version-control.md) makes the general case.
 
 Want the same story worked end to end, one command at a time, with real commit ids instead of a compressed summary? [Debugging a poisoned agent with bisect](https://github.com/Nabzx/mnemosyne/blob/main/docs/debugging-a-poisoned-agent.md) narrates exactly what the GIF above is doing.
-
-## FAQ
-
-**Why not a vector store or RAG?** A different axis. Retrieval ranks by similarity; `mnem` versions and audits exact state. They compose rather than compete: searching inside a `mnem`-versioned memory is a reasonable future direction, not something this replaces.
-
-**Why not mem0, Zep, or a memory-layer product?** Those manage *what* an agent remembers: extraction, summarisation, retrieval. `mnem` manages the *history* of whatever memory representation you already have, closer to the substrate under those tools than a competitor to them.
-
-**Is `mnem` the only one doing git-shaped things for agent state?** No, and it isn't the first. [`docs/comparisons.md`](https://github.com/Nabzx/mnemosyne/blob/main/docs/comparisons.md) checks Letta, Memoria and ByteRover CLI against their actual source, not their marketing pages, and says plainly where each one is ahead and where `mnem`'s claim differs.
-
-**Why not LangGraph's own checkpointer?** A checkpoint resumes a run. There is no `blame`, `bisect`, `merge`, or a long-lived branch model. `mnem-langgraph`'s `MnemosyneStore` targets `BaseStore` (long-term memory), not `BaseCheckpointSaver`.
-
-**Can multiple agents, or different frameworks, share one store?** Yes, sequentially - each opens, writes, and lets the handle drop (or holds it for its own run) before another opens the same path; merging two agents' divergent work then works the same way any two branches merge, with no special-casing for which framework wrote which side. What doesn't work today is two handles open on the same store *at the same instant in the same process* - see [the concurrency model](https://github.com/Nabzx/mnemosyne/blob/main/docs/concurrency-model.md) for exactly what that means and each adapter's own README for the reserved id shape it owns when sharing a store with another.
-
-**Why not just append to a JSONL file?** That is Baseline B in [the benchmark](https://github.com/Nabzx/mnemosyne/blob/main/docs/benchmark.md). It answers "what was the state at step *t*", but not "which observation set this" or "merge two agents' memories, surfacing the conflicts". The benchmark's audit-query table has the full comparison.
-
-**Does this make my agent smarter?** No. See "Prior work" above: the pitch is history, audit, and safe merging, not accuracy.
 
 ## Contributing & licence
 

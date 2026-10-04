@@ -517,6 +517,13 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Changed
 
+- README restructured: "The GitHub for AI agents" and "Status" merge
+  into one new "The vision" section, five stages (version control, the
+  collaboration layer, the platform, the translation layer, physical
+  AI) ending on robots as the end goal and software agents as the
+  easiest place to prove the idea first. The "How it works" and "FAQ"
+  sections are removed; everything else is unchanged.
+
 - README quickstart leads with the cargo-dist shell installer (no Rust
   toolchain needed); `cargo install mnem-git` is now the "already have
   Rust" alternative.
