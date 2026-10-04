@@ -172,6 +172,9 @@ jobs:
       # The worked example doubles as an end-to-end check (#60), same as
       # every other adapter's own example in the `adapters` job above.
       - run: uv run python examples/crewai_memory.py
+      # Needs crewai and langgraph in the same venv, which only this job
+      # provides (#364).
+      - run: uv run python examples/cross_framework_merge.py
 
   wheel:
     name: python (wheel)
