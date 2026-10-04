@@ -40,3 +40,18 @@ for a worked example: a real `AssistantAgent`, `update_context`
 demonstrably injecting stored memories before inference, then `why`/
 `bisect` tracing a memory back to the commit that wrote it. Needs the
 `examples` extra: `pip install "mnem-autogen[examples]"`.
+
+## Sharing a store with other adapters
+
+This adapter's own node ids are `{name}:{seq:010d}`, with a reserved
+`{name}:_seq` counter node. **This scheme is byte-for-byte identical to
+the OpenAI Agents SDK adapter's own** (ADR-0023 reused ADR-0020's
+scheme directly) - sharing a store with `mnem-openai-agents` using the
+same identifier string for a `name` and a `session_id` is not a risk,
+it is a **guaranteed** collision on every write, confirmed directly,
+not assumed ([#362](https://github.com/Nabzx/mnemosyne/issues/362)).
+Always give every `Memory`'s `name` a value distinct from any
+`session_id` in use by an OpenAI Agents SDK `Session` sharing the same
+store. See the
+[concurrency model](https://github.com/Nabzx/mnemosyne/blob/main/docs/concurrency-model.md)
+for when a shared store can safely be opened at all.

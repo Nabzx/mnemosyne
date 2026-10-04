@@ -76,5 +76,23 @@ session.bisect(lambda memory: item_id in memory)
 ```
 
 See [ADR-0020](https://github.com/Nabzx/mnemosyne/blob/main/docs/adr/0020-the-openai-agents-sdk-adapter.md)
-and epic [#232](https://github.com/Nabzx/mnemosyne/issues/232). A worked
-example is not built yet.
+and epic [#232](https://github.com/Nabzx/mnemosyne/issues/232). See
+[`examples/openai_agents_memory.py`](https://github.com/Nabzx/mnemosyne/blob/main/examples/openai_agents_memory.py)
+for a worked example: a real `Runner.run` tool-calling turn, provenance
+auto-capture, then `why`/`bisect` tracing the answer back to the exact
+tool call.
+
+## Sharing a store with other adapters
+
+This adapter's own node ids are `{session_id}:{seq:010d}`, with a
+reserved `{session_id}:_seq` counter node. **This scheme is
+byte-for-byte identical to the AutoGen adapter's own** (ADR-0023 reused
+ADR-0020's scheme directly) - sharing a store with `mnem-autogen` using
+the same identifier string for a `session_id` and a `name` is not a
+risk, it is a **guaranteed** collision on every write, confirmed
+directly, not assumed
+([#362](https://github.com/Nabzx/mnemosyne/issues/362)). Always give
+every `session_id` a value distinct from any `name` in use by an
+AutoGen `Memory` sharing the same store. See the
+[concurrency model](https://github.com/Nabzx/mnemosyne/blob/main/docs/concurrency-model.md)
+for when a shared store can safely be opened at all.

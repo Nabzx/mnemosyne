@@ -9,6 +9,7 @@
 
 - [On-disk format](format/README.md)
   - [Golden vectors](format/golden-vectors.md)
+- [The concurrency model](concurrency-model.md)
 - [Benchmark report](benchmark.md)
 - [Merge chaos report](chaos-report.md)
 - [How mnem compares](comparisons.md)

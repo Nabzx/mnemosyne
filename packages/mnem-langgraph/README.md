@@ -37,3 +37,18 @@ Not on the `BaseStore` interface, for a graph node to call: `branch(name)`,
 `switch(target)`, `why(namespace, key)`, `history(limit=...)`.
 
 See [ADR-0016](https://github.com/Nabzx/mnemosyne/blob/main/docs/adr/0016-mcp-tools-and-the-adapter-contract.md).
+
+## Sharing a store with other adapters
+
+Unlike the other three adapters this project ships, this one has **no
+reserved shape of its own** - your own namespace/key choice controls the
+id entirely. That means a careless choice can reproduce another
+adapter's exact reserved id, including another adapter's own `_seq`
+counter node specifically, corrupting its bookkeeping rather than
+sitting alongside it harmlessly (confirmed directly, not assumed -
+[#362](https://github.com/Nabzx/mnemosyne/issues/362)). When sharing a
+store, pick a namespace that doesn't equal another adapter's own
+identifier (a CrewAI `scope`, an OpenAI Agents SDK `session_id`, an
+AutoGen `name`) and a key that doesn't end in `_seq`. See the
+[concurrency model](https://github.com/Nabzx/mnemosyne/blob/main/docs/concurrency-model.md)
+for when a shared store can safely be opened at all.

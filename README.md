@@ -159,6 +159,8 @@ Want the same story worked end to end, one command at a time, with real commit i
 
 **Why not LangGraph's own checkpointer?** A checkpoint resumes a run. There is no `blame`, `bisect`, `merge`, or a long-lived branch model. `mnem-langgraph`'s `MnemosyneStore` targets `BaseStore` (long-term memory), not `BaseCheckpointSaver`.
 
+**Can multiple agents, or different frameworks, share one store?** Yes, sequentially - each opens, writes, and lets the handle drop (or holds it for its own run) before another opens the same path; merging two agents' divergent work then works the same way any two branches merge, with no special-casing for which framework wrote which side. What doesn't work today is two handles open on the same store *at the same instant in the same process* - see [the concurrency model](https://github.com/Nabzx/mnemosyne/blob/main/docs/concurrency-model.md) for exactly what that means and each adapter's own README for the reserved id shape it owns when sharing a store with another.
+
 **Why not just append to a JSONL file?** That is Baseline B in [the benchmark](https://github.com/Nabzx/mnemosyne/blob/main/docs/benchmark.md). It answers "what was the state at step *t*", but not "which observation set this" or "merge two agents' memories, surfacing the conflicts". The benchmark's audit-query table has the full comparison.
 
 **Does this make my agent smarter?** No. See "Prior work" above: the pitch is history, audit, and safe merging, not accuracy.
