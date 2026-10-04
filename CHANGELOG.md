@@ -10,6 +10,24 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Added
 
+- `docs/concurrency-model.md`: states plainly what was previously only a
+  test gotcha (#311) - redb allows exactly one open handle per store per
+  process, what that rules out (two handles open at the same instant in
+  the same process), and what it doesn't (sequential access across
+  processes, including multiple agents or frameworks sharing one store
+  over time, same as `examples/cross_framework_merge.py` already proves)
+  (#363). Each of the four adapters' own README gains a "Sharing a store
+  with other adapters" section stating its own reserved id shape and
+  cross-linking back to this doc (#365) - using #362's actual findings:
+  CrewAI's `/`-rooted scheme is distinct from the others; LangGraph has
+  no reserved shape of its own and can reproduce another adapter's exact
+  id; the OpenAI Agents SDK and AutoGen adapters' schemes are
+  byte-for-byte identical, so sharing an identifier string between them
+  is a guaranteed collision, not a risk. Also fixed a stale line in
+  `mnem-openai-agents`'s own README claiming no worked example exists -
+  `examples/openai_agents_memory.py` has existed and run in CI all
+  session.
+
 - `examples/fork_via_export_import.py`: fork a store with `export`/
   `import`, edit the fork on a branch, `merge` the edit back into the
   fork's own main - no new convention, `export`/`import`/`merge` are
