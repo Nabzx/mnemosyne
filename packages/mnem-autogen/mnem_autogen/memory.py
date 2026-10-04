@@ -2,10 +2,15 @@
 ADR-0023).
 
 Every ``Memory`` method is real. ``clear()`` is a batched tombstone commit,
-never a hard delete (#320); ``close()`` actually releases the store handle,
-unlike ``ListMemory``'s own true no-op - redb allows only one open handle
-per store per process, so this is what lets another instance open the same
-path afterward. A worked example is the only thing left (#321).
+never a hard delete; ``close()`` actually releases the store handle, unlike
+``ListMemory``'s own true no-op - redb allows only one open handle per
+store per process, so this is what lets another instance open the same
+path afterward.
+
+``why``/``bisect`` are extra methods outside the ``Memory`` protocol, the
+same shape as the LangGraph, OpenAI Agents SDK, and CrewAI adapters' own
+(ADR-0016/0020/0021) - needed to do anything with the history every write
+already leaves behind.
 
 ``MnemosyneMemory`` subclasses ``autogen_core.memory.Memory`` directly (an
 ABC, unlike CrewAI's structural ``StorageBackend`` Protocol) - one store per
@@ -27,6 +32,8 @@ from autogen_core.memory import Memory, MemoryContent, MemoryQueryResult, Update
 from autogen_core.models import SystemMessage
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from autogen_core import CancellationToken
     from autogen_core.model_context import ChatCompletionContext
 
@@ -240,3 +247,24 @@ class MnemosyneMemory(Memory):
         afterward, unlike ``ListMemory``, which holds nothing OS-level to
         release in the first place."""
         self._store = None  # type: ignore[assignment]
+
+    def why(self, item_id: str) -> mnem.Blame:
+        """The commit and provenance that gave ``item_id`` its current
+        value - not part of the ``Memory`` protocol, same shape as every
+        other adapter's own extra methods (ADR-0016/0020/0021). ``item_id``
+        is one of this instance's own ids, e.g. built with :func:`_item_id`
+        - there is no bare record id to key on the way CrewAI's ``why``
+        needs a scan for, since ``MemoryContent`` has no id field at all."""
+        return self._store.blame(item_id)
+
+    def bisect(
+        self,
+        predicate: Callable[[dict[str, mnem.MemoryNode]], bool],
+        *,
+        bad: str | None = None,
+        good: str | None = None,
+    ) -> str:
+        """The first commit where ``predicate`` holds, over the full store
+        state - a thin wrapper, matching the OpenAI Agents SDK adapter's
+        own (ADR-0020)."""
+        return self._store.bisect(predicate, bad=bad, good=good)

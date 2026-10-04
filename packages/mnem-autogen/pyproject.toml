@@ -32,6 +32,13 @@ Documentation = "https://nabzx.github.io/mnemosyne/"
 
 [project.optional-dependencies]
 dev = ["pytest >= 8", "ruff >= 0.6"]
+# Only the worked example needs these - MnemosyneMemory itself depends on
+# nothing beyond autogen-core. A real AssistantAgent plus a deterministic
+# ReplayChatCompletionClient both live in these two packages, not
+# autogen-core itself; keeping them out of the package's own dependencies
+# means someone using just the Memory adapter isn't forced to install the
+# full agent-framework stack.
+examples = ["autogen-agentchat >= 0.5.0, < 1", "autogen-ext >= 0.5.0, < 1"]
 
 # The SDK is not on PyPI yet; take it from the repo root.
 [tool.uv.sources]

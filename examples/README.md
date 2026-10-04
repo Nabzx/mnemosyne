@@ -15,6 +15,7 @@ external PRs (see `CONTRIBUTING.md`).
 | `mcp_client.py` | `mnem-mcp` | drive the MCP server over stdio the way an MCP client would |
 | `openai_agents_memory.py` | `mnem-openai-agents` | a real `Runner.run` tool-calling turn, provenance auto-capture, then `why` + `bisect` trace the answer to the exact tool call |
 | `crewai_memory.py` | `mnem-crewai` | a real `Memory` instance, `remember`/`recall` round-tripping through `MnemosyneStorageBackend`, then `why` + `bisect` trace a record to the commit that wrote it |
+| `autogen_memory.py` | `mnem-autogen` | a real `AssistantAgent`, `update_context` demonstrably injecting stored memories before inference, then `why` + `bisect` trace a memory to the commit that wrote it |
 
 ```bash
 python examples/support_agent.py
@@ -24,4 +25,5 @@ python examples/langgraph_memory.py                    # needs mnem-langgraph
 python examples/mcp_client.py                          # needs mnem-mcp on PATH
 python examples/openai_agents_memory.py                # needs mnem-openai-agents
 python examples/crewai_memory.py                       # needs mnem-crewai
+python examples/autogen_memory.py                      # needs mnem-autogen[examples]
 ```

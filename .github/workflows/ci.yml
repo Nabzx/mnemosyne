@@ -122,7 +122,7 @@ jobs:
       - run: uv pip install -e "./packages/mnem-mcp[dev]"
       - run: uv pip install -e "./packages/mnem-langgraph[dev]"
       - run: uv pip install -e "./packages/mnem-openai-agents[dev]"
-      - run: uv pip install -e "./packages/mnem-autogen[dev]"
+      - run: uv pip install -e "./packages/mnem-autogen[dev,examples]"
       # ruff needs no installed deps to lint source on disk, so it covers
       # every package including mnem-crewai here; pytest does need real
       # imports, so mnem-crewai's own tests run in the adapters-crewai job
@@ -139,6 +139,7 @@ jobs:
       - run: uv run python examples/langgraph_memory.py
       - run: uv run python examples/mcp_client.py
       - run: uv run python examples/openai_agents_memory.py
+      - run: uv run python examples/autogen_memory.py
 
   adapters-crewai:
     name: adapters (crewai)
