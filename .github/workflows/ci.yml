@@ -142,7 +142,7 @@ jobs:
       - run: uv run python examples/autogen_memory.py
 
   adapters-crewai:
-    name: adapters (crewai)
+    name: adapters (crewai, cross-adapter ids)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -155,11 +155,20 @@ jobs:
       # every crewai release with the StorageBackend protocol (1.10.1
       # through at least 1.15.23, checked directly) pins mcp~=1.2x, which
       # is incompatible with mnem-mcp's own mcp>=2.2 floor - the two
-      # cannot share one venv (found the hard way, #310).
+      # cannot share one venv (found the hard way, #310). mnem-mcp isn't
+      # installed in this job at all, so langgraph/openai-agents/autogen
+      # can join crewai here with no conflict - verified directly (#362) -
+      # which is what the cross-adapter id-collision test below needs.
+      # All four MUST install in one call: splitting crewai into its own
+      # `uv pip install` before the other three (matching this job's own
+      # previous two-line style) silently resolves an incompatible
+      # protobuf gencode/runtime pair - found the hard way building this
+      # very test, reproduced and fixed by combining the calls, not by
+      # pinning protobuf by hand.
       - run: uv venv
       - run: uv pip install -e ".[dev]"
-      - run: uv pip install -e "./packages/mnem-crewai[dev]"
-      - run: uv run pytest packages/mnem-crewai -q
+      - run: uv pip install -e "./packages/mnem-crewai[dev]" -e "./packages/mnem-langgraph[dev]" -e "./packages/mnem-openai-agents[dev]" -e "./packages/mnem-autogen[dev]"
+      - run: uv run pytest packages/mnem-crewai tests -q
       # The worked example doubles as an end-to-end check (#60), same as
       # every other adapter's own example in the `adapters` job above.
       - run: uv run python examples/crewai_memory.py
