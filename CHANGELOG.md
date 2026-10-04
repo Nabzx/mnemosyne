@@ -10,6 +10,22 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Added
 
+- `tests/test_cross_adapter_ids.py`: verified, not assumed, whether the
+  four adapters' own node-id schemes can collide on a shared store. Real
+  finding: the OpenAI Agents SDK and AutoGen adapters' schemes are
+  byte-for-byte identical (ADR-0023 reused ADR-0020's scheme directly),
+  so the same identifier string used for both on one store guarantees a
+  collision on every write, not just risks one - and LangGraph's own
+  scheme has no reserved shape at all, so it can reproduce any other
+  adapter's exact reserved id, including another adapter's own `_seq`
+  counter node specifically. The real, statable invariant: distinct
+  identifiers per adapter avoid it; nothing structural guarantees it.
+  Runs in the `adapters-crewai` job, which needed all four installed in
+  one combined `uv pip install` call - splitting crewai into its own
+  call first (the job's previous style) silently resolved an
+  incompatible protobuf gencode/runtime pair, found the hard way and
+  fixed by combining the install, not by hand-pinning protobuf.
+
 - `packages/mnem-autogen`: scaffolding for an AutoGen `Memory` backed by
   Mnemosyne (ADR-0023). `MnemosyneMemory` subclasses `autogen_core.memory.
   Memory` directly (a real ABC, unlike CrewAI's structural `StorageBackend`
