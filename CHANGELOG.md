@@ -10,6 +10,20 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Added
 
+- `examples/cross_framework_merge.py`: two different framework adapters -
+  CrewAI and LangGraph - writing their own branches of one shared store.
+  A real conflict surfaces and resolves between two of CrewAI's own
+  branches, while an independent LangGraph branch merges in cleanly
+  alongside it, proving `merge` needs no adapter-specific code to work
+  across frameworks sharing one store (#364). The original design tried
+  to force CrewAI and LangGraph onto one literal, colliding node id;
+  checked directly against each adapter's real validated public API
+  (not just its internal id-building helper), this turned out to be
+  structurally impossible for this pair specifically - LangGraph's own
+  `put()` rejects an empty namespace, so its real output always contains
+  a `:` that CrewAI's `/`-rooted scheme never does. Runs in the
+  `adapters-crewai` job, which already has both adapters in one venv.
+
 - `tests/test_cross_adapter_ids.py`: verified, not assumed, whether the
   four adapters' own node-id schemes can collide on a shared store. Real
   finding: the OpenAI Agents SDK and AutoGen adapters' schemes are
