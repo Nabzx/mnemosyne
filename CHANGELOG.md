@@ -10,6 +10,17 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Added
 
+- `docs/retention.md`: there is no garbage collection anywhere in the
+  engine - confirmed directly, not assumed (`delete_branch`'s own doc
+  comment states a deleted branch's commits stay reachable by id; `rm`
+  and every adapter's `clear`/`clear_session`/`pop_item` stage a
+  tombstone commit, never a hard delete). Every commit, once made, is
+  retained for the life of the store - a real, already-true property,
+  stated as a fact about the engine, explicitly not a claim about
+  meeting any specific regulatory retention requirement (that's left to
+  map #376's own open research question). Cross-linked from
+  `docs/why.md` and `docs/why-version-control.md` (#379).
+
 - `docs/concurrency-model.md`: states plainly what was previously only a
   test gotcha (#311) - redb allows exactly one open handle per store per
   process, what that rules out (two handles open at the same instant in

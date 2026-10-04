@@ -109,3 +109,8 @@ It's open-source, Apache-2.0, and installable today - `pip install
 mnem-agents`, or a one-line binary install with no Rust toolchain required.
 If you're running agents in production and any of this sounds like a
 problem you actually have, I'd like to hear about it.
+
+One property falls out of the architecture for free, worth stating
+plainly: there's no garbage collection anywhere in the engine, so every
+commit is retained for the life of the store, already - see
+[retention](retention.md).

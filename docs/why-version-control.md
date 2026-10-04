@@ -108,5 +108,11 @@ row update. Against an LLM call measured in seconds, that's noise. It
 wouldn't be, at a much higher write frequency than an agent's own reasoning
 steps produce - which is a real, current limit, not a hidden one.
 
+There's a retention property that falls out of this for free, worth
+stating plainly rather than leaving as an implicit side effect: there is
+no garbage collection anywhere in the engine, so every commit, once
+made, is retained for the life of the store. See
+[retention](retention.md) for exactly what that does and doesn't mean.
+
 [`mnem`](https://github.com/Nabzx/mnemosyne) is one concrete implementation
 of this argument - open-source, working, and benchmarked, not a proposal.
