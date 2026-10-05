@@ -10,6 +10,20 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Added
 
+- `docs/research/issue-339-naming-collision.md`: a Reddit commenter
+  flagged one same-named project (`mnemosyne-oss/mnemosyne`,
+  NousResearch-backed, 3,336 stars); checked directly, and the real
+  picture is bigger - at least eight unrelated GitHub projects share
+  the name "Mnemosyne" in the agent-memory space, plus a ninth,
+  unrelated claim on the plain `mnemosyne` PyPI name. None of them use
+  commit/branch/merge/blame/bisect language - the overlap is real at
+  the name and category level, not the feature level. The technical
+  cost of a rename is lower than expected: no PyPI or crates.io
+  collision on this project's real package names (`mnem-agents`,
+  `mnem-git`, ...), and the CLI binary is already `mnem`, not
+  `mnemosyne`. Feeds the real open decision (rename or not), not yet
+  made (#339).
+
 - `docs/retention.md`: there is no garbage collection anywhere in the
   engine - confirmed directly, not assumed (`delete_branch`'s own doc
   comment states a deleted branch's commits stay reachable by id; `rm`
