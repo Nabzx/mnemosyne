@@ -178,6 +178,8 @@ jobs:
       # Needs crewai and langgraph in the same venv, which only this job
       # provides (#364).
       - run: uv run python examples/cross_framework_merge.py
+      # Needs all four adapters in one venv, same reason (#371).
+      - run: uv run python examples/multi_agent_incident_retro.py
 
   wheel:
     name: python (wheel)
