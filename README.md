@@ -18,7 +18,7 @@
   <img src="https://raw.githubusercontent.com/Nabzx/mnemosyne/main/assets/demo.gif" alt="A support agent is told a past answer was wrong. It runs bisect to find the commit where the belief entered, blame to trace it to a misread billing note, then merges in a parallel branch that had the right answer, resolving a real conflict. The history keeps every line of it." width="900" />
 </p>
 
-An AI agent builds up memory as it works: facts it learns, decisions it makes. Frameworks store that as state it overwrites as it goes. Mnemosyne gives agent memory what Git gives code: **commits, branches, merge, blame and bisect.** A Rust core, a `mnem` CLI, and a Python SDK. Local, deterministic, no network, no model calls.
+An AI agent builds up memory as it works: facts it learns, decisions it makes. Frameworks store that as state it overwrites as it goes. Mnemosyne gives agent memory what Git gives code: **blame, bisect, commits, branches and merge.** A Rust core, a `mnem` CLI, and a Python SDK. Local, deterministic, no network, no model calls.
 
 ## The problem
 
@@ -28,12 +28,12 @@ Your agent runs for an hour, makes forty tool calls, and updates its memory the 
 
 | Command | What it does |
 | --- | --- |
+| `blame` | resolve any belief to the commit (through merges) and the observation that introduced it |
+| `bisect` | binary-search a run for the first commit where a wrong belief appears |
 | `commit` · `log` | record memory as an immutable, content-addressed snapshot with its provenance, and walk the history |
 | `show <commit>` | reconstruct the memory exactly as it stood at any past commit |
 | `branch` · `checkout` · `diff` | fork memory for the price of a pointer to explore a hypothesis in isolation |
 | `merge` | combine two lines of memory, surfacing conflicts as objects you inspect and resolve |
-| `blame` | resolve any belief to the commit (through merges) and the observation that introduced it |
-| `bisect` | binary-search a run for the first commit where a wrong belief appears |
 | `export` · `import` | dump the whole history as one portable JSON file, and rebuild a store from it |
 
 <p align="center"><img src="https://raw.githubusercontent.com/Nabzx/mnemosyne/main/assets/panel-agent.svg" alt="A Python agent loop: a Claude call, store.add with provenance, store.commit, and store.blame tracing a belief to its origin" width="820" /></p>

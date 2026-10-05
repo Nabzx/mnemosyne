@@ -241,6 +241,15 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Changed
 
+- README: the top pitch line and the "What you get" table now lead
+  with `blame`/`bisect` ahead of `commit`/`branch`/`merge` - real
+  feedback from the 2026-09-29 Reddit launch ("nobody has ever wanted
+  to branch their agent's memory, everybody has wanted to know which
+  turn a wrong fact came in on"). Ordering and emphasis only, no
+  wording or claims changed on any row. The Quickstart demo and the
+  README GIF already led with bisect/blame ahead of merge, so neither
+  needed touching (#340).
+
 - `redb` 2 -> 4. A real breaking change, not routine: `Database::
   begin_read`/`begin_write` moved from inherent methods to the new
   `ReadableDatabase` trait, needing one import in `store.rs` (used in
