@@ -10,6 +10,23 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Added
 
+- `examples/multi_agent_incident_retro.py`: four agents on four
+  different frameworks (CrewAI, LangGraph, the OpenAI Agents SDK,
+  AutoGen) each investigate one incident on their own branch, merged
+  sequentially into one shared store - extends #364's two-agent demo
+  to prove `merge` holds up past the simplest pairwise case. The real
+  point: every finding still `blame`s to the commit the agent that
+  wrote it made, even after three more merges land on top of it -
+  history stays legible at 4-way scale, not just 2-way. Confirmed
+  directly while building this, not assumed: the OpenAI Agents SDK and
+  AutoGen adapters auto-sequence their own node ids per session/name
+  (`{identifier}:{seq:010d}`, plus a reserved `:_seq` counter node),
+  unlike CrewAI/LangGraph's caller-chosen ids - given deliberately
+  distinct identifiers here, per each adapter's own "Sharing a store"
+  README note (#365), avoiding the guaranteed collision #362 found
+  for this pair. Wired into the `adapters-crewai` job, which already
+  has all four adapters in one venv (#371).
+
 - `docs/research/issue-339-naming-collision.md`: a Reddit commenter
   flagged one same-named project (`mnemosyne-oss/mnemosyne`,
   NousResearch-backed, 3,336 stars); checked directly, and the real
