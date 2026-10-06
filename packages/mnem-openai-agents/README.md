@@ -95,4 +95,6 @@ directly, not assumed
 every `session_id` a value distinct from any `name` in use by an
 AutoGen `Memory` sharing the same store. See the
 [concurrency model](https://github.com/Nabzx/mnemosyne/blob/main/docs/concurrency-model.md)
-for when a shared store can safely be opened at all.
+for when a shared store can safely be opened at all, and
+[shared memory across frameworks](https://github.com/Nabzx/mnemosyne/blob/main/docs/shared-memory-across-frameworks.md)
+for the practical how-to.

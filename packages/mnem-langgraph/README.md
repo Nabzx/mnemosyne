@@ -51,4 +51,6 @@ store, pick a namespace that doesn't equal another adapter's own
 identifier (a CrewAI `scope`, an OpenAI Agents SDK `session_id`, an
 AutoGen `name`) and a key that doesn't end in `_seq`. See the
 [concurrency model](https://github.com/Nabzx/mnemosyne/blob/main/docs/concurrency-model.md)
-for when a shared store can safely be opened at all.
+for when a shared store can safely be opened at all, and
+[shared memory across frameworks](https://github.com/Nabzx/mnemosyne/blob/main/docs/shared-memory-across-frameworks.md)
+for the practical how-to.

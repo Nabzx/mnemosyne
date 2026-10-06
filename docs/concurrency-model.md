@@ -53,4 +53,7 @@ other adapters" section stating *what* id shape it owns
 [`mnem-langgraph`](https://github.com/Nabzx/mnemosyne/blob/main/packages/mnem-langgraph/README.md#sharing-a-store-with-other-adapters),
 [`mnem-openai-agents`](https://github.com/Nabzx/mnemosyne/blob/main/packages/mnem-openai-agents/README.md#sharing-a-store-with-other-adapters),
 [`mnem-autogen`](https://github.com/Nabzx/mnemosyne/blob/main/packages/mnem-autogen/README.md#sharing-a-store-with-other-adapters));
-this document covers *when* a store can safely be opened at all.
+this document covers *when* a store can safely be opened at all. See
+[shared memory across frameworks](shared-memory-across-frameworks.md)
+for the practical how-to this feeds: branches vs a shared one, and how
+a real conflict surfaces and resolves.

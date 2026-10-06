@@ -62,6 +62,8 @@ rooted id, so CrewAI's own ids never collide with theirs as long as your
 own `record_id` values don't themselves happen to reproduce another
 adapter's reserved shape. See the
 [concurrency model](https://github.com/Nabzx/mnemosyne/blob/main/docs/concurrency-model.md)
-for when a shared store can safely be opened at all, and
+for when a shared store can safely be opened at all,
 [#362](https://github.com/Nabzx/mnemosyne/issues/362) for how this was
-actually verified rather than assumed.
+actually verified rather than assumed, and
+[shared memory across frameworks](https://github.com/Nabzx/mnemosyne/blob/main/docs/shared-memory-across-frameworks.md)
+for the practical how-to.
