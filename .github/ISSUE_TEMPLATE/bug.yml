@@ -5,9 +5,9 @@ body:
   - type: markdown
     attributes:
       value: |
-        Issues are for reproducible bugs and maintainer work items only.
-        Feature requests, ideas, questions and direction checks belong in
-        [Discussions](https://github.com/Nabzx/mnemosyne/discussions).
+        This is for reproducible bugs specifically. A feature request or
+        something confusing has its own "Feedback or idea" template; a
+        question belongs in [Discussions](https://github.com/Nabzx/mnemosyne/discussions).
 
         Keep it to roughly one screen. State what you observed, not a guessed
         cause. Do not paste a proposed fix, a patch, or an investigation dump.
