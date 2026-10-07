@@ -10,6 +10,14 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Added
 
+- `mnem merge --dry-run`: previews whether a merge would be clean, a
+  fast-forward, or a real conflict, writing nothing - computed straight
+  from the same public primitives `Store::merge` itself uses
+  (`merge_base`, `merge_states`), not by running a real merge and
+  rolling it back, so no change to the merge algorithm or its public
+  API was needed. Does not combine with `--resolve`/`--strategy`. A
+  market-test spike, not an ADR-gated feature (#440).
+
 - `.github/ISSUE_TEMPLATE/feedback.yml`: a real Issues home for feature
   requests, ideas, and confusing bits - previously, the only real issue
   template (`bug.yml`) explicitly required confirming "this is a
