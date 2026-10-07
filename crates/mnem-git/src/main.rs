@@ -164,6 +164,10 @@ enum Command {
         /// Who or what made the merge. Falls back to $MNEM_AUTHOR, then "unknown".
         #[arg(long)]
         author: Option<String>,
+        /// Show what merging would do, without writing anything. Not combined
+        /// with `--resolve` or `--strategy`.
+        #[arg(long = "dry-run")]
+        dry_run: bool,
     },
     /// Show what changed between two memory states.
     Diff {
@@ -258,7 +262,8 @@ fn main() -> Result<()> {
             strategy,
             message,
             author,
-        }) => cmd_merge(theirs, resolve, strategy, message, author),
+            dry_run,
+        }) => cmd_merge(theirs, resolve, strategy, message, author, dry_run),
         Some(Command::Diff {
             from,
             to,
@@ -645,7 +650,15 @@ fn cmd_merge(
     strategy: Option<String>,
     message: Option<String>,
     author: Option<String>,
+    dry_run: bool,
 ) -> Result<()> {
+    if dry_run {
+        if !resolve.is_empty() || strategy.is_some() {
+            anyhow::bail!("--dry-run previews whether a merge collides; it does not combine with --resolve or --strategy");
+        }
+        return cmd_merge_dry_run(theirs);
+    }
+
     let author = author
         .or_else(|| std::env::var("MNEM_AUTHOR").ok())
         .unwrap_or_else(|| "unknown".to_string());
@@ -714,6 +727,63 @@ fn cmd_merge(
         }
     }
     Ok(())
+}
+
+/// Preview `merge`'s own decision (clean, fast-forward, or conflicts) without
+/// writing anything - computed straight from the same public primitives
+/// `Store::merge` itself uses (`merge_base`, `merge_states`), not by running a
+/// real merge and rolling it back. #440: a market-test spike, not a change to
+/// the merge algorithm or its public API.
+fn cmd_merge_dry_run(theirs: String) -> Result<()> {
+    let store = open_store()?;
+    let branch = match store.head()? {
+        Head::Attached(name) => name,
+        Head::Detached(_) => anyhow::bail!("cannot merge from a detached HEAD; check out a branch"),
+    };
+
+    let theirs_tip = store.resolve_commitish(&theirs)?;
+    let Some(ours_tip) = store.head_commit()? else {
+        println!(
+            "(dry run) {} has no commits yet; would fast-forward to {}",
+            style::branch(&branch),
+            style::id(&short(&theirs_tip))
+        );
+        return Ok(());
+    };
+
+    if theirs_tip == ours_tip || store.is_ancestor(theirs_tip, ours_tip)? {
+        println!("Already up to date.");
+        return Ok(());
+    }
+    if store.is_ancestor(ours_tip, theirs_tip)? {
+        println!(
+            "(dry run) would fast-forward {} to {}",
+            style::branch(&branch),
+            style::id(&short(&theirs_tip))
+        );
+        return Ok(());
+    }
+
+    let base = store.merge_base(ours_tip, theirs_tip)?;
+    let state_merge = store.merge_states(base, ours_tip, theirs_tip)?;
+    if state_merge.is_clean() {
+        println!("(dry run) would merge cleanly, no conflicts.");
+        return Ok(());
+    }
+
+    println!(
+        "{}",
+        style::warn(&format!(
+            "(dry run) would conflict in {} node(s):",
+            state_merge.conflicts.len()
+        ))
+    );
+    for conflict in &state_merge.conflicts {
+        print_conflict(&store, conflict)?;
+    }
+    anyhow::bail!(
+        "resolve with `--resolve <id>=<side>` (or `--strategy ours|theirs`) and merge for real"
+    )
 }
 
 fn print_conflict(store: &Store, conflict: &Conflict) -> Result<()> {
