@@ -10,6 +10,20 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Added
 
+- `docs/shared-memory-across-frameworks.md`: the practical how-to for
+  using one store as shared memory across agents on different
+  frameworks - when to give each agent its own branch vs write
+  straight to a shared one, how a real conflict surfaces and resolves,
+  and what the concurrency model means for structuring a real
+  deployment. Grounded in the two real worked examples
+  (`cross_framework_merge.py`, `multi_agent_incident_retro.py`), not
+  written from theory. Cross-linked from `docs/concurrency-model.md`
+  and each adapter's own "Sharing a store with other adapters" README
+  section. Not cross-linked from the main README's own adapter section,
+  as the ticket originally specified - that section was removed in
+  this session's own README rewrite, so the concurrency doc and each
+  adapter's README are the more relevant anchors now (#368).
+
 - `examples/multi_agent_incident_retro.py`: four agents on four
   different frameworks (CrewAI, LangGraph, the OpenAI Agents SDK,
   AutoGen) each investigate one incident on their own branch, merged

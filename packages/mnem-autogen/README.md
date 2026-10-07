@@ -54,4 +54,6 @@ Always give every `Memory`'s `name` a value distinct from any
 `session_id` in use by an OpenAI Agents SDK `Session` sharing the same
 store. See the
 [concurrency model](https://github.com/Nabzx/mnemosyne/blob/main/docs/concurrency-model.md)
-for when a shared store can safely be opened at all.
+for when a shared store can safely be opened at all, and
+[shared memory across frameworks](https://github.com/Nabzx/mnemosyne/blob/main/docs/shared-memory-across-frameworks.md)
+for the practical how-to.
