@@ -1,0 +1,30 @@
+name: Feedback or idea
+description: A feature request, something confusing, or a direction you'd like to see - not a reproducible bug.
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Welcome, and thanks for trying Mnemosyne. This is for anything that
+        isn't a reproducible bug - a feature idea, something that confused
+        you, a direction you'd like to see the project take. Real feedback
+        shapes what gets built next, so don't hold back.
+
+        Keep it to roughly one screen: what you'd like to see, or what's
+        confusing or missing, and why it matters to you.
+
+  - type: textarea
+    id: idea
+    attributes:
+      label: What's the idea, or what's confusing
+      description: What you'd like to see, or what tripped you up.
+    validations:
+      required: true
+
+  - type: textarea
+    id: why
+    attributes:
+      label: Why it matters
+      description: What this would help you (or others) do, if you can say.
+    validations:
+      required: false

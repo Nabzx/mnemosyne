@@ -10,6 +10,16 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Added
 
+- `.github/ISSUE_TEMPLATE/feedback.yml`: a real Issues home for feature
+  requests, ideas, and confusing bits - previously, the only real issue
+  template (`bug.yml`) explicitly required confirming "this is a
+  reproducible bug, not a feature request, idea or question", and
+  everything else was redirected to Discussions instead
+  (`blank_issues_enabled: false` meant there was no free-form path
+  either). `README.md` and `CONTRIBUTING.md` now lead with the
+  invitation to open an issue rather than with the pull-request
+  restriction.
+
 - `docs/shared-memory-across-frameworks.md`: the practical how-to for
   using one store as shared memory across agents on different
   frameworks - when to give each agent its own branch vs write

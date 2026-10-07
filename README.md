@@ -130,4 +130,4 @@ Want the same story worked end to end, one command at a time, with real commit i
 
 ## Contributing & licence
 
-Developed by a single maintainer; issues and feedback welcome, but not open to external pull requests at this stage ([`CONTRIBUTING.md`](https://github.com/Nabzx/mnemosyne/blob/main/CONTRIBUTING.md)). Apache 2.0 ([`LICENSE`](https://github.com/Nabzx/mnemosyne/blob/main/LICENSE)).
+Issues, bug reports, and ideas are genuinely welcome, that's the best way to shape what gets built next. Developed by a single maintainer, so most pull requests outside `docs/`/`examples/` aren't merged for now ([`CONTRIBUTING.md`](https://github.com/Nabzx/mnemosyne/blob/main/CONTRIBUTING.md) has the detail). Apache 2.0 ([`LICENSE`](https://github.com/Nabzx/mnemosyne/blob/main/LICENSE)).
