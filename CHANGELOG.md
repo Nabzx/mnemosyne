@@ -10,6 +10,13 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Added
 
+- `mnem changelog`: narrates what changed between two memory states
+  in plain English, one sentence per node ("customer-4821 changed
+  from "Enterprise" to "Pro", sourced from billing-note-8842"),
+  instead of `diff`'s raw before/after dump - the same data `diff`
+  already computes, just reworded; `diff`'s own structured output is
+  unchanged. A market-test spike, not a new engine capability (#442).
+
 - `mnem inbox`: lists every branch not yet merged into `main`, with
   its tip commit's author and message - a read-only view over
   branches that already exist, no new object model. A market-test
