@@ -11,7 +11,7 @@
 //! Output is coloured when stdout is a terminal (see [`style`]); piped or
 //! redirected output, and output with `NO_COLOR` set, stays plain.
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::fs;
 use std::io::Read;
 use std::path::PathBuf;
@@ -191,6 +191,15 @@ enum Command {
         /// The `to` side: a branch or commit. Default: working memory.
         to: Option<String>,
     },
+    /// Flag whether two nodes in working memory might be the same claim,
+    /// phrased differently - a crude word-overlap heuristic, not the real
+    /// semantic-merge detector.
+    Similar {
+        /// The first node id.
+        a: String,
+        /// The second node id.
+        b: String,
+    },
     /// Print a shell completion script to stdout.
     Completions {
         /// Which shell to generate for.
@@ -281,6 +290,7 @@ fn main() -> Result<()> {
             name_only,
         }) => cmd_diff(from, to, stat, name_only),
         Some(Command::Changelog { from, to }) => cmd_changelog(from, to),
+        Some(Command::Similar { a, b }) => cmd_similar(a, b),
         Some(Command::Completions { shell }) => cmd_completions(shell),
         Some(Command::Export { output }) => cmd_export(output),
         Some(Command::Import { file, path }) => cmd_import(file, path),
@@ -1000,6 +1010,78 @@ fn source_suffix(node: &MemoryNode) -> String {
         Some(source) => format!(", sourced from {source}"),
         None => String::new(),
     }
+}
+
+/// A word-overlap heuristic flags two facts as possibly the same claim,
+/// phrased differently - a crude, explicit spike (#443), not the real
+/// embedding-based detector the semantic-merge map (#423) and the
+/// contradiction map (#234) will eventually settle on. Never merges or
+/// blocks anything; purely a suggestion to act on.
+const SIMILARITY_THRESHOLD: f64 = 0.3;
+
+fn cmd_similar(a: String, b: String) -> Result<()> {
+    let store = open_store()?;
+    let node_a = store
+        .working_node(&a)?
+        .with_context(|| format!("no node {a:?} in working memory"))?;
+    let node_b = store
+        .working_node(&b)?
+        .with_context(|| format!("no node {b:?} in working memory"))?;
+
+    println!(
+        "{}: {}",
+        style::id(&a),
+        serde_json::to_string(&node_a.content)?
+    );
+    println!(
+        "{}: {}",
+        style::id(&b),
+        serde_json::to_string(&node_b.content)?
+    );
+
+    let score = word_overlap(&node_a.content, &node_b.content);
+    println!();
+    if score >= SIMILARITY_THRESHOLD {
+        println!(
+            "{} might be the same claim, phrased differently (word overlap: {:.0}%)",
+            style::warn("flagged:"),
+            score * 100.0
+        );
+    } else {
+        println!("not flagged (word overlap: {:.0}%)", score * 100.0);
+    }
+    Ok(())
+}
+
+/// The Jaccard similarity of two content values' significant words:
+/// lowercased, split on non-alphanumeric characters, a short stopword list
+/// dropped. Crude on purpose - it never looks at meaning, only shared
+/// surface words.
+fn word_overlap(a: &serde_json::Value, b: &serde_json::Value) -> f64 {
+    let words_a = significant_words(a);
+    let words_b = significant_words(b);
+    if words_a.is_empty() || words_b.is_empty() {
+        return 0.0;
+    }
+    let intersection = words_a.intersection(&words_b).count();
+    let union = words_a.union(&words_b).count();
+    intersection as f64 / union as f64
+}
+
+fn significant_words(content: &serde_json::Value) -> BTreeSet<String> {
+    const STOPWORDS: &[&str] = &[
+        "a", "an", "the", "is", "are", "was", "were", "be", "been", "has", "have", "had", "on",
+        "at", "to", "of", "and", "or", "in", "it", "this", "that", "as", "by", "for", "with",
+    ];
+    let text = match content {
+        serde_json::Value::String(s) => s.clone(),
+        other => other.to_string(),
+    };
+    text.split(|c: char| !c.is_alphanumeric())
+        .filter(|w| !w.is_empty())
+        .map(|w| w.to_lowercase())
+        .filter(|w| !STOPWORDS.contains(&w.as_str()))
+        .collect()
 }
 
 /// Print a completion script for `shell` to stdout. Does not need a store.
