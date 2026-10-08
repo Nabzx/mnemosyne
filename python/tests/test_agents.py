@@ -1,6 +1,8 @@
 """Tests for ``mnem.agents`` and the ``to_dict`` serialisers (#59)."""
 
 import json
+import threading
+from http.server import BaseHTTPRequestHandler, HTTPServer
 
 import pytest
 
@@ -104,6 +106,55 @@ def test_to_dict_is_json_serialisable(tmp_path: object) -> None:
     md = commit.to_dict()
     assert md["parents"] == list(commit.parents)
     assert json.loads(json.dumps(md)) == md
+
+
+def test_notify_branch_posts_a_real_payload_to_a_real_server(tmp_path: object) -> None:
+    received: list[dict] = []
+
+    class Handler(BaseHTTPRequestHandler):
+        def do_POST(self) -> None:
+            length = int(self.headers["Content-Length"])
+            received.append(json.loads(self.rfile.read(length)))
+            self.send_response(200)
+            self.end_headers()
+
+        def log_message(self, *args: object) -> None:
+            pass  # keep the test's own output clean
+
+    server = HTTPServer(("127.0.0.1", 0), Handler)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        store = mnem.init(tmp_path)
+        agents.remember(store, "fact", "v1", time_ms=1000)
+        commit_id = store.head_commit()
+        store.new_branch("feature-x")
+
+        agents.notify_branch(
+            store, "feature-x", f"http://127.0.0.1:{server.server_port}/", author="bob"
+        )
+    finally:
+        server.shutdown()
+
+    assert received == [
+        {
+            "event": "branch_created",
+            "branch": "feature-x",
+            "author": "bob",
+            "commit": commit_id,
+        }
+    ]
+
+
+def test_notify_branch_raises_on_an_unreachable_webhook(tmp_path: object) -> None:
+    store = mnem.init(tmp_path)
+    agents.remember(store, "fact", "v1", time_ms=1000)
+    store.new_branch("feature-x")
+
+    with pytest.raises(OSError):
+        agents.notify_branch(
+            store, "feature-x", "http://127.0.0.1:1/", timeout=1.0
+        )
 
 
 def test_with_retry_gives_up_after_a_bounded_number_of_attempts() -> None:

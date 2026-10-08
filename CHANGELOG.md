@@ -10,6 +10,15 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Added
 
+- `mnem.agents.notify_branch`: POSTs a plain JSON payload (branch
+  name, author, tip commit) to a webhook URL - no retry, no queue,
+  the simplest possible "something happened" signal for the real
+  "agents get told about changes" gap raised directly by external
+  feedback. Call it yourself right after creating a branch; nothing
+  in the engine fires this automatically. Stdlib only (`urllib`), no
+  new dependency. A market-test spike, not a real notification
+  system (#444).
+
 - `mnem similar <a> <b>`: a crude word-overlap (Jaccard) heuristic
   flagging whether two nodes in working memory might be the same
   claim, phrased differently - never merges or blocks anything, purely
