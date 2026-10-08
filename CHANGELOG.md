@@ -10,6 +10,13 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Added
 
+- `mnem similar <a> <b>`: a crude word-overlap (Jaccard) heuristic
+  flagging whether two nodes in working memory might be the same
+  claim, phrased differently - never merges or blocks anything, purely
+  a suggestion to act on. Explicitly not the real embedding-based
+  detector the semantic-merge map (#423) or the contradiction map
+  (#234) will eventually settle on. A market-test spike (#443).
+
 - `mnem changelog`: narrates what changed between two memory states
   in plain English, one sentence per node ("customer-4821 changed
   from "Enterprise" to "Pro", sourced from billing-note-8842"),
