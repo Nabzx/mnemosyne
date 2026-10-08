@@ -10,6 +10,12 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Added
 
+- `mnem inbox`: lists every branch not yet merged into `main`, with
+  its tip commit's author and message - a read-only view over
+  branches that already exist, no new object model. A market-test
+  spike, not the ADR-gated propose/approve object #419-422 will
+  eventually settle (#441).
+
 - `mnem merge --dry-run`: previews whether a merge would be clean, a
   fast-forward, or a real conflict, writing nothing - computed straight
   from the same public primitives `Store::merge` itself uses
