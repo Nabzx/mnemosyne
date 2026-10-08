@@ -92,6 +92,8 @@ enum Command {
     },
     /// The current branch, HEAD, and what is staged.
     Status,
+    /// List every branch not yet merged into `main`, with its tip commit.
+    Inbox,
     /// List, create, or delete branches.
     Branch {
         /// The branch to create. Omit to list branches.
@@ -236,6 +238,7 @@ fn main() -> Result<()> {
             oneline,
         }) => cmd_log(first_parent, max_count, oneline),
         Some(Command::Status) => cmd_status(),
+        Some(Command::Inbox) => cmd_inbox(),
         Some(Command::Branch {
             name,
             start,
@@ -414,6 +417,60 @@ fn cmd_status() -> Result<()> {
                 "  {}",
                 paint_change(&format!("{} {}", marker(&change), change.id()), &change)
             );
+        }
+    }
+    Ok(())
+}
+
+/// List every branch not yet merged into `main`, with its tip commit's
+/// author and message - a market-test spike (#441), not the ADR-gated
+/// propose/approve object #419-422 will eventually settle. A read-only view
+/// over branches that already exist; no new object model.
+fn cmd_inbox() -> Result<()> {
+    let store = open_store()?;
+    let branches = store.branches()?;
+    let main_tip = branches
+        .iter()
+        .find(|(name, _)| name == "main")
+        .map(|(_, tip)| *tip);
+
+    let mut pending = Vec::new();
+    for (name, tip) in &branches {
+        if name == "main" {
+            continue;
+        }
+        let already_merged = match main_tip {
+            Some(main_tip) => *tip == main_tip || store.is_ancestor(*tip, main_tip)?,
+            None => false,
+        };
+        if !already_merged {
+            pending.push((name.clone(), *tip));
+        }
+    }
+
+    if pending.is_empty() {
+        println!("Nothing pending - every branch is merged into main.");
+        return Ok(());
+    }
+
+    for (name, tip) in pending {
+        let commit = store.log(tip, true, Some(1))?.into_iter().next();
+        match commit {
+            Some((_, commit)) => {
+                let first_line = commit.message.lines().next().unwrap_or_default();
+                println!(
+                    "{}  {}  {}  {first_line}",
+                    style::branch(&name),
+                    style::id(&short(&tip)),
+                    style::dim(&commit.author),
+                );
+            }
+            None => println!(
+                "{}  {}  {}",
+                style::branch(&name),
+                style::id(&short(&tip)),
+                style::dim("(no commits)")
+            ),
         }
     }
     Ok(())
