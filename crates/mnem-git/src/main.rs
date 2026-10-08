@@ -184,6 +184,13 @@ enum Command {
         #[arg(long = "name-only")]
         name_only: bool,
     },
+    /// Narrate what changed between two memory states in plain English.
+    Changelog {
+        /// The `from` side: a branch or commit. Default: the HEAD commit.
+        from: Option<String>,
+        /// The `to` side: a branch or commit. Default: working memory.
+        to: Option<String>,
+    },
     /// Print a shell completion script to stdout.
     Completions {
         /// Which shell to generate for.
@@ -273,6 +280,7 @@ fn main() -> Result<()> {
             stat,
             name_only,
         }) => cmd_diff(from, to, stat, name_only),
+        Some(Command::Changelog { from, to }) => cmd_changelog(from, to),
         Some(Command::Completions { shell }) => cmd_completions(shell),
         Some(Command::Export { output }) => cmd_export(output),
         Some(Command::Import { file, path }) => cmd_import(file, path),
@@ -872,11 +880,16 @@ fn conflict_kind_label(kind: ConflictKind) -> &'static str {
     }
 }
 
-fn cmd_diff(from: Option<String>, to: Option<String>, stat: bool, name_only: bool) -> Result<()> {
-    let store = open_store()?;
-
-    let (from_target, to_target) = match (from, to) {
-        (None, _) => (head_diff_target(&store)?, DiffTarget::Working),
+/// Resolve `diff`/`changelog`'s shared `from`/`to` arguments: no `from` means
+/// HEAD compared against working memory; a lone `from` compares it to
+/// working memory too; both compares two commits directly.
+fn resolve_diff_range(
+    store: &Store,
+    from: Option<String>,
+    to: Option<String>,
+) -> Result<(DiffTarget, DiffTarget)> {
+    Ok(match (from, to) {
+        (None, _) => (head_diff_target(store)?, DiffTarget::Working),
         (Some(a), None) => (
             DiffTarget::Commit(store.resolve_commitish(&a)?),
             DiffTarget::Working,
@@ -885,7 +898,12 @@ fn cmd_diff(from: Option<String>, to: Option<String>, stat: bool, name_only: boo
             DiffTarget::Commit(store.resolve_commitish(&a)?),
             DiffTarget::Commit(store.resolve_commitish(&b)?),
         ),
-    };
+    })
+}
+
+fn cmd_diff(from: Option<String>, to: Option<String>, stat: bool, name_only: bool) -> Result<()> {
+    let store = open_store()?;
+    let (from_target, to_target) = resolve_diff_range(&store, from, to)?;
 
     let changes = store.diff(from_target, to_target)?;
     if changes.is_empty() {
@@ -931,6 +949,57 @@ fn cmd_diff(from: Option<String>, to: Option<String>, stat: bool, name_only: boo
         }
     }
     Ok(())
+}
+
+/// Narrate `diff`'s own output in plain English, one sentence per node,
+/// instead of a raw before/after dump - the same data `diff` already
+/// computes, just reworded. A market-test spike (#442); `diff`'s own
+/// structured output is unchanged.
+fn cmd_changelog(from: Option<String>, to: Option<String>) -> Result<()> {
+    let store = open_store()?;
+    let (from_target, to_target) = resolve_diff_range(&store, from, to)?;
+
+    let changes = store.diff(from_target, to_target)?;
+    if changes.is_empty() {
+        println!("no changes");
+        return Ok(());
+    }
+
+    for change in &changes {
+        let id = change.id();
+        match change {
+            NodeChange::Added { new, .. } => {
+                let node = store.node(*new)?;
+                println!(
+                    "{id} was added, now {}{}",
+                    node_content(&store, *new)?,
+                    source_suffix(&node)
+                );
+            }
+            NodeChange::Removed { old, .. } => {
+                println!("{id} was removed, was {}", node_content(&store, *old)?);
+            }
+            NodeChange::Modified { old, new, .. } => {
+                let node = store.node(*new)?;
+                println!(
+                    "{id} changed from {} to {}{}",
+                    node_content(&store, *old)?,
+                    node_content(&store, *new)?,
+                    source_suffix(&node)
+                );
+            }
+        }
+    }
+    Ok(())
+}
+
+/// `, sourced from <source>` when the node's own provenance names one;
+/// empty otherwise.
+fn source_suffix(node: &MemoryNode) -> String {
+    match &node.provenance.source {
+        Some(source) => format!(", sourced from {source}"),
+        None => String::new(),
+    }
 }
 
 /// Print a completion script for `shell` to stdout. Does not need a store.
