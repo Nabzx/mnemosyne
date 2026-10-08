@@ -10,14 +10,16 @@ There is no staging concept for a caller of this module: one call is one commit.
 
 from __future__ import annotations
 
+import json
 import time
+import urllib.request
 from collections.abc import Callable, Iterable, Mapping
 from typing import Any, TypeVar
 
 from ._mnem import ConflictError
 from ._sdk import Provenance, Store
 
-__all__ = ["forget", "remember", "remember_many"]
+__all__ = ["forget", "notify_branch", "remember", "remember_many"]
 
 _RETRIES = 4
 _BACKOFF_MS = 25
@@ -133,3 +135,38 @@ def forget(
         )
 
     return _with_retry(go)
+
+
+def notify_branch(
+    store: Store,
+    branch: str,
+    webhook_url: str,
+    *,
+    author: str = "agent",
+    timeout: float = 5.0,
+) -> None:
+    """POST a plain JSON payload to ``webhook_url`` announcing that
+    ``branch`` was created: the branch name, ``author``, and the branch's
+    real tip commit id.
+
+    No retry logic, no queue - the simplest possible "something happened"
+    signal, for the real "agents get told about changes" gap raised
+    directly by external feedback. Not a real notification system; a
+    market-test spike (#444). Call this yourself right after creating the
+    branch - nothing in the engine fires this automatically.
+    """
+    commit = store.resolve(branch)
+    payload = {
+        "event": "branch_created",
+        "branch": branch,
+        "author": author,
+        "commit": commit,
+    }
+    request = urllib.request.Request(
+        webhook_url,
+        data=json.dumps(payload).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+    with urllib.request.urlopen(request, timeout=timeout):
+        pass
