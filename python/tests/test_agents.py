@@ -2,6 +2,7 @@
 
 import json
 import threading
+import time
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 import pytest
@@ -155,6 +156,59 @@ def test_notify_branch_raises_on_an_unreachable_webhook(tmp_path: object) -> Non
         agents.notify_branch(
             store, "feature-x", "http://127.0.0.1:1/", timeout=1.0
         )
+
+
+def test_sync_from_directory_mirrors_a_remote_store_without_colliding(
+    tmp_path: object,
+) -> None:
+    sender = mnem.init(tmp_path / "sender")
+    agents.remember(sender, "plan", "canary rollout v1", time_ms=1000)
+
+    watcher = mnem.init(tmp_path / "watcher")
+    agents.remember(watcher, "own-fact", "belongs to the watcher only", time_ms=1000)
+
+    watch_dir = tmp_path / "watch"
+    watch_dir.mkdir()
+
+    stop = threading.Event()
+    thread = threading.Thread(
+        target=agents.sync_from_directory,
+        args=(watcher, watch_dir, "sender"),
+        kwargs={"poll_interval": 0.1, "stop": stop},
+        daemon=True,
+    )
+    thread.start()
+    try:
+        (watch_dir / "export1.json").write_text(sender.export())
+        _wait_until(lambda: "sender:plan" in watcher.working_memory())
+
+        mem = watcher.working_memory()
+        assert set(mem) == {"own-fact", "sender:plan"}
+        assert mem["sender:plan"].content == "canary rollout v1"
+        assert mem["own-fact"].content == "belongs to the watcher only"
+
+        agents.remember(sender, "plan", "canary rollout v2, widened", time_ms=2000)
+        (watch_dir / "export2.json").write_text(sender.export())
+        _wait_until(
+            lambda: watcher.working_memory().get("sender:plan")
+            and watcher.working_memory()["sender:plan"].content
+            == "canary rollout v2, widened"
+        )
+
+        assert list(watch_dir.glob("*.json")) == []
+    finally:
+        stop.set()
+        thread.join(timeout=5.0)
+    assert not thread.is_alive()
+
+
+def _wait_until(predicate: object, timeout: float = 5.0) -> None:
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        if predicate():
+            return
+        time.sleep(0.05)
+    raise AssertionError("condition never became true")
 
 
 def test_with_retry_gives_up_after_a_bounded_number_of_attempts() -> None:
