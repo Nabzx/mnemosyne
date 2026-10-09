@@ -11,15 +11,18 @@ There is no staging concept for a caller of this module: one call is one commit.
 from __future__ import annotations
 
 import json
+import tempfile
+import threading
 import time
 import urllib.request
 from collections.abc import Callable, Iterable, Mapping
+from pathlib import Path
 from typing import Any, TypeVar
 
 from ._mnem import ConflictError
 from ._sdk import Provenance, Store
 
-__all__ = ["forget", "notify_branch", "remember", "remember_many"]
+__all__ = ["forget", "notify_branch", "remember", "remember_many", "sync_from_directory"]
 
 _RETRIES = 4
 _BACKOFF_MS = 25
@@ -170,3 +173,60 @@ def notify_branch(
     )
     with urllib.request.urlopen(request, timeout=timeout):
         pass
+
+
+def sync_from_directory(
+    store: Store,
+    watch_dir: str | Path,
+    remote_label: str,
+    *,
+    poll_interval: float = 0.5,
+    stop: threading.Event | None = None,
+    author: str = "sync",
+) -> None:
+    """Poll ``watch_dir`` for dropped ``mnem export`` JSON files and mirror
+    each one's current facts into ``store``, under node ids prefixed
+    ``f"{remote_label}:"`` so they never collide with ``store``'s own
+    facts. Deletes each file once processed. Blocks until ``stop`` is set
+    (an empty one is created if not given) - run this in a background
+    thread.
+
+    This is **not** a real cross-store merge. ``Store.merge`` only reaches
+    commits that physically exist in its own store file, and there is no
+    primitive today to transplant a foreign store's objects into another
+    one - the same real constraint #364 found building the cross-framework
+    merge demo. What this demonstrates instead - "two stores converge" in
+    the sense the sync-protocol map (#413) actually cares about - is a
+    one-way mirror: the watching store's view of the remote's facts
+    converges to the remote's real current state, safely alongside the
+    watching store's own independent writes, with zero id collision risk.
+    A market-test spike ahead of #414-417's own decided sync design
+    (#445).
+    """
+    watch_dir = Path(watch_dir)
+    stop_event = stop if stop is not None else threading.Event()
+    seen: set[str] = set()
+    while not stop_event.is_set():
+        for path in sorted(watch_dir.glob("*.json")):
+            if path.name in seen:
+                continue
+            seen.add(path.name)
+            _mirror_export(store, path, remote_label, author)
+            path.unlink()
+        stop_event.wait(poll_interval)
+
+
+def _mirror_export(store: Store, export_path: Path, remote_label: str, author: str) -> None:
+    data = export_path.read_text()
+    with tempfile.TemporaryDirectory() as scratch_dir:
+        remote_store = Store.import_(f"{scratch_dir}/remote", data)
+        facts = remote_store.working_memory()
+
+    items = [
+        {"id": f"{remote_label}:{node_id}", "content": node.content}
+        for node_id, node in facts.items()
+    ]
+    if items:
+        remember_many(
+            store, items, summary=f"sync from {remote_label}", author=author
+        )

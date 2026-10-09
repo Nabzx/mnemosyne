@@ -10,6 +10,16 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Added
 
+- `mnem.agents.sync_from_directory`: polls a directory for dropped
+  `mnem export` JSON files and mirrors each one's current facts into
+  the watching store, under a `{remote_label}:` id prefix so they
+  never collide with the watcher's own writes. Explicitly not a real
+  cross-store merge - there is no primitive today to transplant a
+  foreign store's objects into another one (the same real constraint
+  #364 found), so this demonstrates "two stores converge" as a
+  one-way mirror instead, honestly documented as such. A market-test
+  spike ahead of #414-417's own decided sync design (#445).
+
 - `mnem.agents.notify_branch`: POSTs a plain JSON payload (branch
   name, author, tip commit) to a webhook URL - no retry, no queue,
   the simplest possible "something happened" signal for the real
