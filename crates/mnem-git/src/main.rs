@@ -91,7 +91,12 @@ enum Command {
         oneline: bool,
     },
     /// The current branch, HEAD, and what is staged.
-    Status,
+    Status {
+        /// A dashboard view: every branch, its tip's author, and how long
+        /// ago it last moved - instead of just the current branch.
+        #[arg(long = "all-branches")]
+        all_branches: bool,
+    },
     /// List every branch not yet merged into `main`, with its tip commit.
     Inbox,
     /// List, create, or delete branches.
@@ -253,7 +258,7 @@ fn main() -> Result<()> {
             max_count,
             oneline,
         }) => cmd_log(first_parent, max_count, oneline),
-        Some(Command::Status) => cmd_status(),
+        Some(Command::Status { all_branches }) => cmd_status(all_branches),
         Some(Command::Inbox) => cmd_inbox(),
         Some(Command::Branch {
             name,
@@ -409,8 +414,11 @@ fn cmd_log(first_parent: bool, max_count: Option<usize>, oneline: bool) -> Resul
     Ok(())
 }
 
-fn cmd_status() -> Result<()> {
+fn cmd_status(all_branches: bool) -> Result<()> {
     let store = open_store()?;
+    if all_branches {
+        return cmd_status_all_branches(&store);
+    }
     match store.head()? {
         Head::Attached(name) => println!("On branch {}", style::branch(&name)),
         Head::Detached(id) => println!("HEAD detached at {}", style::id(&short(&id))),
@@ -438,6 +446,55 @@ fn cmd_status() -> Result<()> {
         }
     }
     Ok(())
+}
+
+/// `mnem status --all-branches`: every branch, its tip's real author, and
+/// how long ago it last moved - a dashboard-shaped read over data that
+/// already exists. A market-test spike (#446); a human judges whether this
+/// earns its keep over just reading `mnem branch`.
+fn cmd_status_all_branches(store: &Store) -> Result<()> {
+    let branches = store.branches()?;
+    if branches.is_empty() {
+        println!("no branches yet");
+        return Ok(());
+    }
+    let now = now_ms();
+    for (name, tip) in branches {
+        let commit = store.log(tip, true, Some(1))?.into_iter().next();
+        match commit {
+            Some((_, commit)) => {
+                println!(
+                    "{}  {}  {}  {}",
+                    style::branch(&name),
+                    style::id(&short(&tip)),
+                    style::dim(&commit.author),
+                    style::dim(&humanize_age(now - commit.time))
+                );
+            }
+            None => println!(
+                "{}  {}  {}",
+                style::branch(&name),
+                style::id(&short(&tip)),
+                style::dim("(no commits)")
+            ),
+        }
+    }
+    Ok(())
+}
+
+/// A commit age in milliseconds as a short, human-readable string:
+/// "5s ago", "12m ago", "3h ago", "2d ago".
+fn humanize_age(age_ms: i64) -> String {
+    let secs = age_ms.max(0) / 1000;
+    if secs < 60 {
+        format!("{secs}s ago")
+    } else if secs < 3600 {
+        format!("{}m ago", secs / 60)
+    } else if secs < 86_400 {
+        format!("{}h ago", secs / 3600)
+    } else {
+        format!("{}d ago", secs / 86_400)
+    }
 }
 
 /// List every branch not yet merged into `main`, with its tip commit's

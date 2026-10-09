@@ -10,6 +10,11 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Added
 
+- `mnem status --all-branches`: every branch, its tip's real author,
+  and how long ago it last moved ("5s ago", "2h ago", "3d ago") -
+  a dashboard-shaped read over data that already exists. A
+  market-test spike, not a new engine capability (#446).
+
 - `mnem.agents.sync_from_directory`: polls a directory for dropped
   `mnem export` JSON files and mirrors each one's current facts into
   the watching store, under a `{remote_label}:` id prefix so they
