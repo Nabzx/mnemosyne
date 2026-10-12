@@ -230,6 +230,16 @@ enum Command {
         /// The second node id.
         b: String,
     },
+    /// Flag whether two nodes in working memory might be direct negations
+    /// of each other - shared vocabulary plus a negation word on only one
+    /// side. A crude heuristic, not the real contradiction detector #234
+    /// and #423 already deferred past ADR-0018.
+    Contradicts {
+        /// The first node id.
+        a: String,
+        /// The second node id.
+        b: String,
+    },
     /// Print a shell completion script to stdout.
     Completions {
         /// Which shell to generate for.
@@ -328,6 +338,7 @@ fn main() -> Result<()> {
         }) => cmd_diff(from, to, stat, name_only),
         Some(Command::Changelog { from, to }) => cmd_changelog(from, to),
         Some(Command::Similar { a, b }) => cmd_similar(a, b),
+        Some(Command::Contradicts { a, b }) => cmd_contradicts(a, b),
         Some(Command::Completions { shell }) => cmd_completions(shell),
         Some(Command::Export { output }) => cmd_export(output),
         Some(Command::Import { file, path }) => cmd_import(file, path),
@@ -1252,6 +1263,79 @@ fn cmd_similar(a: String, b: String) -> Result<()> {
         println!("not flagged (word overlap: {:.0}%)", score * 100.0);
     }
     Ok(())
+}
+
+/// Flag whether `a` and `b` look like direct negations of each other:
+/// shared vocabulary above the same threshold `similar` uses, plus a
+/// negation word on exactly one side, not both or neither - a fact and
+/// its own double negative are not what this is looking for. #449: a
+/// crude heuristic, not the real contradiction detector #234 and #423
+/// already deferred past ADR-0018. Never blocks a commit, only suggests.
+fn cmd_contradicts(a: String, b: String) -> Result<()> {
+    let store = open_store()?;
+    let node_a = store
+        .working_node(&a)?
+        .with_context(|| format!("no node {a:?} in working memory"))?;
+    let node_b = store
+        .working_node(&b)?
+        .with_context(|| format!("no node {b:?} in working memory"))?;
+
+    println!(
+        "{}: {}",
+        style::id(&a),
+        serde_json::to_string(&node_a.content)?
+    );
+    println!(
+        "{}: {}",
+        style::id(&b),
+        serde_json::to_string(&node_b.content)?
+    );
+
+    let overlap = word_overlap(&node_a.content, &node_b.content);
+    let negates_a = has_negation(&node_a.content);
+    let negates_b = has_negation(&node_b.content);
+
+    println!();
+    if overlap >= SIMILARITY_THRESHOLD && negates_a != negates_b {
+        let negated_side = if negates_a { &a } else { &b };
+        println!(
+            "{} might be direct negations of each other (word overlap: {:.0}%, {} carries a negation word)",
+            style::warn("flagged:"),
+            overlap * 100.0,
+            style::id(negated_side)
+        );
+    } else {
+        println!(
+            "not flagged (word overlap: {:.0}%, negation on {})",
+            overlap * 100.0,
+            match (negates_a, negates_b) {
+                (true, true) => "both sides",
+                (false, false) => "neither side",
+                (true, false) => "only a, below the similarity threshold",
+                (false, true) => "only b, below the similarity threshold",
+            }
+        );
+    }
+    Ok(())
+}
+
+/// Whether `content` carries at least one bare negation word - "not",
+/// "never", "no", "none", "nothing", "nobody", "nowhere", "cannot" - as
+/// its own token. Crude on purpose, and crude the same way
+/// `significant_words` already is: splitting on non-alphanumeric
+/// characters means a contraction like "doesn't" never matches (it
+/// tokenises to "doesn" and "t"), so this only catches a negation spelled
+/// out as its own word.
+fn has_negation(content: &serde_json::Value) -> bool {
+    const NEGATION_WORDS: &[&str] = &[
+        "not", "never", "no", "none", "nothing", "nobody", "nowhere", "cannot",
+    ];
+    let text = match content {
+        serde_json::Value::String(s) => s.clone(),
+        other => other.to_string(),
+    };
+    text.split(|c: char| !c.is_alphanumeric())
+        .any(|w| NEGATION_WORDS.contains(&w.to_lowercase().as_str()))
 }
 
 /// The Jaccard similarity of two content values' significant words:
