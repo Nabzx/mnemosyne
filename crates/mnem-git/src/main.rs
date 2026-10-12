@@ -175,6 +175,10 @@ enum Command {
         /// with `--resolve` or `--strategy`.
         #[arg(long = "dry-run")]
         dry_run: bool,
+        /// With `--dry-run`: if there are conflicts, also render them as a
+        /// static HTML page (base/ours/theirs side by side) at this path.
+        #[arg(long, value_name = "FILE", requires = "dry_run")]
+        html: Option<PathBuf>,
     },
     /// Approve a branch: merge it in with the reviewer recorded as the
     /// merge commit's author. A thin wrapper over `merge`, not the
@@ -308,7 +312,8 @@ fn main() -> Result<()> {
             message,
             author,
             dry_run,
-        }) => cmd_merge(theirs, resolve, strategy, message, author, dry_run),
+            html,
+        }) => cmd_merge(theirs, resolve, strategy, message, author, dry_run, html),
         Some(Command::Approve { branch, reviewer }) => cmd_approve(branch, reviewer),
         Some(Command::Reject {
             branch,
@@ -810,12 +815,13 @@ fn cmd_merge(
     message: Option<String>,
     author: Option<String>,
     dry_run: bool,
+    html: Option<PathBuf>,
 ) -> Result<()> {
     if dry_run {
         if !resolve.is_empty() || strategy.is_some() {
             anyhow::bail!("--dry-run previews whether a merge collides; it does not combine with --resolve or --strategy");
         }
-        return cmd_merge_dry_run(theirs);
+        return cmd_merge_dry_run(theirs, html);
     }
 
     let author = author
@@ -893,7 +899,7 @@ fn cmd_merge(
 /// `Store::merge` itself uses (`merge_base`, `merge_states`), not by running a
 /// real merge and rolling it back. #440: a market-test spike, not a change to
 /// the merge algorithm or its public API.
-fn cmd_merge_dry_run(theirs: String) -> Result<()> {
+fn cmd_merge_dry_run(theirs: String, html: Option<PathBuf>) -> Result<()> {
     let store = open_store()?;
     let branch = match store.head()? {
         Head::Attached(name) => name,
@@ -940,9 +946,98 @@ fn cmd_merge_dry_run(theirs: String) -> Result<()> {
     for conflict in &state_merge.conflicts {
         print_conflict(&store, conflict)?;
     }
+    if let Some(path) = html {
+        let page = render_conflicts_html(&store, &branch, &theirs, &state_merge.conflicts)?;
+        fs::write(&path, page)
+            .with_context(|| format!("writing the conflict page to {}", path.display()))?;
+        println!(
+            "Wrote {} to {}",
+            style::good("the conflict page"),
+            path.display()
+        );
+    }
     anyhow::bail!(
         "resolve with `--resolve <id>=<side>` (or `--strategy ours|theirs`) and merge for real"
     )
+}
+
+/// Render `conflicts` as one static HTML page, base/ours/theirs side by
+/// side per conflicting node - a screenshot-shaped view over the same
+/// data `print_conflict` already prints as text, not a new computation.
+/// No server, no interactivity, no new dependency: content is escaped by
+/// hand (`escape_html`) rather than pulling in an HTML-templating crate
+/// for a throwaway spike (#448).
+fn render_conflicts_html(
+    store: &Store,
+    ours: &str,
+    theirs: &str,
+    conflicts: &[Conflict],
+) -> Result<String> {
+    let mut rows = String::new();
+    for conflict in conflicts {
+        let cell = |side: Option<ObjectId>| -> Result<String> {
+            Ok(match side {
+                Some(id) => format!("<pre>{}</pre>", escape_html(&node_content(store, id)?)),
+                None => "<pre class=\"deleted\">(deleted)</pre>".to_string(),
+            })
+        };
+        rows.push_str(&format!(
+            "<tr>\n  <th>{}<span class=\"kind\">{}</span></th>\n  <td>{}</td>\n  <td>{}</td>\n  <td>{}</td>\n</tr>\n",
+            escape_html(&conflict.id),
+            conflict_kind_label(conflict.kind),
+            cell(conflict.base)?,
+            cell(conflict.ours)?,
+            cell(conflict.theirs)?,
+        ));
+    }
+    Ok(format!(
+        r#"<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>mnem merge conflicts: {ours} vs {theirs}</title>
+<style>
+body {{ font-family: -apple-system, sans-serif; background: #1e1e1e; color: #ddd; margin: 2rem; }}
+h1 {{ font-size: 1.1rem; font-weight: 600; }}
+table {{ border-collapse: collapse; width: 100%; margin-top: 1rem; }}
+th, td {{ border: 1px solid #444; padding: 0.5rem; vertical-align: top; text-align: left; width: 25%; }}
+th {{ background: #272727; font-family: monospace; font-size: 0.85rem; }}
+th .kind {{ display: block; color: #999; font-size: 0.75rem; }}
+td:nth-child(2) {{ background: #22281f; }}
+td:nth-child(3) {{ background: #2a1f1f; }}
+td:nth-child(4) {{ background: #1f232a; }}
+pre {{ margin: 0; white-space: pre-wrap; word-break: break-word; font-family: monospace; }}
+.deleted {{ color: #888; font-style: italic; }}
+</style>
+</head>
+<body>
+<h1>Merge conflicts: <code>{ours}</code> vs <code>{theirs}</code></h1>
+<table>
+<tr><th>node</th><th>base</th><th>ours</th><th>theirs</th></tr>
+{rows}</table>
+</body>
+</html>
+"#,
+        ours = escape_html(ours),
+        theirs = escape_html(theirs),
+        rows = rows,
+    ))
+}
+
+/// Escape the five characters HTML cares about. No templating crate for
+/// one throwaway spike - this is the whole of what `render_conflicts_html`
+/// needs.
+fn escape_html(s: &str) -> String {
+    s.chars()
+        .map(|c| match c {
+            '&' => "&amp;".to_string(),
+            '<' => "&lt;".to_string(),
+            '>' => "&gt;".to_string(),
+            '"' => "&quot;".to_string(),
+            '\'' => "&#39;".to_string(),
+            other => other.to_string(),
+        })
+        .collect()
 }
 
 fn print_conflict(store: &Store, conflict: &Conflict) -> Result<()> {
@@ -981,7 +1076,7 @@ fn conflict_kind_label(kind: ConflictKind) -> &'static str {
 /// conflicting merge still fails exactly as `merge` itself would, with the
 /// same "resolve and merge again" message.
 fn cmd_approve(branch: String, reviewer: String) -> Result<()> {
-    cmd_merge(branch, Vec::new(), None, None, Some(reviewer), false)
+    cmd_merge(branch, Vec::new(), None, None, Some(reviewer), false, None)
 }
 
 /// Reject a branch: print who rejected it and why, and stop there. The
