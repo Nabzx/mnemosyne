@@ -176,6 +176,27 @@ enum Command {
         #[arg(long = "dry-run")]
         dry_run: bool,
     },
+    /// Approve a branch: merge it in with the reviewer recorded as the
+    /// merge commit's author. A thin wrapper over `merge`, not the
+    /// ADR-gated propose/approve object #419-422 will eventually settle.
+    Approve {
+        /// The branch to approve and merge in.
+        branch: String,
+        /// Who is approving. Recorded as the merge commit's author.
+        #[arg(long)]
+        reviewer: String,
+    },
+    /// Reject a branch: record why, without touching the store.
+    Reject {
+        /// The branch being rejected.
+        branch: String,
+        /// Who is rejecting.
+        #[arg(long)]
+        reviewer: String,
+        /// Why the branch is rejected.
+        #[arg(long)]
+        reason: String,
+    },
     /// Show what changed between two memory states.
     Diff {
         /// The `from` side: a branch or commit. Default: the HEAD commit.
@@ -288,6 +309,12 @@ fn main() -> Result<()> {
             author,
             dry_run,
         }) => cmd_merge(theirs, resolve, strategy, message, author, dry_run),
+        Some(Command::Approve { branch, reviewer }) => cmd_approve(branch, reviewer),
+        Some(Command::Reject {
+            branch,
+            reviewer,
+            reason,
+        }) => cmd_reject(branch, reviewer, reason),
         Some(Command::Diff {
             from,
             to,
@@ -945,6 +972,28 @@ fn conflict_kind_label(kind: ConflictKind) -> &'static str {
         ConflictKind::EditDelete => "edit/delete",
         ConflictKind::AddAdd => "add/add",
     }
+}
+
+/// Approve a branch: the real `merge`, with the reviewer named as the
+/// merge commit's author. #447: a market-test spike for the review-model
+/// map (#418), not the ADR-gated propose/approve object #419-422 will
+/// eventually settle. No resolve or strategy options of its own - a
+/// conflicting merge still fails exactly as `merge` itself would, with the
+/// same "resolve and merge again" message.
+fn cmd_approve(branch: String, reviewer: String) -> Result<()> {
+    cmd_merge(branch, Vec::new(), None, None, Some(reviewer), false)
+}
+
+/// Reject a branch: print who rejected it and why, and stop there. The
+/// store is never opened, so nothing about it is touched.
+fn cmd_reject(branch: String, reviewer: String, reason: String) -> Result<()> {
+    println!(
+        "{} {} ({}): {reason}",
+        style::bad("Rejected"),
+        style::branch(&branch),
+        style::dim(&reviewer)
+    );
+    Ok(())
 }
 
 /// Resolve `diff`/`changelog`'s shared `from`/`to` arguments: no `from` means
