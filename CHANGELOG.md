@@ -10,6 +10,15 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Added
 
+- `mnem approve <branch> --reviewer <name>` / `mnem reject <branch>
+  --reviewer <name> --reason <text>`: `approve` runs the real `merge`
+  with the reviewer recorded as the merge commit's author, inheriting
+  `merge`'s own conflict handling unchanged; `reject` only prints who
+  rejected the branch and why, the store is never opened so nothing
+  about it is touched. A market-test spike for the review-model map
+  (#418), not the ADR-gated propose/approve object #419-422 will
+  eventually settle (#447).
+
 - `mnem status --all-branches`: every branch, its tip's real author,
   and how long ago it last moved ("5s ago", "2h ago", "3d ago") -
   a dashboard-shaped read over data that already exists. A
