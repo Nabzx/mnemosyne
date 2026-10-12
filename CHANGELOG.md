@@ -10,6 +10,15 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Added
 
+- `mnem merge --dry-run --html <file>`: when a dry-run finds conflicts,
+  also renders them as one static HTML page, base/ours/theirs side by
+  side per conflicting node - a screenshot-shaped view over the same
+  data `--dry-run` already prints as text, no server, no
+  interactivity. Only combines with `--dry-run` (clap's own `requires`
+  enforces it); content is escaped by hand rather than pulling in a
+  templating crate. A market-test spike well ahead of the real web UI
+  (#233), not that UI itself (#448).
+
 - `mnem approve <branch> --reviewer <name>` / `mnem reject <branch>
   --reviewer <name> --reason <text>`: `approve` runs the real `merge`
   with the reviewer recorded as the merge commit's author, inheriting
