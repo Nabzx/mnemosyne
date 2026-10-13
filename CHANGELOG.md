@@ -10,6 +10,16 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Added
 
+- `mnem contradicts <a> <b>`: flags whether two nodes in working memory
+  might be direct negations of each other - the same word-overlap
+  heuristic `similar` already uses, plus a bare negation word
+  ("not"/"never"/"no"/...) on exactly one side, not both or neither.
+  Never blocks or merges anything, purely a suggestion. Explicitly not
+  the real contradiction detector the poisoning map (#234) or the
+  semantic-merge map (#423) will eventually settle, both of which
+  ADR-0018 already deferred past the substrate. A market-test spike
+  (#449).
+
 - `mnem merge --dry-run --html <file>`: when a dry-run finds conflicts,
   also renders them as one static HTML page, base/ours/theirs side by
   side per conflicting node - a screenshot-shaped view over the same
