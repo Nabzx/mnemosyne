@@ -10,6 +10,16 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Added
 
+- `mnem registry publish/list/fork`: a local file-based registry - a
+  folder of exported agent bundles, one JSON file each. `publish`
+  exports the current store under a name, `list` reads the folder,
+  `fork` imports a named bundle into a new store - three thin
+  wrappers over `export`/`import`, no new object kind, no network.
+  The folder is explicit only (`--registry <DIR>` or `$MNEM_REGISTRY`,
+  same fallback shape `--author`/`$MNEM_AUTHOR` already uses), no
+  invented default location. A market-test spike on the file-based
+  side of the hosted-vs-file-based decision #407 (#451).
+
 - `examples/agent_bundle_export_import.py`: packages an agent - a
   prompt string, a policy value, a tool-declaration list - as one
   portable bundle, committed under a few fixed `agent:` node ids and
