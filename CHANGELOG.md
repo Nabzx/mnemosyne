@@ -10,6 +10,18 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Added
 
+- `examples/agent_bundle_export_import.py`: packages an agent - a
+  prompt string, a policy value, a tool-declaration list - as one
+  portable bundle, committed under a few fixed `agent:` node ids and
+  round-tripped through `export`/`import` into a fresh store with
+  every field intact. Zero new engine code: the same `export`/
+  `import` `fork_via_export_import.py` already proved lossless for a
+  plain memory store, applied to an agent-shaped one instead. The
+  `agent:` node ids are this demo's own pick, not a real convention
+  #354/#355 will eventually settle. Wired into the same CI job as
+  `fork_via_export_import.py` - core CLI, not adapter-specific. A
+  market-test spike (#450).
+
 - `mnem contradicts <a> <b>`: flags whether two nodes in working memory
   might be direct negations of each other - the same word-overlap
   heuristic `similar` already uses, plus a bare negation word
