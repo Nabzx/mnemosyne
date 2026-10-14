@@ -258,6 +258,42 @@ enum Command {
         /// Where to create the store. Refuses if one already exists there.
         path: Option<PathBuf>,
     },
+    /// A local file-based registry: a folder of exported agent bundles,
+    /// one JSON file each. #451: a throwaway spike on the file-based side
+    /// of the hosted-vs-file-based decision #407, built entirely from
+    /// `export`/`import` - no new object kind, no network.
+    Registry {
+        #[command(subcommand)]
+        action: RegistryAction,
+    },
+}
+
+#[derive(Subcommand)]
+enum RegistryAction {
+    /// Export the current store and publish it to the registry as `<name>.json`.
+    Publish {
+        /// The bundle's name in the registry.
+        name: String,
+        /// The registry folder. Falls back to $MNEM_REGISTRY.
+        #[arg(long, value_name = "DIR")]
+        registry: Option<PathBuf>,
+    },
+    /// List every bundle in the registry.
+    List {
+        /// The registry folder. Falls back to $MNEM_REGISTRY.
+        #[arg(long, value_name = "DIR")]
+        registry: Option<PathBuf>,
+    },
+    /// Fork a published bundle into a new store (import under a new name).
+    Fork {
+        /// The bundle's name in the registry.
+        name: String,
+        /// Where to create the forked store. Refuses if one already exists there.
+        dest: PathBuf,
+        /// The registry folder. Falls back to $MNEM_REGISTRY.
+        #[arg(long, value_name = "DIR")]
+        registry: Option<PathBuf>,
+    },
 }
 
 fn main() -> Result<()> {
@@ -342,6 +378,15 @@ fn main() -> Result<()> {
         Some(Command::Completions { shell }) => cmd_completions(shell),
         Some(Command::Export { output }) => cmd_export(output),
         Some(Command::Import { file, path }) => cmd_import(file, path),
+        Some(Command::Registry { action }) => match action {
+            RegistryAction::Publish { name, registry } => cmd_registry_publish(name, registry),
+            RegistryAction::List { registry } => cmd_registry_list(registry),
+            RegistryAction::Fork {
+                name,
+                dest,
+                registry,
+            } => cmd_registry_fork(name, dest, registry),
+        },
     }
 }
 
@@ -1404,6 +1449,81 @@ fn cmd_import(file: PathBuf, path: Option<PathBuf>) -> Result<()> {
     let store = Store::import(&path, &export)?;
     println!(
         "Imported {object_count} object(s) into {}",
+        store.mnem_dir().display()
+    );
+    Ok(())
+}
+
+/// The registry folder: the explicit `--registry`, falling back to
+/// `$MNEM_REGISTRY`, same fallback shape `--author` already uses for
+/// `$MNEM_AUTHOR`. No invented default directory - a spike this thin
+/// should never write somewhere the caller didn't ask for.
+fn registry_dir(explicit: Option<PathBuf>) -> Result<PathBuf> {
+    explicit
+        .or_else(|| std::env::var_os("MNEM_REGISTRY").map(PathBuf::from))
+        .context("no registry: pass --registry <DIR> or set $MNEM_REGISTRY")
+}
+
+/// Export the current store and write it to `<registry>/<name>.json`.
+/// `list` and `fork` below are the exact reverse of this and of each
+/// other - the registry is just a folder, `publish`/`fork` are
+/// `export`/`import` under a name instead of an arbitrary path.
+fn cmd_registry_publish(name: String, registry: Option<PathBuf>) -> Result<()> {
+    let dir = registry_dir(registry)?;
+    fs::create_dir_all(&dir).with_context(|| format!("creating {}", dir.display()))?;
+    let store = open_store()?;
+    let export = store.export()?;
+    let json = serde_json::to_string_pretty(&export).context("encoding the export as JSON")?;
+    let path = dir.join(format!("{name}.json"));
+    fs::write(&path, json).with_context(|| format!("writing {}", path.display()))?;
+    println!(
+        "Published {} ({} object(s)) to {}",
+        style::good(&name),
+        export.objects.len(),
+        path.display()
+    );
+    Ok(())
+}
+
+fn cmd_registry_list(registry: Option<PathBuf>) -> Result<()> {
+    let dir = registry_dir(registry)?;
+    if !dir.exists() {
+        println!("no registry at {}", dir.display());
+        return Ok(());
+    }
+    let mut names: Vec<String> = fs::read_dir(&dir)
+        .with_context(|| format!("reading {}", dir.display()))?
+        .filter_map(|entry| entry.ok())
+        .filter_map(|entry| {
+            let path = entry.path();
+            (path.extension().and_then(|e| e.to_str()) == Some("json"))
+                .then(|| path.file_stem()?.to_str().map(str::to_string))
+                .flatten()
+        })
+        .collect();
+    names.sort();
+    if names.is_empty() {
+        println!("registry is empty ({})", dir.display());
+        return Ok(());
+    }
+    for name in names {
+        println!("{}", style::branch(&name));
+    }
+    Ok(())
+}
+
+fn cmd_registry_fork(name: String, dest: PathBuf, registry: Option<PathBuf>) -> Result<()> {
+    let dir = registry_dir(registry)?;
+    let path = dir.join(format!("{name}.json"));
+    let text = fs::read_to_string(&path)
+        .with_context(|| format!("no bundle {name:?} in the registry ({})", path.display()))?;
+    let export: Export = serde_json::from_str(&text)
+        .with_context(|| format!("{} is not a valid mnem export", path.display()))?;
+    let object_count = export.objects.len();
+    let store = Store::import(&dest, &export)?;
+    println!(
+        "Forked {} into {} ({object_count} object(s))",
+        style::good(&name),
         store.mnem_dir().display()
     );
     Ok(())
