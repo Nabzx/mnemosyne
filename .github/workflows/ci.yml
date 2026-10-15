@@ -144,6 +144,7 @@ jobs:
       # rather than in adapters-crewai (#356).
       - run: uv run python examples/fork_via_export_import.py
       - run: uv run python examples/agent_bundle_export_import.py
+      - run: uv run python examples/agent_bundle_fork.py
 
   adapters-crewai:
     name: adapters (crewai, cross-adapter ids)
