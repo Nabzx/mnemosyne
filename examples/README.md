@@ -20,6 +20,7 @@ external PRs (see `CONTRIBUTING.md`).
 | `fork_via_export_import.py` | the Python SDK | fork a store with `export`/`import`, edit the fork on a branch, `merge` the edit back - the merged node still `blame`s to the exact original commit id, proving the round trip carries real history, not flattened content |
 | `multi_agent_incident_retro.py` | all four adapters | four agents on four frameworks each investigate one incident on their own branch, merged sequentially, not pairwise; every finding still `blame`s to the commit the agent that wrote it made, even after three more merges land on top of it |
 | `agent_bundle_export_import.py` | the Python SDK | package an agent - a prompt, a policy, a tool list - as one portable bundle under a few fixed node ids, round-tripped through `export`/`import` into a fresh store with every field intact |
+| `agent_bundle_fork.py` | the Python SDK | fork a published agent bundle, edit one field, commit - the edited field `blame`s to the new commit while every untouched field still `blame`s to the bundle's own original commit |
 
 ```bash
 python examples/support_agent.py
@@ -34,4 +35,5 @@ python examples/cross_framework_merge.py                # needs mnem-crewai, mne
 python examples/fork_via_export_import.py
 python examples/multi_agent_incident_retro.py           # needs all four adapters
 python examples/agent_bundle_export_import.py
+python examples/agent_bundle_fork.py
 ```
