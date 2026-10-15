@@ -10,6 +10,15 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Added
 
+- `examples/agent_bundle_fork.py`: forks a published agent bundle,
+  edits one field, commits - the edited field `blame`s to the new
+  commit while every untouched field still `blame`s to the bundle's
+  own original commit, retelling `fork_via_export_import.py`'s
+  (#356) "history survives a fork" proof for a whole agent instead
+  of a single memory fact. The SDK equivalent of `mnem registry fork`
+  (#451). Wired into the same CI job as the other export/import
+  examples. A market-test spike (#452).
+
 - `mnem registry publish/list/fork`: a local file-based registry - a
   folder of exported agent bundles, one JSON file each. `publish`
   exports the current store under a name, `list` reads the folder,
