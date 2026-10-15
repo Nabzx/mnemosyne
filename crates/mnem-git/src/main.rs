@@ -294,6 +294,18 @@ enum RegistryAction {
         #[arg(long, value_name = "DIR")]
         registry: Option<PathBuf>,
     },
+    /// Render every bundle in the registry as one static HTML page:
+    /// name, prompt summary, and tool count per bundle (#453). Reads
+    /// `agent:prompt`/`agent:tools` - #450's own demo convention, not a
+    /// real one - so a bundle missing either just shows "(none)".
+    Render {
+        /// The registry folder. Falls back to $MNEM_REGISTRY.
+        #[arg(long, value_name = "DIR")]
+        registry: Option<PathBuf>,
+        /// Write the page here.
+        #[arg(long, value_name = "FILE")]
+        output: PathBuf,
+    },
 }
 
 fn main() -> Result<()> {
@@ -386,6 +398,7 @@ fn main() -> Result<()> {
                 dest,
                 registry,
             } => cmd_registry_fork(name, dest, registry),
+            RegistryAction::Render { registry, output } => cmd_registry_render(registry, output),
         },
     }
 }
@@ -1464,6 +1477,23 @@ fn registry_dir(explicit: Option<PathBuf>) -> Result<PathBuf> {
         .context("no registry: pass --registry <DIR> or set $MNEM_REGISTRY")
 }
 
+/// Every bundle name (the file stem of each `*.json`) in `dir`, sorted.
+/// Shared by `list` and `render` - both just read the folder.
+fn registry_bundle_names(dir: &PathBuf) -> Result<Vec<String>> {
+    let mut names: Vec<String> = fs::read_dir(dir)
+        .with_context(|| format!("reading {}", dir.display()))?
+        .filter_map(|entry| entry.ok())
+        .filter_map(|entry| {
+            let path = entry.path();
+            (path.extension().and_then(|e| e.to_str()) == Some("json"))
+                .then(|| path.file_stem()?.to_str().map(str::to_string))
+                .flatten()
+        })
+        .collect();
+    names.sort();
+    Ok(names)
+}
+
 /// Export the current store and write it to `<registry>/<name>.json`.
 /// `list` and `fork` below are the exact reverse of this and of each
 /// other - the registry is just a folder, `publish`/`fork` are
@@ -1491,17 +1521,7 @@ fn cmd_registry_list(registry: Option<PathBuf>) -> Result<()> {
         println!("no registry at {}", dir.display());
         return Ok(());
     }
-    let mut names: Vec<String> = fs::read_dir(&dir)
-        .with_context(|| format!("reading {}", dir.display()))?
-        .filter_map(|entry| entry.ok())
-        .filter_map(|entry| {
-            let path = entry.path();
-            (path.extension().and_then(|e| e.to_str()) == Some("json"))
-                .then(|| path.file_stem()?.to_str().map(str::to_string))
-                .flatten()
-        })
-        .collect();
-    names.sort();
+    let names = registry_bundle_names(&dir)?;
     if names.is_empty() {
         println!("registry is empty ({})", dir.display());
         return Ok(());
@@ -1527,6 +1547,101 @@ fn cmd_registry_fork(name: String, dest: PathBuf, registry: Option<PathBuf>) -> 
         store.mnem_dir().display()
     );
     Ok(())
+}
+
+/// Render every bundle in the registry as one static HTML page: name,
+/// prompt summary, tool count. No server, build-time only (#453). Reads
+/// each bundle the same way `fork` does - `Store::import` into a scratch
+/// directory under the OS temp dir, read, then thrown away - rather than
+/// hand-parsing the export's own object graph or adding a dependency to
+/// do it. `agent:prompt`/`agent:tools` are #450's own demo node ids, not
+/// a real convention, so a bundle missing either just reads "(none)".
+fn cmd_registry_render(registry: Option<PathBuf>, output: PathBuf) -> Result<()> {
+    let dir = registry_dir(registry)?;
+    if !dir.exists() {
+        anyhow::bail!("no registry at {}", dir.display());
+    }
+    let names = registry_bundle_names(&dir)?;
+
+    let mut rows = String::new();
+    for name in &names {
+        let path = dir.join(format!("{name}.json"));
+        let text =
+            fs::read_to_string(&path).with_context(|| format!("reading {}", path.display()))?;
+        let export: Export = serde_json::from_str(&text)
+            .with_context(|| format!("{} is not a valid mnem export", path.display()))?;
+
+        let scratch = std::env::temp_dir().join(format!("mnem-registry-render-{name}"));
+        let _ = fs::remove_dir_all(&scratch);
+        let store =
+            Store::import(&scratch, &export).with_context(|| format!("reading bundle {name:?}"))?;
+        let prompt = store.working_node("agent:prompt")?;
+        let tools = store.working_node("agent:tools")?;
+        let _ = fs::remove_dir_all(&scratch);
+
+        let prompt_summary = match prompt.map(|n| n.content) {
+            Some(serde_json::Value::String(s)) => truncate(&s, 80),
+            Some(_) => "(agent:prompt is not a string)".to_string(),
+            None => "(none)".to_string(),
+        };
+        let tool_count = match tools.map(|n| n.content) {
+            Some(serde_json::Value::Array(a)) => a.len().to_string(),
+            Some(_) => "(agent:tools is not a list)".to_string(),
+            None => "(none)".to_string(),
+        };
+
+        rows.push_str(&format!(
+            "<tr>\n  <td>{}</td>\n  <td>{}</td>\n  <td>{}</td>\n</tr>\n",
+            escape_html(name),
+            escape_html(&prompt_summary),
+            escape_html(&tool_count),
+        ));
+    }
+
+    let page = format!(
+        r#"<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>mnem registry: {count} bundle(s)</title>
+<style>
+body {{ font-family: -apple-system, sans-serif; background: #1e1e1e; color: #ddd; margin: 2rem; }}
+h1 {{ font-size: 1.1rem; font-weight: 600; }}
+table {{ border-collapse: collapse; width: 100%; margin-top: 1rem; }}
+th, td {{ border: 1px solid #444; padding: 0.5rem; vertical-align: top; text-align: left; }}
+th {{ background: #272727; font-family: monospace; font-size: 0.85rem; }}
+td:first-child {{ font-family: monospace; }}
+</style>
+</head>
+<body>
+<h1>Registry: <code>{dir}</code>, {count} bundle(s)</h1>
+<table>
+<tr><th>name</th><th>prompt summary</th><th>tool count</th></tr>
+{rows}</table>
+</body>
+</html>
+"#,
+        count = names.len(),
+        dir = escape_html(&dir.display().to_string()),
+    );
+    fs::write(&output, page).with_context(|| format!("writing {}", output.display()))?;
+    println!(
+        "Wrote {} ({} bundle(s)) to {}",
+        style::good("the registry page"),
+        names.len(),
+        output.display()
+    );
+    Ok(())
+}
+
+/// Truncate `s` to at most `max` characters, appending `...` if cut.
+fn truncate(s: &str, max: usize) -> String {
+    if s.chars().count() <= max {
+        s.to_string()
+    } else {
+        let short: String = s.chars().take(max).collect();
+        format!("{short}...")
+    }
 }
 
 fn open_store() -> Result<Store> {
