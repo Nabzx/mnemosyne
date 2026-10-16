@@ -10,6 +10,17 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Added
 
+- `mnem registry render --output <file>`: renders every bundle in the
+  registry as one static HTML page - name, prompt summary, tool count
+  per bundle, no server. Reads each bundle the same way `fork` does
+  (`Store::import` into a scratch directory under the OS temp dir,
+  read, then thrown away) rather than hand-parsing the export's own
+  object graph or adding a dependency to do it. `agent:prompt`/
+  `agent:tools` are #450's own demo node ids, not a real convention,
+  so a bundle missing either just reads "(none)". A market-test
+  spike well ahead of the real web UI (#233), not that UI itself
+  (#453).
+
 - `examples/agent_bundle_fork.py`: forks a published agent bundle,
   edits one field, commits - the edited field `blame`s to the new
   commit while every untouched field still `blame`s to the bundle's
