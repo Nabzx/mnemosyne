@@ -24,6 +24,14 @@
   - [rm](commands/rm.md)
   - [commit](commands/commit.md)
   - [status](commands/status.md)
+- [History and inspection]()
+  - [log](commands/log.md)
+  - [show](commands/show.md)
+  - [diff](commands/diff.md)
+  - [blame](commands/blame.md)
+  - [bisect](commands/bisect.md)
+  - [changelog](commands/changelog.md)
+  - [inbox](commands/inbox.md)
 
 # Architecture decisions
 
