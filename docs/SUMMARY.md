@@ -16,6 +16,15 @@
 - [Merge chaos report](chaos-report.md)
 - [How mnem compares](comparisons.md)
 
+# Commands
+
+- [Getting started]()
+  - [init](commands/init.md)
+  - [add](commands/add.md)
+  - [rm](commands/rm.md)
+  - [commit](commands/commit.md)
+  - [status](commands/status.md)
+
 # Architecture decisions
 
 - [Index](adr/README.md)
