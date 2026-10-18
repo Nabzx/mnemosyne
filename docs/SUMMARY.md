@@ -32,6 +32,12 @@
   - [bisect](commands/bisect.md)
   - [changelog](commands/changelog.md)
   - [inbox](commands/inbox.md)
+- [Branching and merging]()
+  - [branch](commands/branch.md)
+  - [checkout](commands/checkout.md)
+  - [merge](commands/merge.md)
+  - [approve](commands/approve.md)
+  - [reject](commands/reject.md)
 
 # Architecture decisions
 
