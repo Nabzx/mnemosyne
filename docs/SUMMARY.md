@@ -38,6 +38,10 @@
   - [merge](commands/merge.md)
   - [approve](commands/approve.md)
   - [reject](commands/reject.md)
+- [Portability]()
+  - [export](commands/export.md)
+  - [import](commands/import.md)
+  - [registry](commands/registry.md)
 
 # Architecture decisions
 
