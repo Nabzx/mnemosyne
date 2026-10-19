@@ -87,6 +87,7 @@
 - [A Mem0 migration path](research/issue-253-mem0-migration-survey.md)
 - [The Mnemosyne naming collision](research/issue-339-naming-collision.md)
 - [A command-reference template and category scheme](research/issue-549-command-reference-template.md)
+- [ADK's memory seam against the real source](research/issue-569-adk-memory-seam-survey.md)
 
 # Progress notes
 
