@@ -88,6 +88,7 @@
 - [The Mnemosyne naming collision](research/issue-339-naming-collision.md)
 - [A command-reference template and category scheme](research/issue-549-command-reference-template.md)
 - [ADK's memory seam against the real source](research/issue-569-adk-memory-seam-survey.md)
+- [How ADK apps call the memory service in practice](research/issue-570-adk-memory-call-patterns.md)
 
 # Progress notes
 
