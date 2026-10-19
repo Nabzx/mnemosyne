@@ -89,6 +89,7 @@
 - [A command-reference template and category scheme](research/issue-549-command-reference-template.md)
 - [ADK's memory seam against the real source](research/issue-569-adk-memory-seam-survey.md)
 - [How ADK apps call the memory service in practice](research/issue-570-adk-memory-call-patterns.md)
+- [Dependency fit of google-adk in the adapters CI venv](research/issue-576-adk-dependency-fit.md)
 
 # Progress notes
 
