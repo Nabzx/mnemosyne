@@ -79,6 +79,12 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   ADR-0023). Store-wide, not scoped to one `(app_name, user_id)`:
   other scopes may share this store, and a branch or merge moves the
   whole thing (#595).
+- `mnem-adk`: an offline integration test driving a real ADK `Runner`
+  through both `load_memory` and `preload_memory` against
+  `MnemosyneMemoryService`, a scripted model, no network call -
+  productionising #584's own throwaway spike (which only drove
+  `load_memory`) and confirming #570's finding that the two really do
+  compose on one agent (#596).
 
 - `mnem registry render --output <file>`: renders every bundle in the
   registry as one static HTML page - name, prompt summary, tool count
