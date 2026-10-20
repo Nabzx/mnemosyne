@@ -10,6 +10,18 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ### Added
 
+- `packages/mnem-adk`: scaffolding for a Google ADK `BaseMemoryService`
+  backed by Mnemosyne (ADR-0026). `MnemosyneMemoryService` subclasses
+  `google.adk.memory.BaseMemoryService` directly (a real ABC) and imports
+  cleanly, but every method still raises `NotImplementedError` - real
+  behaviour lands one ticket at a time under the ADK adapter map (#568).
+  `requires-python = ">=3.11"`, a real exception to this project's
+  otherwise-uniform `>=3.10` floor, forced by `google-adk` itself (#576).
+  Shares the plain `adapters` CI job and is covered on Windows from day
+  one (#576, #587): `google-adk`'s own deps install cleanly alongside
+  every other adapter in one venv, with the three downgrades #576 already
+  found and no new ones.
+
 - `mnem registry render --output <file>`: renders every bundle in the
   registry as one static HTML page - name, prompt summary, tool count
   per bundle, no server. Reads each bundle the same way `fork` does
