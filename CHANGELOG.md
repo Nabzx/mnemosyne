@@ -28,6 +28,16 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   `add_memory` entry with no id of its own, backed by a reserved counter
   node excluded from search and content iteration. No `BaseMemoryService`
   methods wired up to it yet (#588).
+- `mnem-adk`: the Event-to-node conversion (#572, ADR-0026) - a pure
+  field read, no capture hook needed the way the OpenAI Agents SDK
+  adapter's `on_tool_end` is (ADR-0020), since ADK's own `Event` already
+  carries `author`, `invocation_id` and structured `function_call`/
+  `function_response` parts directly. The node's own content is the
+  event's full `Content` object, serialised, not reduced to text -
+  matching `InMemoryMemoryService`'s own real `MemoryEntry(content=
+  event.content, ...)` behaviour. An event with no content or no parts
+  converts to nothing, the same skip condition the reference service
+  uses. Not wired into any `BaseMemoryService` method yet (#589).
 
 - `mnem registry render --output <file>`: renders every bundle in the
   registry as one static HTML page - name, prompt summary, tool count
