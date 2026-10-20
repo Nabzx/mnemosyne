@@ -1,4 +1,14 @@
-"""Tests for the node id and scope helpers (#588, #571, ADR-0026)."""
+"""Tests for the node id and scope helpers (#588, #571, ADR-0026).
+
+Named test_adk_node_ids.py, not test_ids.py or test_node_ids.py: no
+tests/ directory here has an __init__.py, so pytest collects every
+package's tests as bare top-level modules in the shared `adapters`
+CI job - a same-named file in two packages is a real "import file
+mismatch" collection error, not a lint nitpick. mnem-openai-agents
+already has test_ids.py and mnem-autogen already has
+test_node_ids.py; found both the hard way. Prefixing with adk_ keeps
+this file unique regardless of what any other adapter is named.
+"""
 
 import mnem
 
