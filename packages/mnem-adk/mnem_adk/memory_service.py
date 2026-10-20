@@ -11,11 +11,14 @@ Google.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+import time
+from typing import TYPE_CHECKING, Any
 
 import mnem
 from google.adk.memory import BaseMemoryService
 from google.adk.memory.base_memory_service import SearchMemoryResponse
+
+from ._convert import event_to_node
 
 if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
@@ -23,6 +26,39 @@ if TYPE_CHECKING:
     from google.adk.events.event import Event
     from google.adk.memory.memory_entry import MemoryEntry
     from google.adk.sessions.session import Session
+
+_RETRIES = 4
+_BACKOFF_MS = 25
+_AUTHOR = "mnem-adk"
+
+
+def _write_nodes(
+    store: mnem.Store,
+    nodes: list[tuple[str, dict[str, Any], mnem.Provenance]],
+    *,
+    message: str,
+) -> None:
+    """Stage every ``(node_id, content, provenance)`` in ``nodes`` and
+    commit once - one write, however many nodes it touches (ADR-0016's own
+    retry-on-conflict idiom). Node ids here are always deterministic (an
+    event's own real id, or #588's explicit/sequence scheme), so a retry
+    simply restages the same ops - unlike a sequence counter, there is
+    nothing to re-read fresh."""
+    if not nodes:
+        return
+
+    last: mnem.ConflictError | None = None
+    for attempt in range(_RETRIES):
+        try:
+            for node_id, content, provenance in nodes:
+                store.add(node_id, content, provenance=provenance)
+            store.commit(message, author=_AUTHOR)
+            return
+        except mnem.ConflictError as exc:
+            last = exc
+            time.sleep(_BACKOFF_MS * (attempt + 1) / 1000)
+    assert last is not None
+    raise last
 
 
 class MnemosyneMemoryService(BaseMemoryService):
@@ -40,7 +76,12 @@ class MnemosyneMemoryService(BaseMemoryService):
         self._store = store
 
     async def add_session_to_memory(self, session: Session) -> None:
-        raise NotImplementedError("filled in by #590")
+        nodes = []
+        for event in session.events:
+            result = event_to_node(session.app_name, session.user_id, session.id, event)
+            if result is not None:
+                nodes.append(result)
+        _write_nodes(self._store, nodes, message=f"ingest session {session.id}")
 
     async def add_events_to_memory(
         self,

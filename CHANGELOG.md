@@ -38,6 +38,13 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   event.content, ...)` behaviour. An event with no content or no parts
   converts to nothing, the same skip condition the reference service
   uses. Not wired into any `BaseMemoryService` method yet (#589).
+- `mnem-adk`: `MnemosyneMemoryService.add_session_to_memory` now does
+  real work (ADR-0026) - one Mnemosyne commit per call, every
+  convertible event in one batch, with the bounded retry-on-
+  `ConflictError` wrapper every other adapter already uses (ADR-0016).
+  Idempotent against ADK's own documented "a session may be added
+  multiple times" contract: event ids are deterministic, so re-adding
+  the same session overwrites in place rather than duplicating (#590).
 
 - `mnem registry render --output <file>`: renders every bundle in the
   registry as one static HTML page - name, prompt summary, tool count
