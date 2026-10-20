@@ -93,6 +93,7 @@
 - [Node id scheme and scope mapping for ADK](research/issue-571-adk-node-id-scheme.md)
 - [Provenance mapping from ADK events to mnem Provenance](research/issue-572-adk-provenance-mapping.md)
 - [Search ranking parity with InMemoryMemoryService](research/issue-573-adk-search-ranking-parity.md)
+- [Gemini 4 Argon through ADK](research/issue-575-adk-argon-routing-and-cost.md)
 
 # Progress notes
 
