@@ -1,6 +1,6 @@
 """Tests for the MnemosyneMemoryService scaffolding (#586). Real behaviour
-for each BaseMemoryService method is tested in its own ticket's test module
-(#590-#593)."""
+for each BaseMemoryService method is tested in its own ticket's test
+module (test_adk_add_session.py and onward, #590-#593)."""
 
 import asyncio
 
@@ -34,8 +34,7 @@ def test_is_a_base_memory_service(service: MnemosyneMemoryService) -> None:
 
 
 def test_methods_not_yet_implemented(service: MnemosyneMemoryService) -> None:
-    with pytest.raises(NotImplementedError):
-        _run(service.add_session_to_memory(None))
+    # add_session_to_memory: real behaviour now, tested in test_adk_add_session.py (#590).
     with pytest.raises(NotImplementedError):
         _run(
             service.add_events_to_memory(app_name="a", user_id="u", events=[])
