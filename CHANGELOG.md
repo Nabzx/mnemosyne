@@ -58,6 +58,14 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   every retry attempt rather than trusted stale, the same reasoning
   the OpenAI Agents SDK adapter's own sequence counter already
   settled (#592).
+- `mnem-adk`: `search_memory` now does real work (#573, ADR-0026) -
+  `InMemoryMemoryService`'s own real keyword-overlap algorithm, ported
+  directly from the `v2.12.0` source rather than approximated:
+  NFC-normalised `\w+` tokenising, Latin/non-Latin script-run widening,
+  a non-ASCII query token also matching by substring over the lowered
+  text, zero-score entries dropped, stable descending sort, top 10.
+  Scoped by `(app_name, user_id)` only, the reserved sequence-counter
+  node excluded from every candidate (#593).
 
 - `mnem registry render --output <file>`: renders every bundle in the
   registry as one static HTML page - name, prompt summary, tool count

@@ -17,15 +17,24 @@ from typing import TYPE_CHECKING, Any
 import mnem
 from google.adk.memory import BaseMemoryService
 from google.adk.memory.base_memory_service import SearchMemoryResponse
+from google.adk.memory.memory_entry import MemoryEntry
+from google.genai import types
 
 from ._convert import event_to_node, memory_entry_to_content_and_provenance
-from ._ids import memory_node_id, memory_seq_node_id, next_memory_node_id, read_memory_seq
+from ._ids import (
+    is_reserved,
+    memory_node_id,
+    memory_seq_node_id,
+    next_memory_node_id,
+    read_memory_seq,
+    scope_prefix,
+)
+from ._search import text_from_content_dict, top_matches
 
 if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
 
     from google.adk.events.event import Event
-    from google.adk.memory.memory_entry import MemoryEntry
     from google.adk.sessions.session import Session
 
 _RETRIES = 4
@@ -163,4 +172,23 @@ class MnemosyneMemoryService(BaseMemoryService):
     async def search_memory(
         self, *, app_name: str, user_id: str, query: str
     ) -> SearchMemoryResponse:
-        raise NotImplementedError("filled in by #593")
+        prefix = scope_prefix(app_name, user_id)
+        candidates = []
+        texts_and_nodes = {}
+        for node_id, node in self._store.working_memory().items():
+            if not node_id.startswith(prefix) or is_reserved(node_id):
+                continue
+            text = text_from_content_dict(node.content)
+            candidates.append((node_id, text))
+            texts_and_nodes[node_id] = node
+
+        memories = []
+        for node_id in top_matches(query, candidates):
+            node = texts_and_nodes[node_id]
+            memories.append(
+                MemoryEntry(
+                    content=types.Content.model_validate(node.content),
+                    author=node.provenance.source,
+                )
+            )
+        return SearchMemoryResponse(memories=memories)
