@@ -73,6 +73,12 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   tombstone commit, plus a reserved tombstone marker so a later
   `add_session_to_memory`/`add_events_to_memory` call that still
   carries the same event does not silently resurrect it (#594).
+- `mnem-adk`: `branch`/`switch`/`merge`/`why`/`bisect`/`history`,
+  outside `BaseMemoryService` - the same precedent LangGraph, the
+  OpenAI Agents SDK and AutoGen already set (ADR-0016, ADR-0020,
+  ADR-0023). Store-wide, not scoped to one `(app_name, user_id)`:
+  other scopes may share this store, and a branch or merge moves the
+  whole thing (#595).
 
 - `mnem registry render --output <file>`: renders every bundle in the
   registry as one static HTML page - name, prompt summary, tool count

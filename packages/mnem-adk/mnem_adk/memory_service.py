@@ -33,7 +33,7 @@ from ._ids import (
 from ._search import text_from_content_dict, top_matches
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping, Sequence
+    from collections.abc import Callable, Mapping, Sequence
 
     from google.adk.events.event import Event
     from google.adk.sessions.session import Session
@@ -236,3 +236,58 @@ class MnemosyneMemoryService(BaseMemoryService):
         would simply re-add it, silently undoing the delete. The marker
         makes the deletion stick."""
         _delete_node(self._store, node_id)
+
+    def branch(self, name: str, *, start: str | None = None) -> str:
+        """Create a branch (at ``start`` or ``HEAD``) without switching to
+        it - the same precedent every other adapter's own extra methods
+        already set (ADR-0016, ADR-0020, ADR-0023). Store-wide, not scoped
+        to one ``(app_name, user_id)``: other scopes may share this store,
+        and a branch moves the whole thing."""
+        self._store.new_branch(name, start=start)
+        return name
+
+    def switch(self, target: str) -> None:
+        """Move the store to a branch or commit."""
+        self._store.checkout(target)
+
+    def merge(
+        self,
+        theirs: str,
+        *,
+        resolutions: dict[str, str | mnem.MemoryNode] | None = None,
+        strategy: str | None = None,
+        message: str | None = None,
+        author: str | None = None,
+        time_ms: int | None = None,
+    ) -> mnem.MergeResult:
+        """Merge ``theirs`` into the current branch - a thin wrapper over
+        :meth:`mnem.Store.merge`, store-wide like every merge."""
+        return self._store.merge(
+            theirs,
+            resolutions=resolutions,
+            strategy=strategy,
+            message=message,
+            author=author,
+            time_ms=time_ms,
+        )
+
+    def why(self, node_id: str) -> mnem.Blame:
+        """The commit and provenance that gave ``node_id`` its current
+        value."""
+        return self._store.blame(node_id)
+
+    def bisect(
+        self,
+        predicate: Callable[[dict[str, mnem.MemoryNode]], bool],
+        *,
+        bad: str | None = None,
+        good: str | None = None,
+    ) -> str:
+        """The first commit where ``predicate`` holds, over the full store
+        state - a thin wrapper, not filtered to this scope's own nodes."""
+        return self._store.bisect(predicate, bad=bad, good=good)
+
+    def history(self, *, limit: int = 20) -> list[mnem.Commit]:
+        """The recent commits, newest first - the whole store's history,
+        not filtered to this scope's own nodes."""
+        return self._store.log(limit=limit)
