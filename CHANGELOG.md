@@ -85,6 +85,13 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   productionising #584's own throwaway spike (which only drove
   `load_memory`) and confirming #570's finding that the two really do
   compose on one agent (#596).
+- `packages/mnem-adk/README.md`: the real README, a "Known limits"
+  section, and a measured (not estimated) per-turn overhead figure
+  against `InMemoryMemoryService` - `test_adk_overhead_measurement.py`
+  is the reproducible source, not a number frozen in prose. Found
+  while writing this that no other adapter README here actually has a
+  "known limits" or overhead section to match, unlike this ticket's own
+  premise; written on its own merits instead (#599).
 
 - `mnem registry render --output <file>`: renders every bundle in the
   registry as one static HTML page - name, prompt summary, tool count
