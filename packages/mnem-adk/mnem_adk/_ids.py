@@ -15,6 +15,7 @@ import mnem
 
 _MEMORY_SEGMENT = "_memory"
 _SEQ_SUFFIX = "_seq"
+_TOMBSTONE_SUFFIX = "_deleted"
 
 
 def scope_prefix(app_name: str, user_id: str) -> str:
@@ -57,7 +58,15 @@ def read_memory_seq(store: mnem.Store, app_name: str, user_id: str) -> int:
     return 0 if node is None else node.content
 
 
+def tombstone_marker_id(node_id: str) -> str:
+    """The id of ``node_id``'s own tombstone marker (#574, #594) - written
+    alongside a real deletion so a later re-ingestion of the same event
+    does not resurrect it."""
+    return f"{node_id}:{_TOMBSTONE_SUFFIX}"
+
+
 def is_reserved(node_id: str) -> bool:
     """Whether ``node_id`` is a reserved internal node (the sequence
-    counter) that search and content iteration must skip."""
-    return node_id.endswith(f":{_MEMORY_SEGMENT}:{_SEQ_SUFFIX}")
+    counter, or a tombstone marker) that search and content iteration
+    must skip."""
+    return node_id.endswith((f":{_MEMORY_SEGMENT}:{_SEQ_SUFFIX}", f":{_TOMBSTONE_SUFFIX}"))

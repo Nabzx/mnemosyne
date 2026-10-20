@@ -66,6 +66,13 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   text, zero-score entries dropped, stable descending sort, top 10.
   Scoped by `(app_name, user_id)` only, the reserved sequence-counter
   node excluded from every candidate (#593).
+- `mnem-adk`: `delete_memory`, mnem-adk's own extra method, outside
+  `BaseMemoryService` (#574, ADR-0026) - google-adk has no real
+  `delete_memory` in the released `2.12.0` to match (#569), so this is
+  a real capability ahead of upstream, not a guess at its shape. A
+  tombstone commit, plus a reserved tombstone marker so a later
+  `add_session_to_memory`/`add_events_to_memory` call that still
+  carries the same event does not silently resurrect it (#594).
 
 - `mnem registry render --output <file>`: renders every bundle in the
   registry as one static HTML page - name, prompt summary, tool count

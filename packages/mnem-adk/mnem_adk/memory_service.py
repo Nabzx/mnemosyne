@@ -28,6 +28,7 @@ from ._ids import (
     next_memory_node_id,
     read_memory_seq,
     scope_prefix,
+    tombstone_marker_id,
 )
 from ._search import text_from_content_dict, top_matches
 
@@ -47,6 +48,28 @@ convention (confirmed in the v2.12.0 source), not a value this adapter
 invented."""
 
 
+def _is_tombstoned(store: mnem.Store, node_id: str) -> bool:
+    return store.working_node(tombstone_marker_id(node_id)) is not None
+
+
+def _delete_node(store: mnem.Store, node_id: str) -> None:
+    """Tombstone ``node_id`` and write its own tombstone marker, one
+    commit, with the same bounded retry every other write path here
+    uses."""
+    last: mnem.ConflictError | None = None
+    for attempt in range(_RETRIES):
+        try:
+            store.rm(node_id)
+            store.add(tombstone_marker_id(node_id), True)
+            store.commit(f"delete {node_id}", author=_AUTHOR)
+            return
+        except mnem.ConflictError as exc:
+            last = exc
+            time.sleep(_BACKOFF_MS * (attempt + 1) / 1000)
+    assert last is not None
+    raise last
+
+
 def _write_nodes(
     store: mnem.Store,
     nodes: list[tuple[str, dict[str, Any], mnem.Provenance]],
@@ -58,7 +81,12 @@ def _write_nodes(
     retry-on-conflict idiom). Node ids here are always deterministic (an
     event's own real id, or #588's explicit/sequence scheme), so a retry
     simply restages the same ops - unlike a sequence counter, there is
-    nothing to re-read fresh."""
+    nothing to re-read fresh.
+
+    A node whose own tombstone marker is set is skipped, not restaged
+    (#594): re-ingesting a session that still carries a since-deleted
+    event must not resurrect it."""
+    nodes = [n for n in nodes if not _is_tombstoned(store, n[0])]
     if not nodes:
         return
 
@@ -192,3 +220,19 @@ class MnemosyneMemoryService(BaseMemoryService):
                 )
             )
         return SearchMemoryResponse(memories=memories)
+
+    # --- extra methods, outside BaseMemoryService --------------------------
+
+    async def delete_memory(self, node_id: str) -> None:
+        """Tombstones ``node_id`` - google-adk has no real ``delete_memory``
+        in the released ``2.12.0`` to match (#569, #574), so this is
+        mnem-adk's own extra method, outside ``BaseMemoryService``, the
+        same precedent every other adapter's own extra methods already
+        set (ADR-0016).
+
+        Also writes a reserved tombstone marker alongside the real
+        deletion (#594): without it, a later ``add_session_to_memory``/
+        ``add_events_to_memory`` call that still carries the same event
+        would simply re-add it, silently undoing the delete. The marker
+        makes the deletion stick."""
+        _delete_node(self._store, node_id)
