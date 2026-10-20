@@ -66,6 +66,7 @@
 - [0023 The AutoGen adapter](adr/0023-the-autogen-adapter.md)
 - [0024 The Mem0 migration path](adr/0024-the-mem0-migration-path.md)
 - [0025 CrewAI private-filtering is not the adapter's job](adr/0025-crewai-private-filtering-is-not-the-adapters-job.md)
+- [0026 The Google ADK adapter](adr/0026-the-google-adk-adapter.md)
 
 # Research
 
