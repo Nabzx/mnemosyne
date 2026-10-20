@@ -34,11 +34,8 @@ def test_is_a_base_memory_service(service: MnemosyneMemoryService) -> None:
 
 
 def test_methods_not_yet_implemented(service: MnemosyneMemoryService) -> None:
-    # add_session_to_memory: real behaviour now, tested in test_adk_add_session.py (#590).
-    with pytest.raises(NotImplementedError):
-        _run(
-            service.add_events_to_memory(app_name="a", user_id="u", events=[])
-        )
+    # add_session_to_memory: tested in test_adk_add_session.py (#590).
+    # add_events_to_memory: tested in test_adk_add_events.py (#591).
     with pytest.raises(NotImplementedError):
         _run(service.add_memory(app_name="a", user_id="u", memories=[]))
     with pytest.raises(NotImplementedError):
