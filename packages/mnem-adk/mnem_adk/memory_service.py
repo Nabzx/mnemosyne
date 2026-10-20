@@ -30,6 +30,11 @@ if TYPE_CHECKING:
 _RETRIES = 4
 _BACKOFF_MS = 25
 _AUTHOR = "mnem-adk"
+_UNKNOWN_SESSION_ID = "_unknown_session"
+"""The session segment used when add_events_to_memory's own session_id is
+None - matching InMemoryMemoryService's own real _UNKNOWN_SESSION_ID
+convention (confirmed in the v2.12.0 source), not a value this adapter
+invented."""
 
 
 def _write_nodes(
@@ -92,7 +97,16 @@ class MnemosyneMemoryService(BaseMemoryService):
         session_id: str | None = None,
         custom_metadata: Mapping[str, object] | None = None,
     ) -> None:
-        raise NotImplementedError("filled in by #591")
+        _ = custom_metadata
+        scoped_session_id = session_id or _UNKNOWN_SESSION_ID
+        nodes = []
+        for event in events:
+            result = event_to_node(app_name, user_id, scoped_session_id, event)
+            if result is not None:
+                nodes.append(result)
+        n = len(nodes)
+        message = f"add {n} event{'s' if n != 1 else ''} to {app_name}:{user_id}"
+        _write_nodes(self._store, nodes, message=message)
 
     async def add_memory(
         self,

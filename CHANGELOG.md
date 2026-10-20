@@ -45,6 +45,13 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   Idempotent against ADK's own documented "a session may be added
   multiple times" contract: event ids are deterministic, so re-adding
   the same session overwrites in place rather than duplicating (#590).
+- `mnem-adk`: `add_events_to_memory` now does real work (ADR-0026) - a
+  delta write, additive across calls rather than a full resync. A
+  missing `session_id` falls back to a reserved `_unknown_session`
+  segment, matching `InMemoryMemoryService`'s own real
+  `_UNKNOWN_SESSION_ID` convention rather than inventing one.
+  `custom_metadata` is accepted and ignored, the same no-op the
+  reference service's own signature already settles for it (#591).
 
 - `mnem registry render --output <file>`: renders every bundle in the
   registry as one static HTML page - name, prompt summary, tool count
