@@ -90,6 +90,7 @@
 - [ADK's memory seam against the real source](research/issue-569-adk-memory-seam-survey.md)
 - [How ADK apps call the memory service in practice](research/issue-570-adk-memory-call-patterns.md)
 - [Dependency fit of google-adk in the adapters CI venv](research/issue-576-adk-dependency-fit.md)
+- [Node id scheme and scope mapping for ADK](research/issue-571-adk-node-id-scheme.md)
 
 # Progress notes
 
