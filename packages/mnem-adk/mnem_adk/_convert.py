@@ -33,6 +33,7 @@ from ._ids import event_node_id
 
 if TYPE_CHECKING:
     from google.adk.events.event import Event
+    from google.adk.memory.memory_entry import MemoryEntry
 
 
 def _tool_call_and_observation(content: Any) -> tuple[str | None, str | None]:
@@ -75,3 +76,21 @@ def event_to_node(
     node_id = event_node_id(app_name, user_id, session_id, event.id)
     content = event.content.model_dump(mode="json", exclude_none=True)
     return node_id, content, provenance
+
+
+def memory_entry_to_content_and_provenance(
+    memory: MemoryEntry,
+) -> tuple[dict[str, Any], mnem.Provenance]:
+    """The ``(content, provenance)`` for a direct ``add_memory`` entry -
+    the same ``Content``-extraction core ``event_to_node`` uses, since a
+    ``MemoryEntry``'s own ``content`` is the same real ``types.Content``
+    shape. No ``agent_step``: a direct write has no ``invocation_id``
+    concept the way an ingested ``Event`` does."""
+    tool_call, observation = _tool_call_and_observation(memory.content)
+    provenance = mnem.Provenance(
+        source=memory.author or None,
+        tool_call=tool_call,
+        observation=observation,
+    )
+    content = memory.content.model_dump(mode="json", exclude_none=True)
+    return content, provenance

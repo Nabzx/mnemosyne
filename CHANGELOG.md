@@ -52,6 +52,12 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   `_UNKNOWN_SESSION_ID` convention rather than inventing one.
   `custom_metadata` is accepted and ignored, the same no-op the
   reference service's own signature already settles for it (#591).
+- `mnem-adk`: `add_memory` now does real work (ADR-0026) - an entry
+  with its own id uses it literally; one with none gets the next
+  sequence number from #588's own reserved counter, re-read fresh on
+  every retry attempt rather than trusted stale, the same reasoning
+  the OpenAI Agents SDK adapter's own sequence counter already
+  settled (#592).
 
 - `mnem registry render --output <file>`: renders every bundle in the
   registry as one static HTML page - name, prompt summary, tool count
