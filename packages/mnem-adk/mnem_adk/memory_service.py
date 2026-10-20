@@ -18,7 +18,8 @@ import mnem
 from google.adk.memory import BaseMemoryService
 from google.adk.memory.base_memory_service import SearchMemoryResponse
 
-from ._convert import event_to_node
+from ._convert import event_to_node, memory_entry_to_content_and_provenance
+from ._ids import memory_node_id, memory_seq_node_id, next_memory_node_id, read_memory_seq
 
 if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
@@ -57,6 +58,46 @@ def _write_nodes(
         try:
             for node_id, content, provenance in nodes:
                 store.add(node_id, content, provenance=provenance)
+            store.commit(message, author=_AUTHOR)
+            return
+        except mnem.ConflictError as exc:
+            last = exc
+            time.sleep(_BACKOFF_MS * (attempt + 1) / 1000)
+    assert last is not None
+    raise last
+
+
+def _write_memories(
+    store: mnem.Store,
+    app_name: str,
+    user_id: str,
+    memories: list[MemoryEntry],
+) -> None:
+    """Stage every entry in ``memories`` under #588's locked id scheme and
+    commit once. Unlike :func:`_write_nodes`, a retry must re-read the
+    sequence counter fresh each attempt - a concurrent writer may have
+    moved it, the same reasoning the OpenAI Agents SDK adapter's own
+    sequence-counter retry already settled (ADR-0020)."""
+    if not memories:
+        return
+
+    last: mnem.ConflictError | None = None
+    for attempt in range(_RETRIES):
+        try:
+            seq = read_memory_seq(store, app_name, user_id)
+            next_seq = seq
+            for memory in memories:
+                content, provenance = memory_entry_to_content_and_provenance(memory)
+                if memory.id:
+                    node_id = memory_node_id(app_name, user_id, memory.id)
+                else:
+                    node_id = next_memory_node_id(app_name, user_id, next_seq)
+                    next_seq += 1
+                store.add(node_id, content, provenance=provenance)
+            if next_seq != seq:
+                store.add(memory_seq_node_id(app_name, user_id), next_seq)
+            n = len(memories)
+            message = f"add {n} memor{'y' if n == 1 else 'ies'} to {app_name}:{user_id}"
             store.commit(message, author=_AUTHOR)
             return
         except mnem.ConflictError as exc:
@@ -116,7 +157,8 @@ class MnemosyneMemoryService(BaseMemoryService):
         memories: Sequence[MemoryEntry],
         custom_metadata: Mapping[str, object] | None = None,
     ) -> None:
-        raise NotImplementedError("filled in by #592")
+        _ = custom_metadata
+        _write_memories(self._store, app_name, user_id, list(memories))
 
     async def search_memory(
         self, *, app_name: str, user_id: str, query: str
