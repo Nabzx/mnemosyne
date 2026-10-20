@@ -21,6 +21,13 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
   one (#576, #587): `google-adk`'s own deps install cleanly alongside
   every other adapter in one venv, with the three downgrades #576 already
   found and no new ones.
+- `mnem-adk`: the node id and scope helper module the rest of the
+  adapter is built on (#571, ADR-0026) - a flat `{app_name}:{user_id}:`
+  scope prefix, an ingested event's own `Event.id` honoured literally, a
+  sortable `{app_name}:{user_id}:_memory:{seq:010d}` id for a direct
+  `add_memory` entry with no id of its own, backed by a reserved counter
+  node excluded from search and content iteration. No `BaseMemoryService`
+  methods wired up to it yet (#588).
 
 - `mnem registry render --output <file>`: renders every bundle in the
   registry as one static HTML page - name, prompt summary, tool count
