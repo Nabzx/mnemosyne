@@ -62,13 +62,15 @@ jobs:
       - run: uv venv
       - run: uv pip install -e ".[dev]"
       - run: uv run pytest python/tests -q
-      - run: uv pip install -e "./packages/mnem-mcp[dev]" -e "./packages/mnem-langgraph[dev]" -e "./packages/mnem-openai-agents[dev]" -e "./packages/mnem-autogen[dev]"
+      - run: uv pip install -e "./packages/mnem-mcp[dev]" -e "./packages/mnem-langgraph[dev]" -e "./packages/mnem-openai-agents[dev]" -e "./packages/mnem-autogen[dev]" -e "./packages/mnem-adk[dev]"
       # mnem-crewai isn't installed here (crewai's mcp~=1.2x pin conflicts
       # with mnem-mcp's own mcp>=2.2 floor in one venv, #310) and Windows
       # coverage for it is deferred until it has real logic worth testing
       # cross-platform - it's scaffolding-only right now. mnem-autogen has
       # no such conflict (#317), so it's covered here from day one.
-      - run: uv run pytest packages/mnem-mcp packages/mnem-langgraph packages/mnem-openai-agents packages/mnem-autogen -q
+      # mnem-adk needs Python >=3.11 (one above every other adapter's own
+      # >=3.10 floor, #576) - already satisfied, this job runs 3.12.
+      - run: uv run pytest packages/mnem-mcp packages/mnem-langgraph packages/mnem-openai-agents packages/mnem-autogen packages/mnem-adk -q
 
   python:
     name: python (ruff, pytest)
@@ -123,6 +125,7 @@ jobs:
       - run: uv pip install -e "./packages/mnem-langgraph[dev]"
       - run: uv pip install -e "./packages/mnem-openai-agents[dev]"
       - run: uv pip install -e "./packages/mnem-autogen[dev,examples]"
+      - run: uv pip install -e "./packages/mnem-adk[dev]"
       # ruff needs no installed deps to lint source on disk, so it covers
       # every package including mnem-crewai here; pytest does need real
       # imports, so mnem-crewai's own tests run in the adapters-crewai job
@@ -130,8 +133,13 @@ jobs:
       # mnem-autogen's own deps (jsonref/opentelemetry-api/pillow/protobuf/
       # pydantic) don't conflict with anything already in this venv, so it
       # shares this job rather than needing its own isolated one (#317).
+      # mnem-adk's own google-adk dependency shares this venv too (#576,
+      # confirmed in a real venv): its mcp extra resolves to one shared
+      # mcp==2.3.0 against mnem-mcp's own pin, with three shared deps
+      # downgraded (opentelemetry-api, tenacity, websockets) but every
+      # existing adapter test still passing under the downgrade.
       - run: uv run ruff check packages examples
-      - run: uv run pytest packages/mnem-mcp packages/mnem-langgraph packages/mnem-openai-agents packages/mnem-autogen -q
+      - run: uv run pytest packages/mnem-mcp packages/mnem-langgraph packages/mnem-openai-agents packages/mnem-autogen packages/mnem-adk -q
       # The worked examples double as end-to-end checks: each asserts its
       # outcome and exits non-zero on failure (#60).
       - run: uv run python examples/support_agent.py

@@ -1,0 +1,46 @@
+"""Tests for the MnemosyneMemoryService scaffolding (#586). Real behaviour
+for each BaseMemoryService method is tested in its own ticket's test module
+(#590-#593)."""
+
+import asyncio
+
+import mnem
+import pytest
+from google.adk.memory import BaseMemoryService
+
+from mnem_adk import MnemosyneMemoryService
+
+
+def _run(coro):
+    return asyncio.run(coro)
+
+
+@pytest.fixture
+def store(tmp_path: object) -> mnem.Store:
+    return mnem.init(tmp_path)
+
+
+@pytest.fixture
+def service(store: mnem.Store) -> MnemosyneMemoryService:
+    return MnemosyneMemoryService(store)
+
+
+def test_import() -> None:
+    import mnem_adk  # noqa: F401
+
+
+def test_is_a_base_memory_service(service: MnemosyneMemoryService) -> None:
+    assert isinstance(service, BaseMemoryService)
+
+
+def test_methods_not_yet_implemented(service: MnemosyneMemoryService) -> None:
+    with pytest.raises(NotImplementedError):
+        _run(service.add_session_to_memory(None))
+    with pytest.raises(NotImplementedError):
+        _run(
+            service.add_events_to_memory(app_name="a", user_id="u", events=[])
+        )
+    with pytest.raises(NotImplementedError):
+        _run(service.add_memory(app_name="a", user_id="u", memories=[]))
+    with pytest.raises(NotImplementedError):
+        _run(service.search_memory(app_name="a", user_id="u", query="q"))

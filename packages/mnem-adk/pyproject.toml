@@ -1,0 +1,41 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mnem-adk"
+version = "0.0.1"
+description = "A Google ADK BaseMemoryService backed by Mnemosyne: versioned agent memory with blame and bisect."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Nabil Shah", email = "nabilshahx@gmail.com" }]
+keywords = ["ai", "agents", "memory", "adk", "version-control"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+]
+dependencies = [
+    "mnem-agents ~= 0.0",
+    "google-adk >= 2.12, < 3",
+]
+
+[project.urls]
+Homepage = "https://github.com/Nabzx/mnemosyne"
+Repository = "https://github.com/Nabzx/mnemosyne"
+Documentation = "https://nabzx.github.io/mnemosyne/"
+
+[project.optional-dependencies]
+dev = ["pytest >= 8", "ruff >= 0.6"]
+
+# The SDK is not on PyPI yet; take it from the repo root.
+[tool.uv.sources]
+mnem-agents = { path = "../..", editable = true }
+
+[tool.hatch.build.targets.wheel]
+packages = ["mnem_adk"]
+
+[tool.ruff]
+line-length = 100
