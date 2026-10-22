@@ -8,6 +8,15 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html); the on-disk
 
 ## [Unreleased]
 
+### Changed
+
+- README: the "what you get" section now names `contradicts`,
+  `approve`/`reject` and `registry publish`/`fork` alongside the core
+  commands - real, already-shipped market-test spikes that never made
+  it into the top-level pitch. Checked each one against the real CLI
+  source rather than the changelog prose alone; wording only, the main
+  table untouched.
+
 ### Added
 
 - `packages/mnem-adk`: scaffolding for a Google ADK `BaseMemoryService`
