@@ -40,6 +40,8 @@ Your agent runs for an hour, makes forty tool calls, and updates its memory the 
 
 Every correctness property above - exact reconstruction, precise `bisect`, accurate `blame`, no lost writes on `merge` - holds at 100% across an 80-seed, 720-run sweep, plus a separate 50,000-case fuzz test on the merge algorithm, gated in CI on every change. Full detail: [the benchmark](https://github.com/Nabzx/mnemosyne/blob/main/docs/benchmark.md).
 
+A handful of newer, more exploratory commands sit alongside these: `mnem contradicts` flags likely direct negations in working memory, `mnem approve`/`mnem reject` run a review step over a branch before it merges, and `mnem registry publish`/`fork` shares a whole agent as one portable bundle.
+
 ## Quickstart
 
 ```bash
