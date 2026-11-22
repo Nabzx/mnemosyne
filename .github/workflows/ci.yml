@@ -279,7 +279,7 @@ jobs:
       # bans: no network-capable or async-runtime crate may enter the tree
       # (ADR-0004, deny.toml). licenses/advisories/sources: the rest of what
       # cargo-deny checks, all four in one run.
-      - uses: EmbarkStudios/cargo-deny-action@3c6349835b2b7b196a839186cb8b78e02f7b5f25 # v2
+      - uses: EmbarkStudios/cargo-deny-action@70f81531115945ba6eb6b941ec9d39d063438eb9 # v2
         with:
           command: check
 
